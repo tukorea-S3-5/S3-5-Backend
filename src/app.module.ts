@@ -5,6 +5,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { EntitiesModule } from './entities/entities.module';
+import { PregnancyModule } from './pregnancy/pregnancy.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { EntitiesModule } from './entities/entities.module';
 
     UsersModule,
     EntitiesModule,
+    PregnancyModule,
   ],
   controllers: [AppController], 
   providers: [AppService],      
