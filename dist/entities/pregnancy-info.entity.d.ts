@@ -1,6 +1,8 @@
+import { User } from '../users/user.entity';
 export declare class PregnancyInfo {
     pregnancy_id: number;
     user_id: string;
+    user: User;
     trimester: number;
     week: number;
     height: number;
