@@ -13,6 +13,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PregnancyController = void 0;
+const swagger_1 = require("@nestjs/swagger");
 const common_1 = require("@nestjs/common");
 const pregnancy_service_1 = require("./pregnancy.service");
 const create_pregnancy_dto_1 = require("./dto/create-pregnancy.dto");
@@ -34,6 +35,8 @@ let PregnancyController = class PregnancyController {
 };
 exports.PregnancyController = PregnancyController;
 __decorate([
+    (0, swagger_1.ApiOperation)({ summary: '임신 정보 등록' }),
+    (0, swagger_1.ApiBody)({ type: create_pregnancy_dto_1.CreatePregnancyDto }),
     (0, common_1.Post)(),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -41,6 +44,8 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], PregnancyController.prototype, "create", null);
 __decorate([
+    (0, swagger_1.ApiOperation)({ summary: '사용자 최신 임신 정보 조회' }),
+    (0, swagger_1.ApiParam)({ name: 'userId', description: '사용자 UUID' }),
     (0, common_1.Get)(':userId'),
     __param(0, (0, common_1.Param)('userId')),
     __metadata("design:type", Function),
@@ -48,6 +53,9 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], PregnancyController.prototype, "getLatestPregnancy", null);
 __decorate([
+    (0, swagger_1.ApiOperation)({ summary: '사용자 최신 임신 정보 수정' }),
+    (0, swagger_1.ApiParam)({ name: 'userId', description: '사용자 UUID' }),
+    (0, swagger_1.ApiBody)({ type: update_pregnancy_dto_1.UpdatePregnancyDto }),
     (0, common_1.Put)(':userId'),
     __param(0, (0, common_1.Param)('userId')),
     __param(1, (0, common_1.Body)()),
@@ -56,6 +64,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], PregnancyController.prototype, "updateLatest", null);
 exports.PregnancyController = PregnancyController = __decorate([
+    (0, swagger_1.ApiTags)('Pregnancy'),
     (0, common_1.Controller)('pregnancy'),
     __metadata("design:paramtypes", [pregnancy_service_1.PregnancyService])
 ], PregnancyController);
