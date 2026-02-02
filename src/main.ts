@@ -9,9 +9,9 @@ async function bootstrap() {
   // DTO 유효성 검사 전역 적용
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true,            // DTO에 없는 값 제거
+      whitelist: true, // DTO에 없는 값 제거
       forbidNonWhitelisted: true, // DTO에 없는 값 들어오면 400
-      transform: true,            // string → number / boolean 자동 변환
+      transform: true, // string → number / boolean 자동 변환
     }),
   );
 

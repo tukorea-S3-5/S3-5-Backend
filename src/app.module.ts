@@ -33,7 +33,7 @@ import { PregnancyModule } from './pregnancy/pregnancy.module';
     EntitiesModule,
     PregnancyModule,
   ],
-  controllers: [AppController], 
-  providers: [AppService],      
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}
