@@ -11,17 +11,29 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UpdatePregnancyDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
+const class_validator_1 = require("class-validator");
 class UpdatePregnancyDto {
     current_weight;
     due_date;
+    is_multiple;
 }
 exports.UpdatePregnancyDto = UpdatePregnancyDto;
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({ example: 58 }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
 ], UpdatePregnancyDto.prototype, "current_weight", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({ example: '2025-07-10' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsDateString)(),
     __metadata("design:type", String)
 ], UpdatePregnancyDto.prototype, "due_date", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], UpdatePregnancyDto.prototype, "is_multiple", void 0);
 //# sourceMappingURL=update-pregnancy.dto.js.map

@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreatePregnancyDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
+const class_validator_1 = require("class-validator");
 class CreatePregnancyDto {
     user_id;
     height;
@@ -18,30 +19,44 @@ class CreatePregnancyDto {
     current_weight;
     pregnancy_start_date;
     due_date;
+    is_multiple;
 }
 exports.CreatePregnancyDto = CreatePregnancyDto;
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 'test-user-uuid' }),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreatePregnancyDto.prototype, "user_id", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 160 }),
+    (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
 ], CreatePregnancyDto.prototype, "height", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 55 }),
+    (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
 ], CreatePregnancyDto.prototype, "pre_weight", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 57 }),
+    (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
 ], CreatePregnancyDto.prototype, "current_weight", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: '2024-10-01' }),
+    (0, class_validator_1.IsDateString)(),
     __metadata("design:type", String)
 ], CreatePregnancyDto.prototype, "pregnancy_start_date", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: '2025-07-01', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsDateString)(),
     __metadata("design:type", String)
 ], CreatePregnancyDto.prototype, "due_date", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], CreatePregnancyDto.prototype, "is_multiple", void 0);
 //# sourceMappingURL=create-pregnancy.dto.js.map

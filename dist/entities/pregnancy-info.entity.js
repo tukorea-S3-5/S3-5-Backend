@@ -15,6 +15,7 @@ const user_entity_1 = require("../users/user.entity");
 let PregnancyInfo = class PregnancyInfo {
     pregnancy_id;
     user_id;
+    is_multiple;
     user;
     trimester;
     week;
@@ -35,6 +36,10 @@ __decorate([
     (0, typeorm_1.Column)({ type: 'uuid' }),
     __metadata("design:type", String)
 ], PregnancyInfo.prototype, "user_id", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'boolean', nullable: true }),
+    __metadata("design:type", Object)
+], PregnancyInfo.prototype, "is_multiple", void 0);
 __decorate([
     (0, typeorm_1.ManyToOne)(() => user_entity_1.User),
     (0, typeorm_1.JoinColumn)({ name: 'user_id' }),

@@ -5,4 +5,5 @@ export declare class CreatePregnancyDto {
     current_weight: number;
     pregnancy_start_date: string;
     due_date?: string;
+    is_multiple?: boolean;
 }

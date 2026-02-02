@@ -24,6 +24,16 @@ export class PregnancyInfo {
   user_id: string;
 
   /**
+ * 다태아 여부
+ * - null  : 아직 확인되지 않음
+ * - false : 단태아
+ * - true  : 다태아 (쌍둥이 이상)
+ */
+  @Column({ type: 'boolean', nullable: true })
+  is_multiple: boolean | null;
+
+
+  /**
    * User 엔티티와의 관계
    * 여러 임신 정보가 하나의 사용자에 속한다.
    */
