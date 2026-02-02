@@ -26,10 +26,27 @@ export default tseslint.config(
   },
   {
     rules: {
-      '@typescript-eslint/no-explicit-any': 'off',
+      // TypeScript 규칙: 개발 흐름을 막지 않고 경고 위주
+      '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-floating-promises': 'warn',
       '@typescript-eslint/no-unsafe-argument': 'warn',
-      "prettier/prettier": ["error", { endOfLine: "auto" }],
+
+      // 사용하지 않는 변수 / import는 경고만 표시
+      '@typescript-eslint/no-unused-vars': [
+        'warn',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+        },
+      ],
+
+      // Prettier 포맷 문제는 에러가 아닌 경고로
+      'prettier/prettier': 'warn',
+
+      // 백엔드 환경에서는 console 사용 허용
+      'no-console': 'off',
+
+      '@typescript-eslint/no-unsafe-call': 'off',
     },
   },
 );

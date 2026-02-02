@@ -5,13 +5,12 @@ import { PregnancyInfo } from '../entities/pregnancy-info.entity';
 import { CreatePregnancyDto } from './dto/create-pregnancy.dto';
 import { UpdatePregnancyDto } from './dto/update-pregnancy.dto';
 
-
 @Injectable()
 export class PregnancyService {
   constructor(
     @InjectRepository(PregnancyInfo)
     private readonly pregnancyRepository: Repository<PregnancyInfo>,
-  ) { }
+  ) {}
 
   /**
    * 임신 정보 등록
@@ -23,8 +22,7 @@ export class PregnancyService {
     const startDate = new Date(dto.pregnancy_start_date);
 
     const today = new Date();
-    const diffDays =
-      (today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24);
+    const diffDays = (today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24);
     const week = Math.floor(diffDays / 7);
 
     const heightMeter = dto.height / 100;
@@ -61,12 +59,9 @@ export class PregnancyService {
   }
 
   /**
- * 특정 사용자의 최신 임신 정보 수정
- */
-  async updateLatestByUser(
-    userId: string,
-    dto: UpdatePregnancyDto,
-  ): Promise<PregnancyInfo | null> {
+   * 특정 사용자의 최신 임신 정보 수정
+   */
+  async updateLatestByUser(userId: string, dto: UpdatePregnancyDto): Promise<PregnancyInfo | null> {
     // 1. 최신 임신 정보 조회
     const pregnancy = await this.pregnancyRepository.findOne({
       where: { user_id: userId },
@@ -82,8 +77,7 @@ export class PregnancyService {
       pregnancy.current_weight = dto.current_weight;
 
       const heightMeter = pregnancy.height / 100;
-      pregnancy.bmi =
-        pregnancy.pre_weight / (heightMeter * heightMeter);
+      pregnancy.bmi = pregnancy.pre_weight / (heightMeter * heightMeter);
     }
 
     // 3. 출산 예정일 수정
@@ -99,5 +93,4 @@ export class PregnancyService {
     // 4. 저장 (updated_at 자동 변경)
     return this.pregnancyRepository.save(pregnancy);
   }
-
 }
