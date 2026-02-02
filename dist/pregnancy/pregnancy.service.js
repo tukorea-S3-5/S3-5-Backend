@@ -38,6 +38,7 @@ let PregnancyService = class PregnancyService {
             week,
             trimester: Math.ceil(week / 13),
             bmi,
+            is_multiple: dto.is_multiple ?? null,
             ...(dto.due_date && { due_date: new Date(dto.due_date) }),
         });
         return this.pregnancyRepository.save(pregnancy);
@@ -66,6 +67,9 @@ let PregnancyService = class PregnancyService {
         }
         if (dto.due_date) {
             pregnancy.due_date = new Date(dto.due_date);
+        }
+        if (dto.is_multiple !== undefined) {
+            pregnancy.is_multiple = dto.is_multiple;
         }
         return this.pregnancyRepository.save(pregnancy);
     }

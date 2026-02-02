@@ -11,9 +11,12 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Report = void 0;
 const typeorm_1 = require("typeorm");
+const exercise_session_entity_1 = require("../entities/exercise-session.entity");
 let Report = class Report {
     report_id;
     user_id;
+    session_id;
+    session;
     type;
     summary;
     created_at;
@@ -28,6 +31,15 @@ __decorate([
     __metadata("design:type", String)
 ], Report.prototype, "user_id", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ type: 'int', nullable: true }),
+    __metadata("design:type", Object)
+], Report.prototype, "session_id", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => exercise_session_entity_1.ExerciseSession, { nullable: true }),
+    (0, typeorm_1.JoinColumn)({ name: 'session_id' }),
+    __metadata("design:type", Object)
+], Report.prototype, "session", void 0);
+__decorate([
     (0, typeorm_1.Column)({ type: 'varchar', length: 20 }),
     __metadata("design:type", String)
 ], Report.prototype, "type", void 0);
@@ -36,7 +48,7 @@ __decorate([
     __metadata("design:type", String)
 ], Report.prototype, "summary", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'timestamp' }),
+    (0, typeorm_1.CreateDateColumn)({ type: 'timestamp' }),
     __metadata("design:type", Date)
 ], Report.prototype, "created_at", void 0);
 exports.Report = Report = __decorate([
