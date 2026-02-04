@@ -15,6 +15,7 @@ const app_service_1 = require("./app.service");
 const users_module_1 = require("./users/users.module");
 const entities_module_1 = require("./entities/entities.module");
 const pregnancy_module_1 = require("./pregnancy/pregnancy.module");
+const exercise_module_1 = require("./exercise/exercise.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -39,6 +40,7 @@ exports.AppModule = AppModule = __decorate([
             users_module_1.UsersModule,
             entities_module_1.EntitiesModule,
             pregnancy_module_1.PregnancyModule,
+            exercise_module_1.ExerciseModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],
