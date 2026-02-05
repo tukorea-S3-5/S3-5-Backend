@@ -1,4 +1,4 @@
-import { User } from '../users/user.entity';
+import { User } from '../user/user.entity';
 export declare class PregnancyInfo {
     pregnancy_id: number;
     user_id: string;

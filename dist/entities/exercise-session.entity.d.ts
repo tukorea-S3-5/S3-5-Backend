@@ -1,4 +1,4 @@
-import { User } from '../users/user.entity';
+import { User } from '../user/user.entity';
 import { ExerciseRecord } from './exercise-record.entity';
 export declare class ExerciseSession {
     session_id: number;

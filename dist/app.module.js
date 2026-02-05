@@ -12,10 +12,13 @@ const config_1 = require("@nestjs/config");
 const typeorm_1 = require("@nestjs/typeorm");
 const app_controller_1 = require("./app.controller");
 const app_service_1 = require("./app.service");
-const users_module_1 = require("./users/users.module");
 const entities_module_1 = require("./entities/entities.module");
 const pregnancy_module_1 = require("./pregnancy/pregnancy.module");
 const exercise_module_1 = require("./exercise/exercise.module");
+const auth_module_1 = require("./auth/auth.module");
+const user_module_1 = require("./user/user.module");
+const core_1 = require("@nestjs/core");
+const jwt_guard_1 = require("./auth/jwt.guard");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -37,13 +40,20 @@ exports.AppModule = AppModule = __decorate([
                 timezone: '+09:00',
                 charset: 'utf8mb4',
             }),
-            users_module_1.UsersModule,
             entities_module_1.EntitiesModule,
             pregnancy_module_1.PregnancyModule,
             exercise_module_1.ExerciseModule,
+            auth_module_1.AuthModule,
+            user_module_1.UserModule,
         ],
         controllers: [app_controller_1.AppController],
-        providers: [app_service_1.AppService],
+        providers: [
+            app_service_1.AppService,
+            {
+                provide: core_1.APP_GUARD,
+                useClass: jwt_guard_1.JwtAuthGuard,
+            },
+        ],
     })
 ], AppModule);
 //# sourceMappingURL=app.module.js.map

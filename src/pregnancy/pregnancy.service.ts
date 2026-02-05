@@ -22,7 +22,8 @@ export class PregnancyService {
     const startDate = new Date(dto.pregnancy_start_date);
 
     const today = new Date();
-    const diffDays = (today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24);
+    const diffDays =
+      (today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24);
     const week = Math.floor(diffDays / 7);
 
     const heightMeter = dto.height / 100;
@@ -61,7 +62,10 @@ export class PregnancyService {
   /**
    * 특정 사용자의 최신 임신 정보 수정
    */
-  async updateLatestByUser(userId: string, dto: UpdatePregnancyDto): Promise<PregnancyInfo | null> {
+  async updateLatestByUser(
+    userId: string,
+    dto: UpdatePregnancyDto,
+  ): Promise<PregnancyInfo | null> {
     // 1. 최신 임신 정보 조회
     const pregnancy = await this.pregnancyRepository.findOne({
       where: { user_id: userId },
