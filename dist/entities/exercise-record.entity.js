@@ -11,9 +11,11 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ExerciseRecord = void 0;
 const typeorm_1 = require("typeorm");
+const exercise_session_entity_1 = require("./exercise-session.entity");
 let ExerciseRecord = class ExerciseRecord {
     record_id;
     session_id;
+    session;
     exercise_name;
     duration;
     intensity;
@@ -24,9 +26,14 @@ __decorate([
     __metadata("design:type", Number)
 ], ExerciseRecord.prototype, "record_id", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'int' }),
+    (0, typeorm_1.Column)(),
     __metadata("design:type", Number)
 ], ExerciseRecord.prototype, "session_id", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => exercise_session_entity_1.ExerciseSession, (session) => session.records, { onDelete: 'CASCADE' }),
+    (0, typeorm_1.JoinColumn)({ name: 'session_id' }),
+    __metadata("design:type", exercise_session_entity_1.ExerciseSession)
+], ExerciseRecord.prototype, "session", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'varchar', length: 100 }),
     __metadata("design:type", String)
@@ -37,7 +44,7 @@ __decorate([
 ], ExerciseRecord.prototype, "duration", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'varchar', length: 20, nullable: true }),
-    __metadata("design:type", String)
+    __metadata("design:type", Object)
 ], ExerciseRecord.prototype, "intensity", void 0);
 exports.ExerciseRecord = ExerciseRecord = __decorate([
     (0, typeorm_1.Entity)('exercise_record')

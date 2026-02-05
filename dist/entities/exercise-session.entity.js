@@ -11,14 +11,20 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ExerciseSession = void 0;
 const typeorm_1 = require("typeorm");
+const user_entity_1 = require("../users/user.entity");
+const exercise_record_entity_1 = require("./exercise-record.entity");
 let ExerciseSession = class ExerciseSession {
     session_id;
     user_id;
+    user;
     started_at;
     ended_at;
     avg_hr;
     max_hr;
     status;
+    records;
+    created_at;
+    updated_at;
 };
 exports.ExerciseSession = ExerciseSession;
 __decorate([
@@ -30,25 +36,42 @@ __decorate([
     __metadata("design:type", String)
 ], ExerciseSession.prototype, "user_id", void 0);
 __decorate([
+    (0, typeorm_1.ManyToOne)(() => user_entity_1.User),
+    (0, typeorm_1.JoinColumn)({ name: 'user_id' }),
+    __metadata("design:type", user_entity_1.User)
+], ExerciseSession.prototype, "user", void 0);
+__decorate([
     (0, typeorm_1.Column)({ type: 'timestamp' }),
     __metadata("design:type", Date)
 ], ExerciseSession.prototype, "started_at", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'timestamp', nullable: true }),
-    __metadata("design:type", Date)
+    __metadata("design:type", Object)
 ], ExerciseSession.prototype, "ended_at", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'int', nullable: true }),
-    __metadata("design:type", Number)
+    __metadata("design:type", Object)
 ], ExerciseSession.prototype, "avg_hr", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'int', nullable: true }),
-    __metadata("design:type", Number)
+    __metadata("design:type", Object)
 ], ExerciseSession.prototype, "max_hr", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', length: 20, nullable: true }),
+    (0, typeorm_1.Column)({ type: 'varchar', length: 20 }),
     __metadata("design:type", String)
 ], ExerciseSession.prototype, "status", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => exercise_record_entity_1.ExerciseRecord, (record) => record.session),
+    __metadata("design:type", Array)
+], ExerciseSession.prototype, "records", void 0);
+__decorate([
+    (0, typeorm_1.CreateDateColumn)(),
+    __metadata("design:type", Date)
+], ExerciseSession.prototype, "created_at", void 0);
+__decorate([
+    (0, typeorm_1.UpdateDateColumn)(),
+    __metadata("design:type", Date)
+], ExerciseSession.prototype, "updated_at", void 0);
 exports.ExerciseSession = ExerciseSession = __decorate([
     (0, typeorm_1.Entity)('exercise_session')
 ], ExerciseSession);

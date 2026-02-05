@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { EntitiesModule } from './entities/entities.module';
 import { PregnancyModule } from './pregnancy/pregnancy.module';
+import { ExerciseModule } from './exercise/exercise.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { PregnancyModule } from './pregnancy/pregnancy.module';
     UsersModule,
     EntitiesModule,
     PregnancyModule,
+    ExerciseModule,
   ],
   controllers: [AppController],
   providers: [AppService],

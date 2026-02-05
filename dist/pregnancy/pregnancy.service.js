@@ -62,8 +62,7 @@ let PregnancyService = class PregnancyService {
         if (dto.current_weight !== undefined) {
             pregnancy.current_weight = dto.current_weight;
             const heightMeter = pregnancy.height / 100;
-            pregnancy.bmi =
-                pregnancy.pre_weight / (heightMeter * heightMeter);
+            pregnancy.bmi = pregnancy.pre_weight / (heightMeter * heightMeter);
         }
         if (dto.due_date) {
             pregnancy.due_date = new Date(dto.due_date);
