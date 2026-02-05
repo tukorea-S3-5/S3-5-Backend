@@ -3,10 +3,13 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { UsersModule } from './users/users.module';
 import { EntitiesModule } from './entities/entities.module';
 import { PregnancyModule } from './pregnancy/pregnancy.module';
 import { ExerciseModule } from './exercise/exercise.module';
+import { AuthModule } from './auth/auth.module';
+import { UserModule } from './user/user.module';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtAuthGuard } from './auth/jwt.guard';
 
 @Module({
   imports: [
@@ -30,12 +33,19 @@ import { ExerciseModule } from './exercise/exercise.module';
       charset: 'utf8mb4',
     }),
 
-    UsersModule,
     EntitiesModule,
     PregnancyModule,
     ExerciseModule,
+    AuthModule,
+    UserModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD, // "나는 이 앱의 전역 문지기(APP_GUARD)를 등록할 거야."
+      useClass: JwtAuthGuard, // "그 문지기 역할은 JwtAuthGuard 클래스가 할 거야."
+    },
+  ],
 })
 export class AppModule {}

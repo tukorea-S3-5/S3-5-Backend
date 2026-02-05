@@ -8,7 +8,7 @@ import {
   OneToMany,
   JoinColumn,
 } from 'typeorm';
-import { User } from '../users/user.entity';
+import { User } from '../user/user.entity';
 import { ExerciseRecord } from './exercise-record.entity';
 
 /**
@@ -70,10 +70,7 @@ export class ExerciseSession {
   /**
    * 운동 상세 기록들
    */
-  @OneToMany(
-    () => ExerciseRecord,
-    (record) => record.session,
-  )
+  @OneToMany(() => ExerciseRecord, (record) => record.session)
   records: ExerciseRecord[];
 
   /**
