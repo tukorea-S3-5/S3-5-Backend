@@ -61,6 +61,7 @@ export class AuthController {
   // ================= 로그인 API =================
   @ApiOperation({ summary: '로그인' })
   @ApiBody({ type: LoginDto })
+  @HttpCode(HttpStatus.OK)
   @ApiResponse({ status: 200, description: '로그인 성공 (토큰 발급)' })
   @ApiResponse({ status: 401, description: '로그인 실패 (아이디/비번 불일치)' })
   @Public()
