@@ -22,15 +22,17 @@ let PregnancyService = class PregnancyService {
     constructor(pregnancyRepository) {
         this.pregnancyRepository = pregnancyRepository;
     }
-    async create(dto) {
+    async create(userId, dto) {
         const startDate = new Date(dto.pregnancy_start_date);
         const today = new Date();
-        const diffDays = (today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24);
+        const diffDays = (today.getTime() - startDate.getTime()) /
+            (1000 * 60 * 60 * 24);
         const week = Math.floor(diffDays / 7);
         const heightMeter = dto.height / 100;
-        const bmi = dto.pre_weight / (heightMeter * heightMeter);
+        const bmi = dto.pre_weight /
+            (heightMeter * heightMeter);
         const pregnancy = this.pregnancyRepository.create({
-            user_id: dto.user_id,
+            user_id: userId,
             height: dto.height,
             pre_weight: dto.pre_weight,
             current_weight: dto.current_weight,
@@ -39,7 +41,9 @@ let PregnancyService = class PregnancyService {
             trimester: Math.ceil(week / 13),
             bmi,
             is_multiple: dto.is_multiple ?? null,
-            ...(dto.due_date && { due_date: new Date(dto.due_date) }),
+            ...(dto.due_date && {
+                due_date: new Date(dto.due_date),
+            }),
         });
         return this.pregnancyRepository.save(pregnancy);
     }
@@ -56,19 +60,19 @@ let PregnancyService = class PregnancyService {
             where: { user_id: userId },
             order: { pregnancy_id: 'DESC' },
         });
-        if (!pregnancy) {
+        if (!pregnancy)
             return null;
-        }
         if (dto.current_weight !== undefined) {
-            pregnancy.current_weight = dto.current_weight;
+            pregnancy.current_weight =
+                dto.current_weight;
             const heightMeter = pregnancy.height / 100;
-            pregnancy.bmi = pregnancy.pre_weight / (heightMeter * heightMeter);
+            pregnancy.bmi =
+                pregnancy.pre_weight /
+                    (heightMeter * heightMeter);
         }
         if (dto.due_date) {
-            pregnancy.due_date = new Date(dto.due_date);
-        }
-        if (dto.is_multiple !== undefined) {
-            pregnancy.is_multiple = dto.is_multiple;
+            pregnancy.due_date =
+                new Date(dto.due_date);
         }
         return this.pregnancyRepository.save(pregnancy);
     }

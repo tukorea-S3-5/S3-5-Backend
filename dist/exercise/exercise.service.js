@@ -22,43 +22,37 @@ let ExerciseService = class ExerciseService {
     constructor(sessionRepository) {
         this.sessionRepository = sessionRepository;
     }
-    async startExercise(dto) {
+    async startExercise(userId, dto) {
         const ongoing = await this.sessionRepository.findOne({
-            where: { user_id: dto.user_id, status: 'ONGOING' },
+            where: {
+                user_id: userId,
+                status: 'ONGOING',
+            },
         });
         if (ongoing) {
             throw new common_1.BadRequestException('이미 진행 중인 운동이 있습니다.');
         }
         const session = this.sessionRepository.create({
-            user_id: dto.user_id,
+            user_id: userId,
+            exercise_type: dto.exercise_type ?? null,
             started_at: new Date(),
             status: 'ONGOING',
         });
         return this.sessionRepository.save(session);
     }
-    async endExercise(dto) {
+    async endExercise(userId) {
         const session = await this.sessionRepository.findOne({
-            where: { session_id: dto.session_id },
+            where: {
+                user_id: userId,
+                status: 'ONGOING',
+            },
         });
-        if (!session || session.status !== 'ONGOING') {
-            throw new common_1.BadRequestException('종료할 수 없는 세션입니다.');
+        if (!session) {
+            throw new common_1.BadRequestException('진행 중인 운동이 없습니다.');
         }
         session.ended_at = new Date();
         session.status = 'COMPLETED';
-        session.avg_hr = 110;
-        session.max_hr = 145;
         return this.sessionRepository.save(session);
-    }
-    async getSessionsByUser(userId) {
-        return this.sessionRepository.find({
-            where: { user_id: userId },
-            order: { started_at: 'DESC' },
-        });
-    }
-    async getOngoingSession(userId) {
-        return this.sessionRepository.findOne({
-            where: { user_id: userId, status: 'ONGOING' },
-        });
     }
 };
 exports.ExerciseService = ExerciseService;

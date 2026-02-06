@@ -13,8 +13,9 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PregnancyController = void 0;
-const swagger_1 = require("@nestjs/swagger");
 const common_1 = require("@nestjs/common");
+const swagger_1 = require("@nestjs/swagger");
+const passport_1 = require("@nestjs/passport");
 const pregnancy_service_1 = require("./pregnancy.service");
 const create_pregnancy_dto_1 = require("./dto/create-pregnancy.dto");
 const update_pregnancy_dto_1 = require("./dto/update-pregnancy.dto");
@@ -23,48 +24,47 @@ let PregnancyController = class PregnancyController {
     constructor(pregnancyService) {
         this.pregnancyService = pregnancyService;
     }
-    create(dto) {
-        return this.pregnancyService.create(dto);
+    create(req, dto) {
+        return this.pregnancyService.create(req.user.user_id, dto);
     }
-    async getLatestPregnancy(userId) {
-        return this.pregnancyService.findLatestByUser(userId);
+    findMyLatest(req) {
+        return this.pregnancyService.findLatestByUser(req.user.user_id);
     }
-    updateLatest(userId, dto) {
-        return this.pregnancyService.updateLatestByUser(userId, dto);
+    updateMyLatest(req, dto) {
+        return this.pregnancyService.updateLatestByUser(req.user.user_id, dto);
     }
 };
 exports.PregnancyController = PregnancyController;
 __decorate([
-    (0, swagger_1.ApiOperation)({ summary: '임신 정보 등록' }),
-    (0, swagger_1.ApiBody)({ type: create_pregnancy_dto_1.CreatePregnancyDto }),
     (0, common_1.Post)(),
-    __param(0, (0, common_1.Body)()),
+    (0, swagger_1.ApiOperation)({ summary: '임신 정보 등록 (JWT 기준)' }),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [create_pregnancy_dto_1.CreatePregnancyDto]),
+    __metadata("design:paramtypes", [Object, create_pregnancy_dto_1.CreatePregnancyDto]),
     __metadata("design:returntype", void 0)
 ], PregnancyController.prototype, "create", null);
 __decorate([
-    (0, swagger_1.ApiOperation)({ summary: '사용자 최신 임신 정보 조회' }),
-    (0, swagger_1.ApiParam)({ name: 'userId', description: '사용자 UUID' }),
-    (0, common_1.Get)(':userId'),
-    __param(0, (0, common_1.Param)('userId')),
+    (0, common_1.Get)('me'),
+    (0, swagger_1.ApiOperation)({ summary: '내 최신 임신 정보 조회' }),
+    __param(0, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Promise)
-], PregnancyController.prototype, "getLatestPregnancy", null);
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], PregnancyController.prototype, "findMyLatest", null);
 __decorate([
-    (0, swagger_1.ApiOperation)({ summary: '사용자 최신 임신 정보 수정' }),
-    (0, swagger_1.ApiParam)({ name: 'userId', description: '사용자 UUID' }),
-    (0, swagger_1.ApiBody)({ type: update_pregnancy_dto_1.UpdatePregnancyDto }),
-    (0, common_1.Put)(':userId'),
-    __param(0, (0, common_1.Param)('userId')),
+    (0, common_1.Put)('me'),
+    (0, swagger_1.ApiOperation)({ summary: '내 최신 임신 정보 수정' }),
+    __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, update_pregnancy_dto_1.UpdatePregnancyDto]),
+    __metadata("design:paramtypes", [Object, update_pregnancy_dto_1.UpdatePregnancyDto]),
     __metadata("design:returntype", void 0)
-], PregnancyController.prototype, "updateLatest", null);
+], PregnancyController.prototype, "updateMyLatest", null);
 exports.PregnancyController = PregnancyController = __decorate([
     (0, swagger_1.ApiTags)('Pregnancy'),
+    (0, swagger_1.ApiBearerAuth)('access-token'),
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),
     (0, common_1.Controller)('pregnancy'),
     __metadata("design:paramtypes", [pregnancy_service_1.PregnancyService])
 ], PregnancyController);

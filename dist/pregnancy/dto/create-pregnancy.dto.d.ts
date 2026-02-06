@@ -1,5 +1,4 @@
 export declare class CreatePregnancyDto {
-    user_id: string;
     height: number;
     pre_weight: number;
     current_weight: number;

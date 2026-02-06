@@ -4,7 +4,7 @@ import { UpdatePregnancyDto } from './dto/update-pregnancy.dto';
 export declare class PregnancyController {
     private readonly pregnancyService;
     constructor(pregnancyService: PregnancyService);
-    create(dto: CreatePregnancyDto): Promise<import("../entities/pregnancy-info.entity").PregnancyInfo>;
-    getLatestPregnancy(userId: string): Promise<import("../entities/pregnancy-info.entity").PregnancyInfo | null>;
-    updateLatest(userId: string, dto: UpdatePregnancyDto): Promise<import("../entities/pregnancy-info.entity").PregnancyInfo | null>;
+    create(req: any, dto: CreatePregnancyDto): Promise<import("../entities/pregnancy-info.entity").PregnancyInfo>;
+    findMyLatest(req: any): Promise<import("../entities/pregnancy-info.entity").PregnancyInfo>;
+    updateMyLatest(req: any, dto: UpdatePregnancyDto): Promise<import("../entities/pregnancy-info.entity").PregnancyInfo | null>;
 }

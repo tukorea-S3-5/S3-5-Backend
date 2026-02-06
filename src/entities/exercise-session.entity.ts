@@ -3,38 +3,33 @@ import {
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
-  UpdateDateColumn,
-  ManyToOne,
   OneToMany,
-  JoinColumn,
 } from 'typeorm';
-import { User } from '../user/user.entity';
 import { ExerciseRecord } from './exercise-record.entity';
 
 /**
- * 운동 세션
- * - 한 번의 운동 단위
+ * 운동 세션 엔티티
+ * - 한 번의 운동 시작 ~ 종료 단위
  */
 @Entity('exercise_session')
 export class ExerciseSession {
   /**
-   * 세션 ID (PK)
+   * 운동 세션 PK
    */
   @PrimaryGeneratedColumn()
   session_id: number;
 
   /**
-   * 사용자 ID (FK)
+   * 사용자 ID
    */
   @Column({ type: 'uuid' })
   user_id: string;
 
   /**
-   * 사용자 관계
+   * 운동 종류
    */
-  @ManyToOne(() => User)
-  @JoinColumn({ name: 'user_id' })
-  user: User;
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  exercise_type: string | null;
 
   /**
    * 운동 시작 시각
@@ -49,28 +44,20 @@ export class ExerciseSession {
   ended_at: Date | null;
 
   /**
-   * 평균 심박수
-   */
-  @Column({ type: 'int', nullable: true })
-  avg_hr: number | null;
-
-  /**
-   * 최대 심박수
-   */
-  @Column({ type: 'int', nullable: true })
-  max_hr: number | null;
-
-  /**
-   * 상태
-   * - ONGOING / COMPLETED / STOPPED
+   * 운동 상태
+   * ONGOING / COMPLETED
    */
   @Column({ type: 'varchar', length: 20 })
   status: string;
 
   /**
-   * 운동 상세 기록들
+   * 세션에 포함된 개별 운동 기록들
+   * ExerciseRecord.session 과 연결됨
    */
-  @OneToMany(() => ExerciseRecord, (record) => record.session)
+  @OneToMany(
+    () => ExerciseRecord,
+    (record) => record.session,
+  )
   records: ExerciseRecord[];
 
   /**
@@ -78,10 +65,4 @@ export class ExerciseSession {
    */
   @CreateDateColumn()
   created_at: Date;
-
-  /**
-   * 수정 시각
-   */
-  @UpdateDateColumn()
-  updated_at: Date;
 }
