@@ -5,7 +5,7 @@ import { UpdatePregnancyDto } from './dto/update-pregnancy.dto';
 export declare class PregnancyService {
     private readonly pregnancyRepository;
     constructor(pregnancyRepository: Repository<PregnancyInfo>);
-    create(dto: CreatePregnancyDto): Promise<PregnancyInfo>;
-    findLatestByUser(userId: string): Promise<PregnancyInfo | null>;
+    create(userId: string, dto: CreatePregnancyDto): Promise<PregnancyInfo>;
+    findLatestByUser(userId: string): Promise<PregnancyInfo>;
     updateLatestByUser(userId: string, dto: UpdatePregnancyDto): Promise<PregnancyInfo | null>;
 }
