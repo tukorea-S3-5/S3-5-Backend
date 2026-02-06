@@ -1,20 +1,34 @@
-import { User } from '../user/user.entity';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UserService } from 'src/user/user.service';
 import { JwtService } from '@nestjs/jwt';
-export declare class UserAlreadyExistsError extends Error {
-    constructor(message?: string);
+import { ConfigService } from '@nestjs/config';
+import { User } from 'src/user/user.entity';
+export interface ValidatedUser {
+    user_id: string;
+    email: string;
+    name: string;
+    age: number | null;
+    created_at: Date;
+    currentRefreshToken: string | null;
 }
 export declare class AuthService {
-    private readonly userRepository;
-    private userService;
+    private userRepository;
     private jwtService;
-    constructor(userRepository: Repository<User>, userService: UserService, jwtService: JwtService);
+    private configService;
+    constructor(userRepository: Repository<User>, jwtService: JwtService, configService: ConfigService);
     signUp(createUserDto: CreateUserDto): Promise<void>;
-    createPassword(plainPassword: string): Promise<string>;
-    validateUser(email: string, password: string): Promise<Omit<User, 'password'> | null>;
-    login(user: Omit<User, 'password'>): Promise<{
-        access_token: string;
+    validateUser(email: string, password: string): Promise<ValidatedUser | null>;
+    login(user: ValidatedUser): Promise<{
+        accessToken: string;
+        refreshToken: string;
+    }>;
+    logout(userId: string): Promise<void>;
+    refreshTokens(userId: string, refreshToken: string): Promise<{
+        accessToken: string;
+        refreshToken: string;
+    }>;
+    getTokens(userId: string, email: string): Promise<{
+        accessToken: string;
+        refreshToken: string;
     }>;
 }

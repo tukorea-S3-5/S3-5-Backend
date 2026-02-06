@@ -6,6 +6,9 @@ import { ValidationPipe } from '@nestjs/common';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // CORS 허용
+  app.enableCors();
+
   // DTO 유효성 검사 전역 적용
   app.useGlobalPipes(
     new ValidationPipe({
@@ -20,6 +23,18 @@ async function bootstrap() {
     .setTitle('MomFit API')
     .setDescription('백엔드 API')
     .setVersion('1.0')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        name: 'JWT',
+        description:
+          '로그인 후 받은 Access Token을 여기에 입력하세요. Bearer 입력 안해도 됨',
+        in: 'header',
+      },
+      'access-token',
+    )
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

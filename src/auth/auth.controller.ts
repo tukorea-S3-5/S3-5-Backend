@@ -9,10 +9,10 @@ import {
   BadRequestException,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { Request as ExpressRequest } from 'express';
 import { CreateUserDto } from './dto/create-user.dto';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiBody,
   ApiCreatedResponse,
   ApiInternalServerErrorResponse,
@@ -20,11 +20,16 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { AuthService, UserAlreadyExistsError } from './auth.service';
+import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { AuthGuard } from '@nestjs/passport';
-import { User } from 'src/user/user.entity';
 import { Public } from 'src/common/decorators/public.decorator';
+import { JwtRefreshGuard } from './jwt-refresh.guard';
+import type {
+  RequestWithRefreshUser,
+  RequestWithUser,
+  RequestWithValidatedUser,
+} from './interfaces/auth.interface';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -47,7 +52,7 @@ export class AuthController {
       await this.authService.signUp(createUserDto);
       return { message: '회원가입이 성공적으로 완료되었습니다.' };
     } catch (error) {
-      if (error instanceof UserAlreadyExistsError) {
+      if (error instanceof BadRequestException) {
         // 중복 유저 에러라면 400 Bad Request로 변환
         throw new BadRequestException(error.message);
       }
@@ -59,17 +64,49 @@ export class AuthController {
   }
 
   // ================= 로그인 API =================
+  // 로컬 가드가 Body의 내용을 보고, 인증에 성공하면 그 결과물(유저 정보)을 req.user에 전달 후 로그인 로직 처리."
   @ApiOperation({ summary: '로그인' })
-  @ApiBody({ type: LoginDto })
   @HttpCode(HttpStatus.OK)
   @ApiResponse({ status: 200, description: '로그인 성공 (토큰 발급)' })
   @ApiResponse({ status: 401, description: '로그인 실패 (아이디/비번 불일치)' })
   @Public()
   @UseGuards(AuthGuard('local'))
   @Post('login')
-  async login(@Request() req: ExpressRequest & { user: User }) {
-    console.log('인증 통과한 유저:', req.user); // 확인용 로그
-    // login 함수 호출해서 토큰을 발급받아 리턴
+  async login(
+    @Request() req: RequestWithValidatedUser,
+    @Body() loginDto: LoginDto,
+  ) {
+    console.log(loginDto, req.user);
     return this.authService.login(req.user);
+  }
+
+  // ================= 리프레시 토큰 갱신 API =================
+  @ApiBearerAuth('access-token')
+  @Public()
+  @UseGuards(JwtRefreshGuard)
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: '토큰 갱신',
+    description: '새로운 Access/Refresh Token을 발급',
+  })
+  async refreshTokens(@Request() req: RequestWithRefreshUser) {
+    const userId = req.user.sub;
+    const refreshToken = req.user.refreshToken;
+
+    return this.authService.refreshTokens(userId, refreshToken);
+  }
+
+  // ================= 로그아웃 API =================
+  @ApiOperation({ summary: '로그아웃' })
+  @ApiBearerAuth('access-token')
+  @Post('logout')
+  @HttpCode(HttpStatus.OK)
+  async logout(@Request() req: RequestWithUser) {
+    const userId = req.user.user_id;
+    console.log('로그아웃 요청 사용자 ID:', userId);
+
+    await this.authService.logout(userId);
+    return { message: '로그아웃 성공' };
   }
 }

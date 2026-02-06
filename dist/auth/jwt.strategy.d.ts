@@ -2,10 +2,7 @@ import { Strategy } from 'passport-jwt';
 import { Repository } from 'typeorm';
 import { User } from '../user/user.entity';
 import { ConfigService } from '@nestjs/config';
-export interface Payload {
-    email: string;
-    sub: string;
-}
+import { Payload } from './interfaces/auth.interface';
 declare const JwtStrategy_base: new (...args: [opt: import("passport-jwt").StrategyOptionsWithRequest] | [opt: import("passport-jwt").StrategyOptionsWithoutRequest]) => Strategy & {
     validate(...args: any[]): unknown;
 };

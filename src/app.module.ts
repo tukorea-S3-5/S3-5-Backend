@@ -43,8 +43,8 @@ import { JwtAuthGuard } from './auth/jwt.guard';
   providers: [
     AppService,
     {
-      provide: APP_GUARD, // "나는 이 앱의 전역 문지기(APP_GUARD)를 등록할 거야."
-      useClass: JwtAuthGuard, // "그 문지기 역할은 JwtAuthGuard 클래스가 할 거야."
+      provide: APP_GUARD, // 앱에 전역 문지기(APP_GUARD) 등록
+      useClass: JwtAuthGuard, // 문지기 역할 JwtAuthGuard 클래스
     },
   ],
 })
