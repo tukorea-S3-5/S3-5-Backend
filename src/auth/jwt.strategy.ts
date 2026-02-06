@@ -9,12 +9,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../user/user.entity';
 import { ConfigService } from '@nestjs/config';
-
-// 토큰 Payload의 모양을 정의
-export interface Payload {
-  email: string;
-  sub: string; // user_id
-}
+import { Payload } from './interfaces/auth.interface';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
@@ -28,7 +23,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       // 헤더에서 토큰 추출, 비밀키로 검증하는 건 부모 클래스가 다 알아서 함
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: configService.getOrThrow<string>('JWT_SECRET'),
+      secretOrKey: configService.getOrThrow<string>('JWT_ACCESS_SECRET'),
     });
   }
 

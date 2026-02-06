@@ -5,8 +5,7 @@
 import { Strategy } from 'passport-local';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { User } from 'src/user/user.entity';
+import { AuthService, ValidatedUser } from './auth.service';
 
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy) {
@@ -17,10 +16,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(
-    email: string,
-    password: string,
-  ): Promise<Omit<User, 'password'> | null> {
+  async validate(email: string, password: string): Promise<ValidatedUser> {
     const user = await this.authService.validateUser(email, password);
     if (!user) {
       // 검증 실패 시 에러 (401 Unauthorized)
