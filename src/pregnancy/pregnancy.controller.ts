@@ -33,7 +33,7 @@ export class PregnancyController {
    * - JWT에서 인증된 사용자 정보(req.user) 기준으로 처리
    */
   @Post()
-  @ApiOperation({ summary: '임신 정보 등록 (JWT 기준)' })
+  @ApiOperation({ summary: '임신 정보 등록' })
   create(
     @Req() req,
     @Body() dto: CreatePregnancyDto,

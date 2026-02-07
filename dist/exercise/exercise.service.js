@@ -17,48 +17,83 @@ const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const exercise_session_entity_1 = require("../entities/exercise-session.entity");
+const exercise_record_entity_1 = require("../entities/exercise-record.entity");
 let ExerciseService = class ExerciseService {
     sessionRepository;
-    constructor(sessionRepository) {
+    recordRepository;
+    constructor(sessionRepository, recordRepository) {
         this.sessionRepository = sessionRepository;
+        this.recordRepository = recordRepository;
     }
-    async startExercise(userId, dto) {
-        const ongoing = await this.sessionRepository.findOne({
-            where: {
-                user_id: userId,
-                status: 'ONGOING',
-            },
-        });
-        if (ongoing) {
-            throw new common_1.BadRequestException('이미 진행 중인 운동이 있습니다.');
-        }
+    async startSession(userId) {
         const session = this.sessionRepository.create({
             user_id: userId,
-            exercise_type: dto.exercise_type ?? null,
-            started_at: new Date(),
             status: 'ONGOING',
+            started_at: new Date(),
         });
         return this.sessionRepository.save(session);
     }
-    async endExercise(userId) {
+    async endSession(userId) {
         const session = await this.sessionRepository.findOne({
-            where: {
-                user_id: userId,
-                status: 'ONGOING',
-            },
+            where: { user_id: userId, status: 'ONGOING' },
         });
         if (!session) {
-            throw new common_1.BadRequestException('진행 중인 운동이 없습니다.');
+            throw new common_1.BadRequestException('진행 중인 전체 운동이 없습니다.');
         }
-        session.ended_at = new Date();
         session.status = 'COMPLETED';
+        session.ended_at = new Date();
         return this.sessionRepository.save(session);
+    }
+    async startRecord(userId, exerciseName, orderIndex) {
+        const record = this.recordRepository.create({
+            user_id: userId,
+            exercise_name: exerciseName,
+            order_index: orderIndex,
+            started_at: new Date(),
+            session_id: null,
+        });
+        return this.recordRepository.save(record);
+    }
+    async endRecord(recordId) {
+        const record = await this.recordRepository.findOne({
+            where: { record_id: recordId },
+        });
+        if (!record || record.ended_at) {
+            throw new common_1.BadRequestException('종료할 운동 기록이 없습니다.');
+        }
+        record.ended_at = new Date();
+        record.duration = Math.floor((record.ended_at.getTime() - record.started_at.getTime()) / 1000);
+        return this.recordRepository.save(record);
+    }
+    async getHistory(userId) {
+        const sessions = await this.sessionRepository.find({
+            where: {
+                user_id: userId,
+                status: 'COMPLETED',
+            },
+            relations: ['records'],
+            order: { started_at: 'DESC' },
+        });
+        const singleRecords = await this.recordRepository.find({
+            where: {
+                user_id: userId,
+                session_id: (0, typeorm_2.IsNull)(),
+                ended_at: (0, typeorm_2.Not)((0, typeorm_2.IsNull)()),
+            },
+            order: { started_at: 'DESC' },
+        });
+        return {
+            sessions,
+            single_records: singleRecords,
+        };
     }
 };
 exports.ExerciseService = ExerciseService;
 exports.ExerciseService = ExerciseService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(exercise_session_entity_1.ExerciseSession)),
-    __metadata("design:paramtypes", [typeorm_2.Repository])
+    __param(1, (0, typeorm_1.InjectRepository)(exercise_record_entity_1.ExerciseRecord)),
+    __metadata("design:paramtypes", [typeorm_2.Repository,
+        typeorm_2.Repository])
 ], ExerciseService);
 //# sourceMappingURL=exercise.service.js.map
