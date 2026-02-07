@@ -1,8 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsInt } from 'class-validator';
 
-export class EndExerciseDto {
+/**
+ * 개별 운동 종료 DTO
+ */
+export class EndExerciseRecordDto {
   @ApiProperty({ example: 1 })
   @IsInt()
-  session_id: number;
+  record_id: number;
 }

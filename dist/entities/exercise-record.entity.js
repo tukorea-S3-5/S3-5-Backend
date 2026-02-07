@@ -16,9 +16,12 @@ let ExerciseRecord = class ExerciseRecord {
     record_id;
     session_id;
     session;
+    user_id;
     exercise_name;
+    order_index;
+    started_at;
+    ended_at;
     duration;
-    intensity;
 };
 exports.ExerciseRecord = ExerciseRecord;
 __decorate([
@@ -26,14 +29,18 @@ __decorate([
     __metadata("design:type", Number)
 ], ExerciseRecord.prototype, "record_id", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
-    __metadata("design:type", Number)
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", Object)
 ], ExerciseRecord.prototype, "session_id", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => exercise_session_entity_1.ExerciseSession, (session) => session.records, { onDelete: 'CASCADE' }),
+    (0, typeorm_1.ManyToOne)(() => exercise_session_entity_1.ExerciseSession, (session) => session.records, { onDelete: 'SET NULL' }),
     (0, typeorm_1.JoinColumn)({ name: 'session_id' }),
-    __metadata("design:type", exercise_session_entity_1.ExerciseSession)
+    __metadata("design:type", Object)
 ], ExerciseRecord.prototype, "session", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'uuid' }),
+    __metadata("design:type", String)
+], ExerciseRecord.prototype, "user_id", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'varchar', length: 100 }),
     __metadata("design:type", String)
@@ -41,11 +48,19 @@ __decorate([
 __decorate([
     (0, typeorm_1.Column)({ type: 'int' }),
     __metadata("design:type", Number)
-], ExerciseRecord.prototype, "duration", void 0);
+], ExerciseRecord.prototype, "order_index", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', length: 20, nullable: true }),
+    (0, typeorm_1.Column)({ type: 'datetime' }),
+    __metadata("design:type", Date)
+], ExerciseRecord.prototype, "started_at", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'datetime', nullable: true }),
     __metadata("design:type", Object)
-], ExerciseRecord.prototype, "intensity", void 0);
+], ExerciseRecord.prototype, "ended_at", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'int', nullable: true }),
+    __metadata("design:type", Object)
+], ExerciseRecord.prototype, "duration", void 0);
 exports.ExerciseRecord = ExerciseRecord = __decorate([
     (0, typeorm_1.Entity)('exercise_record')
 ], ExerciseRecord);

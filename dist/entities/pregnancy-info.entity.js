@@ -15,16 +15,16 @@ const user_entity_1 = require("../user/user.entity");
 let PregnancyInfo = class PregnancyInfo {
     pregnancy_id;
     user_id;
-    is_multiple;
     user;
-    trimester;
+    last_menstrual_period;
+    pregnancy_start_date;
     week;
+    trimester;
+    due_date;
+    is_multiple;
     height;
     pre_weight;
-    current_weight;
     bmi;
-    pregnancy_start_date;
-    due_date;
     updated_at;
 };
 exports.PregnancyInfo = PregnancyInfo;
@@ -37,22 +37,34 @@ __decorate([
     __metadata("design:type", String)
 ], PregnancyInfo.prototype, "user_id", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'boolean', nullable: true }),
-    __metadata("design:type", Object)
-], PregnancyInfo.prototype, "is_multiple", void 0);
-__decorate([
     (0, typeorm_1.ManyToOne)(() => user_entity_1.User),
     (0, typeorm_1.JoinColumn)({ name: 'user_id' }),
     __metadata("design:type", user_entity_1.User)
 ], PregnancyInfo.prototype, "user", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'int', nullable: true }),
+    (0, typeorm_1.Column)({ type: 'date' }),
+    __metadata("design:type", Date)
+], PregnancyInfo.prototype, "last_menstrual_period", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'date' }),
+    __metadata("design:type", Date)
+], PregnancyInfo.prototype, "pregnancy_start_date", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'int' }),
+    __metadata("design:type", Number)
+], PregnancyInfo.prototype, "week", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'int' }),
     __metadata("design:type", Number)
 ], PregnancyInfo.prototype, "trimester", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'int', nullable: true }),
-    __metadata("design:type", Number)
-], PregnancyInfo.prototype, "week", void 0);
+    (0, typeorm_1.Column)({ type: 'date', nullable: true }),
+    __metadata("design:type", Date)
+], PregnancyInfo.prototype, "due_date", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'boolean', nullable: true }),
+    __metadata("design:type", Object)
+], PregnancyInfo.prototype, "is_multiple", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'float' }),
     __metadata("design:type", Number)
@@ -62,21 +74,9 @@ __decorate([
     __metadata("design:type", Number)
 ], PregnancyInfo.prototype, "pre_weight", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'float' }),
-    __metadata("design:type", Number)
-], PregnancyInfo.prototype, "current_weight", void 0);
-__decorate([
     (0, typeorm_1.Column)({ type: 'float', nullable: true }),
     __metadata("design:type", Number)
 ], PregnancyInfo.prototype, "bmi", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ type: 'date' }),
-    __metadata("design:type", Date)
-], PregnancyInfo.prototype, "pregnancy_start_date", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ type: 'date', nullable: true }),
-    __metadata("design:type", Date)
-], PregnancyInfo.prototype, "due_date", void 0);
 __decorate([
     (0, typeorm_1.UpdateDateColumn)(),
     __metadata("design:type", Date)

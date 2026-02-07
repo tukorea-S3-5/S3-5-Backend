@@ -10,6 +10,7 @@ import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/jwt.guard';
+import { PregnancyWeightModule } from './pregnancy-weight/pregnancy-weight.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { JwtAuthGuard } from './auth/jwt.guard';
     ExerciseModule,
     AuthModule,
     UserModule,
+    PregnancyWeightModule,
   ],
   controllers: [AppController],
   providers: [

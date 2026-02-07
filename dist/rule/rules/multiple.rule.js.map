@@ -1,0 +1,1 @@
+{"version":3,"file":"multiple.rule.js","sourceRoot":"","sources":["../../../src/rule/rules/multiple.rule.ts"],"names":[],"mappings":";;AAOA,sDAWC;AAXD,SAAgB,qBAAqB,CACnC,SAAwB;IAExB,IAAI,SAAS,CAAC,WAAW,KAAK,IAAI,EAAE,CAAC;QACnC,OAAO;YACL,QAAQ,EAAE,OAAO;YACjB,MAAM,EAAE,wBAAwB;SACjC,CAAC;IACJ,CAAC;IAED,OAAO,IAAI,CAAC;AACd,CAAC"}

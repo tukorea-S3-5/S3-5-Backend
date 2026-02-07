@@ -13,14 +13,18 @@ exports.CreatePregnancyDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
 class CreatePregnancyDto {
+    last_menstrual_period;
     height;
     pre_weight;
-    current_weight;
-    pregnancy_start_date;
     due_date;
     is_multiple;
 }
 exports.CreatePregnancyDto = CreatePregnancyDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: '2025-11-15' }),
+    (0, class_validator_1.IsDateString)(),
+    __metadata("design:type", String)
+], CreatePregnancyDto.prototype, "last_menstrual_period", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 160 }),
     (0, class_validator_1.IsNumber)(),
@@ -32,19 +36,9 @@ __decorate([
     __metadata("design:type", Number)
 ], CreatePregnancyDto.prototype, "pre_weight", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: 57 }),
-    (0, class_validator_1.IsNumber)(),
-    __metadata("design:type", Number)
-], CreatePregnancyDto.prototype, "current_weight", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: '2024-10-01' }),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], CreatePregnancyDto.prototype, "pregnancy_start_date", void 0);
-__decorate([
-    (0, swagger_1.ApiPropertyOptional)({ example: '2025-07-01' }),
+    (0, swagger_1.ApiPropertyOptional)({ example: '2026-08-22' }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsDateString)(),
     __metadata("design:type", String)
 ], CreatePregnancyDto.prototype, "due_date", void 0);
 __decorate([

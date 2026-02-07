@@ -9,16 +9,16 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.EndExerciseDto = void 0;
+exports.UpdateWeightLogDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
-class EndExerciseDto {
-    session_id;
+class UpdateWeightLogDto {
+    weight;
 }
-exports.EndExerciseDto = EndExerciseDto;
+exports.UpdateWeightLogDto = UpdateWeightLogDto;
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: 1 }),
-    (0, class_validator_1.IsInt)(),
+    (0, swagger_1.ApiProperty)({ example: 58.0 }),
+    (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
-], EndExerciseDto.prototype, "session_id", void 0);
-//# sourceMappingURL=end-exercise.dto.js.map
+], UpdateWeightLogDto.prototype, "weight", void 0);
+//# sourceMappingURL=update-weight-log.dto.js.map

@@ -9,17 +9,20 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ExerciseModule = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
-const exercise_controller_1 = require("./exercise.controller");
-const exercise_service_1 = require("./exercise.service");
 const exercise_session_entity_1 = require("../entities/exercise-session.entity");
 const exercise_record_entity_1 = require("../entities/exercise-record.entity");
+const exercise_service_1 = require("./exercise.service");
+const exercise_controller_1 = require("./exercise.controller");
 let ExerciseModule = class ExerciseModule {
 };
 exports.ExerciseModule = ExerciseModule;
 exports.ExerciseModule = ExerciseModule = __decorate([
     (0, common_1.Module)({
         imports: [
-            typeorm_1.TypeOrmModule.forFeature([exercise_session_entity_1.ExerciseSession, exercise_record_entity_1.ExerciseRecord]),
+            typeorm_1.TypeOrmModule.forFeature([
+                exercise_session_entity_1.ExerciseSession,
+                exercise_record_entity_1.ExerciseRecord,
+            ]),
         ],
         controllers: [exercise_controller_1.ExerciseController],
         providers: [exercise_service_1.ExerciseService],
