@@ -1,19 +1,21 @@
 import {
   Controller,
   Post,
-  Req,
+  Get,
   Body,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import {
-  ApiTags,
   ApiBearerAuth,
+  ApiTags,
   ApiOperation,
 } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 
 import { ExerciseService } from './exercise.service';
-import { StartExerciseDto } from './dto/start-exercise.dto';
+import { StartExerciseRecordDto } from './dto/start-exercise-record.dto';
+import { EndExerciseRecordDto } from './dto/end-exercise-record.dto';
 
 @ApiTags('Exercise')
 @ApiBearerAuth('access-token')
@@ -24,32 +26,40 @@ export class ExerciseController {
     private readonly exerciseService: ExerciseService,
   ) {}
 
-  /**
-   * 운동 시작
-   * - user_id는 JWT(req.user)에서 가져온다
-   * - exercise_type은 선택 값
-   */
-  @Post('start')
-  @ApiOperation({ summary: '운동 시작' })
-  start(
+  @Post('session/start')
+  @ApiOperation({ summary: '전체 운동 시작' })
+  startSession(@Req() req) {
+    return this.exerciseService.startSession(req.user.user_id);
+  }
+
+  @Post('session/end')
+  @ApiOperation({ summary: '전체 운동 종료' })
+  endSession(@Req() req) {
+    return this.exerciseService.endSession(req.user.user_id);
+  }
+
+  @Post('record/start')
+  @ApiOperation({ summary: '개별 운동 시작' })
+  startRecord(
     @Req() req,
-    @Body() dto: StartExerciseDto,
+    @Body() dto: StartExerciseRecordDto,
   ) {
-    return this.exerciseService.startExercise(
+    return this.exerciseService.startRecord(
       req.user.user_id,
-      dto,
+      dto.exercise_name,
+      dto.order_index,
     );
   }
 
-  /**
-   * 운동 종료
-   * - 진행 중(ONGOING)인 운동 세션을 종료
-   */
-  @Post('end')
-  @ApiOperation({ summary: '운동 종료' })
-  end(@Req() req) {
-    return this.exerciseService.endExercise(
-      req.user.user_id,
-    );
+  @Post('record/end')
+  @ApiOperation({ summary: '개별 운동 종료' })
+  endRecord(@Body() dto: EndExerciseRecordDto) {
+    return this.exerciseService.endRecord(dto.record_id);
+  }
+
+  @Get('history')
+  @ApiOperation({ summary: '운동 기록 조회' })
+  getHistory(@Req() req) {
+    return this.exerciseService.getHistory(req.user.user_id);
   }
 }

@@ -9,17 +9,16 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.StartExerciseDto = void 0;
+exports.EndExerciseSessionDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
-class StartExerciseDto {
-    exercise_type;
+class EndExerciseSessionDto {
+    session_id;
 }
-exports.StartExerciseDto = StartExerciseDto;
+exports.EndExerciseSessionDto = EndExerciseSessionDto;
 __decorate([
-    (0, swagger_1.ApiPropertyOptional)({ example: '걷기' }),
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], StartExerciseDto.prototype, "exercise_type", void 0);
-//# sourceMappingURL=start-exercise.dto.js.map
+    (0, swagger_1.ApiProperty)({ example: 1 }),
+    (0, class_validator_1.IsInt)(),
+    __metadata("design:type", Number)
+], EndExerciseSessionDto.prototype, "session_id", void 0);
+//# sourceMappingURL=end-exercise-session.dto.js.map

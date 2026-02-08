@@ -15,12 +15,10 @@ const exercise_record_entity_1 = require("./exercise-record.entity");
 let ExerciseSession = class ExerciseSession {
     session_id;
     user_id;
-    exercise_type;
+    status;
     started_at;
     ended_at;
-    status;
     records;
-    created_at;
 };
 exports.ExerciseSession = ExerciseSession;
 __decorate([
@@ -32,29 +30,21 @@ __decorate([
     __metadata("design:type", String)
 ], ExerciseSession.prototype, "user_id", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', length: 50, nullable: true }),
-    __metadata("design:type", Object)
-], ExerciseSession.prototype, "exercise_type", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ type: 'timestamp' }),
-    __metadata("design:type", Date)
-], ExerciseSession.prototype, "started_at", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ type: 'timestamp', nullable: true }),
-    __metadata("design:type", Object)
-], ExerciseSession.prototype, "ended_at", void 0);
-__decorate([
     (0, typeorm_1.Column)({ type: 'varchar', length: 20 }),
     __metadata("design:type", String)
 ], ExerciseSession.prototype, "status", void 0);
 __decorate([
+    (0, typeorm_1.CreateDateColumn)(),
+    __metadata("design:type", Date)
+], ExerciseSession.prototype, "started_at", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'datetime', nullable: true }),
+    __metadata("design:type", Object)
+], ExerciseSession.prototype, "ended_at", void 0);
+__decorate([
     (0, typeorm_1.OneToMany)(() => exercise_record_entity_1.ExerciseRecord, (record) => record.session),
     __metadata("design:type", Array)
 ], ExerciseSession.prototype, "records", void 0);
-__decorate([
-    (0, typeorm_1.CreateDateColumn)(),
-    __metadata("design:type", Date)
-], ExerciseSession.prototype, "created_at", void 0);
 exports.ExerciseSession = ExerciseSession = __decorate([
     (0, typeorm_1.Entity)('exercise_session')
 ], ExerciseSession);
