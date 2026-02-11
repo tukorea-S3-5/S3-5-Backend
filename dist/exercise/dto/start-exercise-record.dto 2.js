@@ -9,32 +9,28 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SymptomLog = void 0;
-const typeorm_1 = require("typeorm");
-let SymptomLog = class SymptomLog {
-    symptom_id;
-    user_id;
-    symptom_name;
-    recorded_at;
-};
-exports.SymptomLog = SymptomLog;
+exports.StartExerciseRecordDto = void 0;
+const swagger_1 = require("@nestjs/swagger");
+const class_validator_1 = require("class-validator");
+class StartExerciseRecordDto {
+    session_id;
+    exercise_name;
+    order_index;
+}
+exports.StartExerciseRecordDto = StartExerciseRecordDto;
 __decorate([
-    (0, typeorm_1.PrimaryGeneratedColumn)(),
+    (0, swagger_1.ApiProperty)({ example: 1 }),
+    (0, class_validator_1.IsInt)(),
     __metadata("design:type", Number)
-], SymptomLog.prototype, "symptom_id", void 0);
+], StartExerciseRecordDto.prototype, "session_id", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
+    (0, swagger_1.ApiProperty)({ example: '요가' }),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], SymptomLog.prototype, "user_id", void 0);
+], StartExerciseRecordDto.prototype, "exercise_name", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ length: 100 }),
-    __metadata("design:type", String)
-], SymptomLog.prototype, "symptom_name", void 0);
-__decorate([
-    (0, typeorm_1.CreateDateColumn)(),
-    __metadata("design:type", Date)
-], SymptomLog.prototype, "recorded_at", void 0);
-exports.SymptomLog = SymptomLog = __decorate([
-    (0, typeorm_1.Entity)('symptom_log')
-], SymptomLog);
-//# sourceMappingURL=symptom-log.entity.js.map
+    (0, swagger_1.ApiProperty)({ example: 1 }),
+    (0, class_validator_1.IsInt)(),
+    __metadata("design:type", Number)
+], StartExerciseRecordDto.prototype, "order_index", void 0);
+//# sourceMappingURL=start-exercise-record.dto%202.js.map
