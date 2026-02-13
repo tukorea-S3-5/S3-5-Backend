@@ -39,6 +39,12 @@ let ExerciseController = class ExerciseController {
     getHistory(req) {
         return this.exerciseService.getHistory(req.user.user_id);
     }
+    getAllExercises() {
+        return this.exerciseService.getAllExercises();
+    }
+    getExerciseDetail(id) {
+        return this.exerciseService.getExerciseDetail(Number(id));
+    }
 };
 exports.ExerciseController = ExerciseController;
 __decorate([
@@ -82,6 +88,21 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], ExerciseController.prototype, "getHistory", null);
+__decorate([
+    (0, common_1.Get)(),
+    (0, swagger_1.ApiOperation)({ summary: '운동 목록 조회' }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], ExerciseController.prototype, "getAllExercises", null);
+__decorate([
+    (0, common_1.Get)(':id'),
+    (0, swagger_1.ApiOperation)({ summary: '운동 상세 조회' }),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], ExerciseController.prototype, "getExerciseDetail", null);
 exports.ExerciseController = ExerciseController = __decorate([
     (0, swagger_1.ApiTags)('Exercise'),
     (0, swagger_1.ApiBearerAuth)('access-token'),

@@ -1,5 +1,10 @@
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+
 import { RuleService } from './rule.service';
+import { Exercise } from '../entities/exercise.entity';
+import { ExerciseTagMap } from '../entities/exercise-tag-map.entity';
+import { RuleController } from './rule.controller';
 
 /**
  * Rule Module
@@ -7,7 +12,14 @@ import { RuleService } from './rule.service';
  * - Exercise, Recommendation 등에서 공통으로 사용
  */
 @Module({
+  imports: [
+    TypeOrmModule.forFeature([
+      Exercise,
+      ExerciseTagMap,
+    ]),
+  ],
   providers: [RuleService],
-  exports: [RuleService], // 다른 모듈에서 RuleService 사용 가능
+  controllers: [RuleController],
+  exports: [RuleService],
 })
 export class RuleModule {}

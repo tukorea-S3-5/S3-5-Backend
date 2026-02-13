@@ -12,4 +12,18 @@ export declare class ExerciseController {
         sessions: import("../entities/exercise-session.entity").ExerciseSession[];
         single_records: import("../entities/exercise-record.entity").ExerciseRecord[];
     }>;
+    getAllExercises(): Promise<import("../entities/exercise.entity").Exercise[]>;
+    getExerciseDetail(id: string): Promise<{
+        steps: import("../entities/exercise-step.entity").ExerciseStep[];
+        exercise_id: number;
+        exercise_name: string;
+        category_name: string;
+        intensity: string | null;
+        position_type: string | null;
+        fall_risk: boolean;
+        allowed_trimesters: number[];
+        description: string | null;
+        difficulty_label: string | null;
+        tagMaps: import("../entities/exercise-tag-map.entity").ExerciseTagMap[];
+    }>;
 }

@@ -12,6 +12,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/jwt.guard';
 import { PregnancyWeightModule } from './pregnancy-weight/pregnancy-weight.module';
 import { SymptomModule } from './symptom/symptom.module';
+import { RuleModule } from './rule/rule.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { SymptomModule } from './symptom/symptom.module';
     UserModule,
     PregnancyWeightModule,
     SymptomModule,
+    RuleModule,
   ],
   controllers: [AppController],
   providers: [

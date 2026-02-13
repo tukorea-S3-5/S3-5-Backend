@@ -9,12 +9,16 @@ import { SymptomLog } from './symptom-log.entity';
 import { HeartRateLog } from './heart-rate-log.entity';
 import { Report } from './report.entity';
 import { Recommendation } from './recommendation.entity';
+import { Exercise } from './exercise.entity';
+import { ExerciseTagMap } from './exercise-tag-map.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([
       PregnancyInfo,
       HealthBaseline,
+      Exercise,
+      ExerciseTagMap,
       ExerciseSession,
       ExerciseRecord,
       SymptomLog,

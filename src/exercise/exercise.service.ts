@@ -4,6 +4,8 @@ import { Repository, IsNull, Not } from 'typeorm';
 
 import { ExerciseSession } from '../entities/exercise-session.entity';
 import { ExerciseRecord } from '../entities/exercise-record.entity';
+import { Exercise } from '../entities/exercise.entity';
+import { ExerciseStep } from '../entities/exercise-step.entity';
 
 @Injectable()
 export class ExerciseService {
@@ -13,11 +15,16 @@ export class ExerciseService {
 
     @InjectRepository(ExerciseRecord)
     private readonly recordRepository: Repository<ExerciseRecord>,
+
+    @InjectRepository(Exercise)
+    private readonly exerciseRepository: Repository<Exercise>,
+
+    @InjectRepository(ExerciseStep)
+    private readonly stepRepository: Repository<ExerciseStep>,
   ) {}
 
   /**
    * 전체 운동 시작
-   * - 하나의 운동 세션 생성
    */
   async startSession(userId: string) {
     const session = this.sessionRepository.create({
@@ -31,7 +38,6 @@ export class ExerciseService {
 
   /**
    * 전체 운동 종료
-   * - 진행 중인 세션을 COMPLETED 상태로 변경
    */
   async endSession(userId: string) {
     const session = await this.sessionRepository.findOne({
@@ -50,7 +56,6 @@ export class ExerciseService {
 
   /**
    * 개별 운동 시작
-   * - 전체 세션 없이 단독으로 수행되는 운동
    */
   async startRecord(
     userId: string,
@@ -70,7 +75,6 @@ export class ExerciseService {
 
   /**
    * 개별 운동 종료
-   * - 시작된 개별 운동의 종료 시간 및 duration 계산
    */
   async endRecord(recordId: number) {
     const record = await this.recordRepository.findOne({
@@ -91,11 +95,8 @@ export class ExerciseService {
 
   /**
    * 운동 기록 전체 조회
-   * - 완료된 전체 운동 세션
-   * - 완료된 개별 운동 기록
    */
   async getHistory(userId: string) {
-    // 전체 운동 세션 (완료된 것만)
     const sessions = await this.sessionRepository.find({
       where: {
         user_id: userId,
@@ -105,7 +106,6 @@ export class ExerciseService {
       order: { started_at: 'DESC' },
     });
 
-    // 개별 운동 (세션 없이 수행 + 종료된 것만)
     const singleRecords = await this.recordRepository.find({
       where: {
         user_id: userId,
@@ -118,6 +118,40 @@ export class ExerciseService {
     return {
       sessions,
       single_records: singleRecords,
+    };
+  }
+
+  /**
+   * 운동 목록 조회
+   */
+  async getAllExercises() {
+    return this.exerciseRepository.find({
+      order: { exercise_id: 'ASC' },
+    });
+  }
+
+  /**
+   * 운동 상세 조회
+   * - 단계 포함
+   * - 단계 순서 정렬
+   */
+  async getExerciseDetail(exerciseId: number) {
+    const exercise = await this.exerciseRepository.findOne({
+      where: { exercise_id: exerciseId },
+    });
+
+    if (!exercise) {
+      throw new BadRequestException('운동이 존재하지 않습니다.');
+    }
+
+    const steps = await this.stepRepository.find({
+      where: { exercise_id: exerciseId },
+      order: { step_order: 'ASC' },
+    });
+
+    return {
+      ...exercise,
+      steps,
     };
   }
 }

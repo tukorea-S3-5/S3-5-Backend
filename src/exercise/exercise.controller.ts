@@ -5,6 +5,7 @@ import {
   Body,
   Req,
   UseGuards,
+  Param,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -40,10 +41,7 @@ export class ExerciseController {
 
   @Post('record/start')
   @ApiOperation({ summary: '개별 운동 시작' })
-  startRecord(
-    @Req() req,
-    @Body() dto: StartExerciseRecordDto,
-  ) {
+  startRecord(@Req() req, @Body() dto: StartExerciseRecordDto) {
     return this.exerciseService.startRecord(
       req.user.user_id,
       dto.exercise_name,
@@ -61,5 +59,17 @@ export class ExerciseController {
   @ApiOperation({ summary: '운동 기록 조회' })
   getHistory(@Req() req) {
     return this.exerciseService.getHistory(req.user.user_id);
+  }
+
+  @Get()
+  @ApiOperation({ summary: '운동 목록 조회' })
+  getAllExercises() {
+    return this.exerciseService.getAllExercises();
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: '운동 상세 조회' })
+  getExerciseDetail(@Param('id') id: string) {
+    return this.exerciseService.getExerciseDetail(Number(id));
   }
 }
