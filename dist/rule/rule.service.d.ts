@@ -1,8 +1,9 @@
-import { RuleResult } from './types/rule-result.type';
+import { Repository } from 'typeorm';
+import { Exercise } from '../entities/exercise.entity';
+import { ExerciseTagMap } from '../entities/exercise-tag-map.entity';
 export declare class RuleService {
-    evaluateExercise(params: {
-        week: number;
-        isMultiple: boolean | null;
-        exerciseType?: string;
-    }): RuleResult;
+    private readonly exerciseRepository;
+    private readonly tagRepository;
+    constructor(exerciseRepository: Repository<Exercise>, tagRepository: Repository<ExerciseTagMap>);
+    generateCandidates(trimester: number, symptoms: string[]): Promise<Exercise[]>;
 }

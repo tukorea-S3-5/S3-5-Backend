@@ -21,6 +21,7 @@ const core_1 = require("@nestjs/core");
 const jwt_guard_1 = require("./auth/jwt.guard");
 const pregnancy_weight_module_1 = require("./pregnancy-weight/pregnancy-weight.module");
 const symptom_module_1 = require("./symptom/symptom.module");
+const rule_module_1 = require("./rule/rule.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -49,6 +50,7 @@ exports.AppModule = AppModule = __decorate([
             user_module_1.UserModule,
             pregnancy_weight_module_1.PregnancyWeightModule,
             symptom_module_1.SymptomModule,
+            rule_module_1.RuleModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [

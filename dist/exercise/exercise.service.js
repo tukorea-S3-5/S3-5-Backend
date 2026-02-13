@@ -18,12 +18,18 @@ const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const exercise_session_entity_1 = require("../entities/exercise-session.entity");
 const exercise_record_entity_1 = require("../entities/exercise-record.entity");
+const exercise_entity_1 = require("../entities/exercise.entity");
+const exercise_step_entity_1 = require("../entities/exercise-step.entity");
 let ExerciseService = class ExerciseService {
     sessionRepository;
     recordRepository;
-    constructor(sessionRepository, recordRepository) {
+    exerciseRepository;
+    stepRepository;
+    constructor(sessionRepository, recordRepository, exerciseRepository, stepRepository) {
         this.sessionRepository = sessionRepository;
         this.recordRepository = recordRepository;
+        this.exerciseRepository = exerciseRepository;
+        this.stepRepository = stepRepository;
     }
     async startSession(userId) {
         const session = this.sessionRepository.create({
@@ -87,13 +93,38 @@ let ExerciseService = class ExerciseService {
             single_records: singleRecords,
         };
     }
+    async getAllExercises() {
+        return this.exerciseRepository.find({
+            order: { exercise_id: 'ASC' },
+        });
+    }
+    async getExerciseDetail(exerciseId) {
+        const exercise = await this.exerciseRepository.findOne({
+            where: { exercise_id: exerciseId },
+        });
+        if (!exercise) {
+            throw new common_1.BadRequestException('운동이 존재하지 않습니다.');
+        }
+        const steps = await this.stepRepository.find({
+            where: { exercise_id: exerciseId },
+            order: { step_order: 'ASC' },
+        });
+        return {
+            ...exercise,
+            steps,
+        };
+    }
 };
 exports.ExerciseService = ExerciseService;
 exports.ExerciseService = ExerciseService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(exercise_session_entity_1.ExerciseSession)),
     __param(1, (0, typeorm_1.InjectRepository)(exercise_record_entity_1.ExerciseRecord)),
+    __param(2, (0, typeorm_1.InjectRepository)(exercise_entity_1.Exercise)),
+    __param(3, (0, typeorm_1.InjectRepository)(exercise_step_entity_1.ExerciseStep)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
+        typeorm_2.Repository,
+        typeorm_2.Repository,
         typeorm_2.Repository])
 ], ExerciseService);
 //# sourceMappingURL=exercise.service.js.map
