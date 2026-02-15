@@ -12,7 +12,6 @@ const typeorm_1 = require("@nestjs/typeorm");
 const rule_service_1 = require("./rule.service");
 const exercise_entity_1 = require("../entities/exercise.entity");
 const exercise_tag_map_entity_1 = require("../entities/exercise-tag-map.entity");
-const rule_controller_1 = require("./rule.controller");
 let RuleModule = class RuleModule {
 };
 exports.RuleModule = RuleModule;
@@ -25,7 +24,6 @@ exports.RuleModule = RuleModule = __decorate([
             ]),
         ],
         providers: [rule_service_1.RuleService],
-        controllers: [rule_controller_1.RuleController],
         exports: [rule_service_1.RuleService],
     })
 ], RuleModule);

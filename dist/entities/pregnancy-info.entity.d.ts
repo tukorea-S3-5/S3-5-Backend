@@ -12,5 +12,6 @@ export declare class PregnancyInfo {
     height: number;
     pre_weight: number;
     bmi: number;
+    created_at: Date;
     updated_at: Date;
 }

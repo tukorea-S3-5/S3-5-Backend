@@ -4,7 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { RuleService } from './rule.service';
 import { Exercise } from '../entities/exercise.entity';
 import { ExerciseTagMap } from '../entities/exercise-tag-map.entity';
-import { RuleController } from './rule.controller';
+//import { RuleController } from './rule.controller';
 
 /**
  * Rule Module
@@ -19,7 +19,7 @@ import { RuleController } from './rule.controller';
     ]),
   ],
   providers: [RuleService],
-  controllers: [RuleController],
+  //controllers: [RuleController],
   exports: [RuleService],
 })
 export class RuleModule {}

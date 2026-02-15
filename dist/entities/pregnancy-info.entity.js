@@ -25,6 +25,7 @@ let PregnancyInfo = class PregnancyInfo {
     height;
     pre_weight;
     bmi;
+    created_at;
     updated_at;
 };
 exports.PregnancyInfo = PregnancyInfo;
@@ -77,6 +78,10 @@ __decorate([
     (0, typeorm_1.Column)({ type: 'float', nullable: true }),
     __metadata("design:type", Number)
 ], PregnancyInfo.prototype, "bmi", void 0);
+__decorate([
+    (0, typeorm_1.CreateDateColumn)(),
+    __metadata("design:type", Date)
+], PregnancyInfo.prototype, "created_at", void 0);
 __decorate([
     (0, typeorm_1.UpdateDateColumn)(),
     __metadata("design:type", Date)

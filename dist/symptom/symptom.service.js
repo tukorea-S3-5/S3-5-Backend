@@ -23,17 +23,30 @@ let SymptomService = class SymptomService {
         this.symptomRepository = symptomRepository;
     }
     async createSymptoms(userId, symptoms) {
-        const symptomEntities = symptoms.map((symptom) => this.symptomRepository.create({
+        if (!symptoms || symptoms.length === 0) {
+            throw new common_1.BadRequestException('최소 1개 이상의 증상을 선택해야 합니다.');
+        }
+        const symptomLog = this.symptomRepository.create({
             user_id: userId,
-            symptom_name: symptom,
-        }));
-        return this.symptomRepository.save(symptomEntities);
+            symptoms,
+        });
+        return this.symptomRepository.save(symptomLog);
     }
     async getHistory(userId) {
         return this.symptomRepository.find({
             where: { user_id: userId },
-            order: { recorded_at: 'DESC' },
+            order: { created_at: 'DESC' },
         });
+    }
+    async getLatestSymptoms(userId) {
+        const latest = await this.symptomRepository.findOne({
+            where: { user_id: userId },
+            order: { created_at: 'DESC' },
+        });
+        if (!latest) {
+            throw new common_1.BadRequestException('입력된 증상이 없습니다.');
+        }
+        return latest.symptoms;
     }
 };
 exports.SymptomService = SymptomService;

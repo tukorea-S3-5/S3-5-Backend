@@ -9,8 +9,7 @@ import { ExerciseRecord } from './exercise-record.entity';
 
 /**
  * 전체 운동 세션
- * - 전체 운동 시작/종료용
- * - 개별 운동 없이도 존재 가능
+ * - 추천 기반 전체 운동 묶음
  */
 @Entity('exercise_session')
 export class ExerciseSession {
@@ -32,20 +31,23 @@ export class ExerciseSession {
 
   /**
    * 세션 시작 시각
+   * - 세션 생성 시 자동 기록
    */
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'timestamp' })
   started_at: Date;
 
   /**
    * 세션 종료 시각
    */
-  @Column({ type: 'datetime', nullable: true })
+  @Column({ type: 'timestamp', nullable: true })
   ended_at: Date | null;
 
   /**
    * 세션에 포함된 운동 기록
-   * - 없을 수도 있음
    */
-  @OneToMany(() => ExerciseRecord, (record) => record.session)
+  @OneToMany(
+    () => ExerciseRecord,
+    (record) => record.session,
+  )
   records: ExerciseRecord[];
 }

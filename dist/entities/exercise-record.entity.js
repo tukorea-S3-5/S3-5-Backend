@@ -17,6 +17,7 @@ let ExerciseRecord = class ExerciseRecord {
     session_id;
     session;
     user_id;
+    exercise_id;
     exercise_name;
     order_index;
     started_at;
@@ -29,7 +30,7 @@ __decorate([
     __metadata("design:type", Number)
 ], ExerciseRecord.prototype, "record_id", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ nullable: true }),
+    (0, typeorm_1.Column)({ type: 'int', nullable: true }),
     __metadata("design:type", Object)
 ], ExerciseRecord.prototype, "session_id", void 0);
 __decorate([
@@ -42,6 +43,10 @@ __decorate([
     __metadata("design:type", String)
 ], ExerciseRecord.prototype, "user_id", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ type: 'int' }),
+    __metadata("design:type", Number)
+], ExerciseRecord.prototype, "exercise_id", void 0);
+__decorate([
     (0, typeorm_1.Column)({ type: 'varchar', length: 100 }),
     __metadata("design:type", String)
 ], ExerciseRecord.prototype, "exercise_name", void 0);
@@ -50,11 +55,11 @@ __decorate([
     __metadata("design:type", Number)
 ], ExerciseRecord.prototype, "order_index", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'datetime' }),
-    __metadata("design:type", Date)
+    (0, typeorm_1.Column)({ type: 'timestamp', nullable: true }),
+    __metadata("design:type", Object)
 ], ExerciseRecord.prototype, "started_at", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'datetime', nullable: true }),
+    (0, typeorm_1.Column)({ type: 'timestamp', nullable: true }),
     __metadata("design:type", Object)
 ], ExerciseRecord.prototype, "ended_at", void 0);
 __decorate([

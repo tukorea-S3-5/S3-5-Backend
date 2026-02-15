@@ -3,18 +3,27 @@ import {
   PrimaryGeneratedColumn,
   Column,
   UpdateDateColumn,
+  CreateDateColumn,
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
 import { User } from '../user/user.entity';
 
 /**
- * 임신 정보 테이블
- * - 임신의 기준 상태 정보를 저장
- * - 체중 변화는 별도 테이블에서 관리
+ * PregnancyInfo
+ *
+ * 임신 기준 정보 저장 테이블
+ *
+ * 역할:
+ * - 사용자의 현재 임신 상태 기준 데이터 저장
+ * - 추천 로직에서 trimester 조회에 사용
+ * - 체중 변화 등은 별도 테이블에서 관리
  */
 @Entity('pregnancy_info')
 export class PregnancyInfo {
+  /**
+   * 임신 정보 PK
+   */
   @PrimaryGeneratedColumn()
   pregnancy_id: number;
 
@@ -25,7 +34,8 @@ export class PregnancyInfo {
   user_id: string;
 
   /**
-   * User 엔티티와의 관계
+   * User 엔티티 관계 매핑
+   * user_id 기준으로 연결
    */
   @ManyToOne(() => User)
   @JoinColumn({ name: 'user_id' })
@@ -53,6 +63,7 @@ export class PregnancyInfo {
 
   /**
    * 임신 단계 (1, 2, 3기)
+   * 추천 로직에서 핵심 필터로 사용
    */
   @Column({ type: 'int' })
   trimester: number;
@@ -65,7 +76,7 @@ export class PregnancyInfo {
 
   /**
    * 다태아 여부
-   * null  : 아직 확인되지 않음
+   * null  : 확인 전
    * false : 단태아
    * true  : 다태아
    */
@@ -90,6 +101,16 @@ export class PregnancyInfo {
   @Column({ type: 'float', nullable: true })
   bmi: number;
 
+  /**
+   * 생성 시 자동 저장
+   * 최신 임신 정보 조회 시 정렬 기준으로 사용
+   */
+  @CreateDateColumn()
+  created_at: Date;
+
+  /**
+   * 수정 시 자동 업데이트
+   */
   @UpdateDateColumn()
   updated_at: Date;
 }
