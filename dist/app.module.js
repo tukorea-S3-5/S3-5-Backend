@@ -22,6 +22,8 @@ const jwt_guard_1 = require("./auth/jwt.guard");
 const pregnancy_weight_module_1 = require("./pregnancy-weight/pregnancy-weight.module");
 const symptom_module_1 = require("./symptom/symptom.module");
 const rule_module_1 = require("./rule/rule.module");
+const recommend_module_1 = require("./recommend/recommend.module");
+const report_module_1 = require("./report/report.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -51,6 +53,8 @@ exports.AppModule = AppModule = __decorate([
             pregnancy_weight_module_1.PregnancyWeightModule,
             symptom_module_1.SymptomModule,
             rule_module_1.RuleModule,
+            recommend_module_1.RecommendModule,
+            report_module_1.ReportModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [

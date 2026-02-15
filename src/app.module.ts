@@ -13,6 +13,8 @@ import { JwtAuthGuard } from './auth/jwt.guard';
 import { PregnancyWeightModule } from './pregnancy-weight/pregnancy-weight.module';
 import { SymptomModule } from './symptom/symptom.module';
 import { RuleModule } from './rule/rule.module';
+import { RecommendModule } from './recommend/recommend.module';
+import { ReportModule } from './report/report.module';
 
 @Module({
   imports: [
@@ -44,6 +46,8 @@ import { RuleModule } from './rule/rule.module';
     PregnancyWeightModule,
     SymptomModule,
     RuleModule,
+    RecommendModule,
+    ReportModule,
   ],
   controllers: [AppController],
   providers: [
