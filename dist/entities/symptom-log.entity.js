@@ -14,8 +14,8 @@ const typeorm_1 = require("typeorm");
 let SymptomLog = class SymptomLog {
     symptom_id;
     user_id;
-    symptom_name;
-    recorded_at;
+    symptoms;
+    created_at;
 };
 exports.SymptomLog = SymptomLog;
 __decorate([
@@ -23,17 +23,17 @@ __decorate([
     __metadata("design:type", Number)
 ], SymptomLog.prototype, "symptom_id", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
+    (0, typeorm_1.Column)({ type: 'uuid' }),
     __metadata("design:type", String)
 ], SymptomLog.prototype, "user_id", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ length: 100 }),
-    __metadata("design:type", String)
-], SymptomLog.prototype, "symptom_name", void 0);
+    (0, typeorm_1.Column)({ type: 'json' }),
+    __metadata("design:type", Array)
+], SymptomLog.prototype, "symptoms", void 0);
 __decorate([
     (0, typeorm_1.CreateDateColumn)(),
     __metadata("design:type", Date)
-], SymptomLog.prototype, "recorded_at", void 0);
+], SymptomLog.prototype, "created_at", void 0);
 exports.SymptomLog = SymptomLog = __decorate([
     (0, typeorm_1.Entity)('symptom_log')
 ], SymptomLog);

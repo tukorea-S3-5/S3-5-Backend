@@ -6,12 +6,12 @@ import {
 } from 'typeorm';
 
 /**
- * 증상 기록 테이블
- * - 사용자가 선택한 증상을 저장
- * - 중복 허용 (같은 증상 여러 번 입력 가능)
- * - 하루에 여러 번 입력 가능
+ * 증상 세트 기록 테이블
+ *
+ * - 사용자가 한 번에 선택한 증상들을 JSON 배열로 저장
+ * - 추천 로직은 가장 최신 1개 세트만 사용
  */
-@Entity('symptom_log') // 실제 DB 테이블명 명시
+@Entity('symptom_log')
 export class SymptomLog {
 
   /**
@@ -21,23 +21,21 @@ export class SymptomLog {
   symptom_id: number;
 
   /**
-   * 증상을 입력한 사용자 ID
-   * (JWT에서 꺼낸 userId와 매핑됨)
+   * 사용자 ID (JWT에서 추출)
    */
-  @Column()
+  @Column({ type: 'uuid' })
   user_id: string;
 
   /**
-   * 사용자가 선택한 증상 이름
-   * 예: 배뭉침, 요통, 피로감 등
+   * 사용자가 선택한 증상 세트
+   * 예: ["요통", "피로감"]
    */
-  @Column({ length: 100 })
-  symptom_name: string;
+  @Column({ type: 'json' })
+  symptoms: string[];
 
   /**
-   * 증상이 기록된 시간
-   * 자동으로 현재 시간 저장됨
+   * 입력 시간
    */
   @CreateDateColumn()
-  recorded_at: Date;
+  created_at: Date;
 }

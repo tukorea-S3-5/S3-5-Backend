@@ -11,10 +11,9 @@ const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const exercise_session_entity_1 = require("../entities/exercise-session.entity");
 const exercise_record_entity_1 = require("../entities/exercise-record.entity");
-const exercise_entity_1 = require("../entities/exercise.entity");
 const exercise_service_1 = require("./exercise.service");
 const exercise_controller_1 = require("./exercise.controller");
-const exercise_step_entity_1 = require("../entities/exercise-step.entity");
+const recommend_module_1 = require("../recommend/recommend.module");
 let ExerciseModule = class ExerciseModule {
 };
 exports.ExerciseModule = ExerciseModule;
@@ -23,10 +22,9 @@ exports.ExerciseModule = ExerciseModule = __decorate([
         imports: [
             typeorm_1.TypeOrmModule.forFeature([
                 exercise_session_entity_1.ExerciseSession,
-                exercise_step_entity_1.ExerciseStep,
                 exercise_record_entity_1.ExerciseRecord,
-                exercise_entity_1.Exercise,
             ]),
+            recommend_module_1.RecommendModule,
         ],
         controllers: [exercise_controller_1.ExerciseController],
         providers: [exercise_service_1.ExerciseService],
