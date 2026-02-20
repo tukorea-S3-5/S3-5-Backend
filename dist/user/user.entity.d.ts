@@ -3,7 +3,7 @@ export declare class User {
     email: string;
     password: string;
     name: string;
-    age: number | null;
+    birth_date: Date;
     created_at: Date;
     currentRefreshToken: string | null;
     hashPassword(plainTextPassword: string): Promise<void>;

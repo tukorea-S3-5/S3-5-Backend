@@ -113,4 +113,25 @@ export class PregnancyInfo {
    */
   @UpdateDateColumn()
   updated_at: Date;
+
+  /**
+   * 임신 전 운동 여부
+   * ACTIVE: 꾸준히 함 / SEDENTARY: 거의 안 함
+   */
+  @Column({ type: 'varchar', length: 20 })
+  fitness_level: 'ACTIVE' | 'SEDENTARY';
+
+  /**
+   * 최대 허용 심박수
+   * 나이와 운동 여부를 바탕으로 계산된 진동 알림 기준값
+   */
+  @Column({ type: 'int' })
+  max_allowed_bpm: number;
+
+  /**
+   * 상대적 금기사항 유무
+   * true일 경우 무조건 저강도 운동만 추천
+   */
+  @Column({ type: 'boolean', default: false })
+  contraindication: boolean;
 }

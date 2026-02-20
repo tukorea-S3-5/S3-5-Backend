@@ -20,8 +20,8 @@ export class User {
   @Column({ length: 50 })
   name: string;
 
-  @Column({ type: 'int', nullable: true })
-  age: number | null;
+  @Column({ type: 'date' })
+  birth_date: Date;
 
   @CreateDateColumn()
   created_at: Date;

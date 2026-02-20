@@ -16,7 +16,7 @@ class CreateUserDto {
     email;
     password;
     name;
-    age;
+    birth_date;
 }
 exports.CreateUserDto = CreateUserDto;
 __decorate([
@@ -51,14 +51,12 @@ __decorate([
 ], CreateUserDto.prototype, "name", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
-        example: 25,
-        description: '나이 (선택 입력)',
-        required: false,
-        minimum: 0,
+        example: '1996-05-20',
+        description: '생년월일 (YYYY-MM-DD 형식)',
+        required: true,
     }),
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsInt)({ message: '나이는 정수여야 합니다.' }),
-    (0, class_validator_1.Min)(0, { message: '나이는 0보다 작을 수 없습니다.' }),
-    __metadata("design:type", Number)
-], CreateUserDto.prototype, "age", void 0);
+    (0, class_validator_1.IsDateString)({}, { message: '올바른 날짜 형식(YYYY-MM-DD)이어야 합니다.' }),
+    (0, class_validator_1.IsNotEmpty)({ message: '생년월일은 필수 입력 항목입니다.' }),
+    __metadata("design:type", String)
+], CreateUserDto.prototype, "birth_date", void 0);
 //# sourceMappingURL=create-user.dto.js.map

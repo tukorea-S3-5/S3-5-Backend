@@ -14,7 +14,6 @@ const health_baseline_entity_1 = require("./health-baseline.entity");
 const exercise_session_entity_1 = require("./exercise-session.entity");
 const exercise_record_entity_1 = require("./exercise-record.entity");
 const symptom_log_entity_1 = require("./symptom-log.entity");
-const heart_rate_log_entity_1 = require("./heart-rate-log.entity");
 const report_entity_1 = require("./report.entity");
 const recommendation_entity_1 = require("./recommendation.entity");
 const exercise_entity_1 = require("./exercise.entity");
@@ -33,7 +32,6 @@ exports.EntitiesModule = EntitiesModule = __decorate([
                 exercise_session_entity_1.ExerciseSession,
                 exercise_record_entity_1.ExerciseRecord,
                 symptom_log_entity_1.SymptomLog,
-                heart_rate_log_entity_1.HeartRateLog,
                 report_entity_1.Report,
                 recommendation_entity_1.Recommendation,
             ]),

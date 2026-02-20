@@ -1,12 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
+  IsDateString,
   IsEmail,
-  IsInt,
   IsNotEmpty,
-  IsOptional,
   IsString,
   Matches,
-  Min,
   MinLength,
 } from 'class-validator';
 
@@ -43,13 +41,11 @@ export class CreateUserDto {
   readonly name: string;
 
   @ApiProperty({
-    example: 25,
-    description: '나이 (선택 입력)',
-    required: false,
-    minimum: 0,
+    example: '1996-05-20',
+    description: '생년월일 (YYYY-MM-DD 형식)',
+    required: true,
   })
-  @IsOptional()
-  @IsInt({ message: '나이는 정수여야 합니다.' })
-  @Min(0, { message: '나이는 0보다 작을 수 없습니다.' })
-  readonly age?: number;
+  @IsDateString({}, { message: '올바른 날짜 형식(YYYY-MM-DD)이어야 합니다.' })
+  @IsNotEmpty({ message: '생년월일은 필수 입력 항목입니다.' })
+  readonly birth_date: string;
 }

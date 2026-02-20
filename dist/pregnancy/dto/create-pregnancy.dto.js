@@ -16,8 +16,9 @@ class CreatePregnancyDto {
     last_menstrual_period;
     height;
     pre_weight;
-    due_date;
     is_multiple;
+    fitness_level;
+    contraindication;
 }
 exports.CreatePregnancyDto = CreatePregnancyDto;
 __decorate([
@@ -36,15 +37,22 @@ __decorate([
     __metadata("design:type", Number)
 ], CreatePregnancyDto.prototype, "pre_weight", void 0);
 __decorate([
-    (0, swagger_1.ApiPropertyOptional)({ example: '2026-08-22' }),
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsDateString)(),
-    __metadata("design:type", String)
-], CreatePregnancyDto.prototype, "due_date", void 0);
-__decorate([
     (0, swagger_1.ApiPropertyOptional)({ example: true }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsBoolean)(),
     __metadata("design:type", Boolean)
 ], CreatePregnancyDto.prototype, "is_multiple", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: 'ACTIVE',
+        description: '임신 전 운동 여부 (ACTIVE 또는 SEDENTARY)',
+    }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreatePregnancyDto.prototype, "fitness_level", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: false, description: '상대적 금기사항 유무' }),
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], CreatePregnancyDto.prototype, "contraindication", void 0);
 //# sourceMappingURL=create-pregnancy.dto.js.map

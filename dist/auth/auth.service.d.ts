@@ -7,7 +7,7 @@ export interface ValidatedUser {
     user_id: string;
     email: string;
     name: string;
-    age: number | null;
+    birth_date: Date;
     created_at: Date;
     currentRefreshToken: string | null;
 }

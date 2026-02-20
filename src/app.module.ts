@@ -36,6 +36,11 @@ import { ReportModule } from './report/report.module';
       synchronize: true, // 개발 단계에서만 true
       timezone: '+09:00',
       charset: 'utf8mb4',
+
+      extra: {
+        charset: 'utf8mb4',
+        collation: 'utf8mb4_unicode_ci',
+      },
     }),
 
     EntitiesModule,

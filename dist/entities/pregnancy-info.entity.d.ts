@@ -14,4 +14,7 @@ export declare class PregnancyInfo {
     bmi: number;
     created_at: Date;
     updated_at: Date;
+    fitness_level: 'ACTIVE' | 'SEDENTARY';
+    max_allowed_bpm: number;
+    contraindication: boolean;
 }
