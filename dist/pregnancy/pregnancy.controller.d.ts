@@ -14,6 +14,7 @@ export declare class PregnancyController {
         total_gain: number;
         due_date: Date;
         is_multiple: boolean | null;
+        max_allowed_bpm: number;
     } | null>;
     updateMyLatest(req: any, dto: UpdatePregnancyDto): Promise<import("../entities/pregnancy-info.entity").PregnancyInfo | null>;
 }

@@ -44,6 +44,10 @@ exports.AppModule = AppModule = __decorate([
                 synchronize: true,
                 timezone: '+09:00',
                 charset: 'utf8mb4',
+                extra: {
+                    charset: 'utf8mb4',
+                    collation: 'utf8mb4_unicode_ci',
+                },
             }),
             entities_module_1.EntitiesModule,
             pregnancy_module_1.PregnancyModule,

@@ -27,6 +27,9 @@ let PregnancyInfo = class PregnancyInfo {
     bmi;
     created_at;
     updated_at;
+    fitness_level;
+    max_allowed_bpm;
+    contraindication;
 };
 exports.PregnancyInfo = PregnancyInfo;
 __decorate([
@@ -86,6 +89,18 @@ __decorate([
     (0, typeorm_1.UpdateDateColumn)(),
     __metadata("design:type", Date)
 ], PregnancyInfo.prototype, "updated_at", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'varchar', length: 20 }),
+    __metadata("design:type", String)
+], PregnancyInfo.prototype, "fitness_level", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'int' }),
+    __metadata("design:type", Number)
+], PregnancyInfo.prototype, "max_allowed_bpm", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'boolean', default: false }),
+    __metadata("design:type", Boolean)
+], PregnancyInfo.prototype, "contraindication", void 0);
 exports.PregnancyInfo = PregnancyInfo = __decorate([
     (0, typeorm_1.Entity)('pregnancy_info')
 ], PregnancyInfo);

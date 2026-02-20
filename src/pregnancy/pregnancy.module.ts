@@ -5,12 +5,14 @@ import { PregnancyService } from './pregnancy.service';
 import { PregnancyController } from './pregnancy.controller';
 import { AuthModule } from '../auth/auth.module';
 import { PregnancyWeightLog } from '../entities/pregnancy-weight-log.entity';
+import { User } from 'src/user/user.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([PregnancyInfo, PregnancyWeightLog]),
+  imports: [
+    TypeOrmModule.forFeature([PregnancyInfo, PregnancyWeightLog, User]),
     AuthModule,
   ],
   controllers: [PregnancyController],
   providers: [PregnancyService],
 })
-export class PregnancyModule { }
+export class PregnancyModule {}
