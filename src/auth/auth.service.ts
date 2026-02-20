@@ -18,7 +18,7 @@ export interface ValidatedUser {
   user_id: string;
   email: string;
   name: string;
-  age: number | null;
+  birth_date: Date;
   created_at: Date;
   currentRefreshToken: string | null;
 }
@@ -34,11 +34,11 @@ export class AuthService {
 
   // ================= 회원가입 =================
   async signUp(createUserDto: CreateUserDto): Promise<void> {
-    const { email, password, name, age } = createUserDto;
+    const { email, password, name, birth_date } = createUserDto;
     const user = this.userRepository.create({
       email,
       name,
-      age,
+      birth_date,
     });
 
     // 비밀번호 해싱

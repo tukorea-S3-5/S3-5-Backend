@@ -50,7 +50,7 @@ let User = class User {
     email;
     password;
     name;
-    age;
+    birth_date;
     created_at;
     currentRefreshToken;
     async hashPassword(plainTextPassword) {
@@ -89,9 +89,9 @@ __decorate([
     __metadata("design:type", String)
 ], User.prototype, "name", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'int', nullable: true }),
-    __metadata("design:type", Object)
-], User.prototype, "age", void 0);
+    (0, typeorm_1.Column)({ type: 'date' }),
+    __metadata("design:type", Date)
+], User.prototype, "birth_date", void 0);
 __decorate([
     (0, typeorm_1.CreateDateColumn)(),
     __metadata("design:type", Date)

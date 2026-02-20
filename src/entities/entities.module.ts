@@ -6,7 +6,6 @@ import { HealthBaseline } from './health-baseline.entity';
 import { ExerciseSession } from './exercise-session.entity';
 import { ExerciseRecord } from './exercise-record.entity';
 import { SymptomLog } from './symptom-log.entity';
-import { HeartRateLog } from './heart-rate-log.entity';
 import { Report } from './report.entity';
 import { Recommendation } from './recommendation.entity';
 import { Exercise } from './exercise.entity';
@@ -22,7 +21,6 @@ import { ExerciseTagMap } from './exercise-tag-map.entity';
       ExerciseSession,
       ExerciseRecord,
       SymptomLog,
-      HeartRateLog,
       Report,
       Recommendation,
     ]),

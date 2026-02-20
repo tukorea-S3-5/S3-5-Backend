@@ -29,11 +29,11 @@ let AuthService = class AuthService {
         this.configService = configService;
     }
     async signUp(createUserDto) {
-        const { email, password, name, age } = createUserDto;
+        const { email, password, name, birth_date } = createUserDto;
         const user = this.userRepository.create({
             email,
             name,
-            age,
+            birth_date,
         });
         await user.hashPassword(password);
         try {
