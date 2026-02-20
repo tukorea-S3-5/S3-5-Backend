@@ -40,17 +40,26 @@ export class PregnancyService {
   private calculateMaxBpm(
     age: number,
     fitnessLevel: 'ACTIVE' | 'SEDENTARY',
+    bmi: number,
   ): number {
+    let maxBpm = 0;
+
     if (age < 20) {
-      return fitnessLevel === 'ACTIVE' ? 151 : 125;
+      maxBpm = fitnessLevel === 'ACTIVE' ? 151 : 125;
     } else if (age >= 20 && age <= 29) {
-      return fitnessLevel === 'ACTIVE' ? 161 : 145;
+      maxBpm = fitnessLevel === 'ACTIVE' ? 161 : 145;
     } else if (age >= 30 && age <= 39) {
-      return fitnessLevel === 'ACTIVE' ? 157 : 145;
+      maxBpm = fitnessLevel === 'ACTIVE' ? 157 : 145;
     } else {
       // 40세 이상 (운동 여부 무관하게 일괄 141 이상 진동)
-      return 141;
+      maxBpm = 141;
     }
+
+    // 비만(BMI 25 이상)인 경우, 심장 부하를 고려해 하드웨어 진동 기준치를 10 낮춤
+    if (bmi >= 25) {
+      return (maxBpm -= 10);
+    }
+    return maxBpm;
   }
 
   /**
@@ -64,8 +73,13 @@ export class PregnancyService {
     });
     if (!user) throw new NotFoundException('사용자를 찾을 수 없습니다.');
 
+    // BMI 계산
+    const heightMeter = dto.height / 100;
+    const bmi = dto.pre_weight / (heightMeter * heightMeter);
+
+    // 나이 및 최대 허용 심박수 계산
     const age = this.calculateAge(new Date(user.birth_date));
-    const maxBpm = this.calculateMaxBpm(age, dto.fitness_level);
+    const maxBpm = this.calculateMaxBpm(age, dto.fitness_level, bmi);
 
     // 날짜 및 주수 계산
     const lmp = new Date(dto.last_menstrual_period);
@@ -80,10 +94,6 @@ export class PregnancyService {
       lmp.getTime() + 280 * 24 * 60 * 60 * 1000,
     );
     const finalDueDate = calculatedDueDate;
-
-    // BMI 계산
-    const heightMeter = dto.height / 100;
-    const bmi = dto.pre_weight / (heightMeter * heightMeter);
 
     // 엔티티 생성 및 저장
     const pregnancy = this.pregnancyRepository.create({
