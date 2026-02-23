@@ -81,7 +81,7 @@ export class ExerciseService {
       );
     }
   
-    // ⭐ 개별 운동도 세션 생성
+    // 개별 운동도 세션 생성
     const session = await this.sessionRepository.save(
       this.sessionRepository.create({
         user_id: userId,
@@ -95,7 +95,7 @@ export class ExerciseService {
       const record = await this.recordRepository.save(
         this.recordRepository.create({
           user_id: userId,
-          session_id: session.session_id, // ⭐ NULL 제거
+          session_id: session.session_id, // NULL 제거
           exercise_id: allowedExercises[i].exercise_id,
           exercise_name: allowedExercises[i].exercise_name,
           order_index: i + 1,
