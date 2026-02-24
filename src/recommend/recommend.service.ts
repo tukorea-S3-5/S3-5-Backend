@@ -143,11 +143,25 @@ export class RecommendService {
         continue;
       }
 
+      // if (positiveScore > 0) {
+      //   recommend.push(exercise);
+      //   continue;
+      // }
+
+      // caution.push(exercise);
+
       if (positiveScore > 0) {
         recommend.push(exercise);
         continue;
       }
-
+      
+      // 증상 없거나, 관련 없어도
+      // 안전하면 기본 recommend
+      if (symptoms.length === 0 || exercise.intensity === 'LOW') {
+        recommend.push(exercise);
+        continue;
+      }
+      
       caution.push(exercise);
     }
 

@@ -102,6 +102,10 @@ let RecommendService = class RecommendService {
                 recommend.push(exercise);
                 continue;
             }
+            if (symptoms.length === 0 || exercise.intensity === 'LOW') {
+                recommend.push(exercise);
+                continue;
+            }
             caution.push(exercise);
         }
         return {
