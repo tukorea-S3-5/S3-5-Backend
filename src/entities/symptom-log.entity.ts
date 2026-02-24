@@ -4,6 +4,7 @@ import {
   Column,
   CreateDateColumn,
 } from 'typeorm';
+import { SymptomType } from 'src/common/enums/symptom.enum';
 
 /**
  * 증상 세트 기록 테이블
@@ -30,8 +31,11 @@ export class SymptomLog {
    * 사용자가 선택한 증상 세트
    * 예: ["요통", "피로감"]
    */
-  @Column({ type: 'json' })
-  symptoms: string[];
+
+  @Column({
+    type: 'json',
+  })
+  symptoms: SymptomType[];
 
   /**
    * 입력 시간

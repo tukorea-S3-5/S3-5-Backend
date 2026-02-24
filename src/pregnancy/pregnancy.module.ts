@@ -6,10 +6,11 @@ import { PregnancyController } from './pregnancy.controller';
 import { AuthModule } from '../auth/auth.module';
 import { PregnancyWeightLog } from '../entities/pregnancy-weight-log.entity';
 import { User } from 'src/user/user.entity';
+import { PregnancyCondition } from '../entities/pregnancy-condition.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([PregnancyInfo, PregnancyWeightLog, User]),
+    TypeOrmModule.forFeature([PregnancyInfo, PregnancyCondition, PregnancyWeightLog, User]),
     AuthModule,
   ],
   controllers: [PregnancyController],

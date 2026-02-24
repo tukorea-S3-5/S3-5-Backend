@@ -1,7 +1,8 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SymptomLog } from '../entities/symptom-log.entity';
+import { SymptomType } from 'src/common/enums/symptom.enum';
 
 @Injectable()
 export class SymptomService {
@@ -12,21 +13,19 @@ export class SymptomService {
 
   /**
    * 증상 세트 저장
-   *
-   * - 사용자가 한 번에 선택한 증상들을
-   *   JSON 배열 형태로 1 row에 저장
-   *
-   * 예:
-   * ["요통", "피로감"]
+   * - 0개도 허용 (해당 없음)
+   * - null이면 빈 배열로 정규화
    */
-  async createSymptoms(userId: string, symptoms: string[]) {
-    if (!symptoms || symptoms.length === 0) {
-      throw new BadRequestException('최소 1개 이상의 증상을 선택해야 합니다.');
-    }
+  async createSymptoms(
+    userId: string,
+    symptoms: SymptomType[] = [],
+  ) {
+
+    const normalizedSymptoms = symptoms ?? [];
 
     const symptomLog = this.symptomRepository.create({
       user_id: userId,
-      symptoms, // ← JSON 배열 그대로 저장
+      symptoms: normalizedSymptoms,
     });
 
     return this.symptomRepository.save(symptomLog);
@@ -34,8 +33,6 @@ export class SymptomService {
 
   /**
    * 증상 이력 조회
-   *
-   * - 과거에 입력했던 세트들 확인
    * - 최신 순 정렬
    */
   async getHistory(userId: string) {
@@ -46,18 +43,20 @@ export class SymptomService {
   }
 
   /**
-   * 최신 증상 세트 조회 (추천용)
+   * 최신 증상 세트 조회
+   * - 한 번도 입력 안 했으면 빈 배열 반환
    */
   async getLatestSymptoms(userId: string) {
+
     const latest = await this.symptomRepository.findOne({
       where: { user_id: userId },
       order: { created_at: 'DESC' },
     });
 
     if (!latest) {
-      throw new BadRequestException('입력된 증상이 없습니다.');
+      return [];
     }
 
-    return latest.symptoms;
+    return latest.symptoms ?? [];
   }
 }

@@ -9,46 +9,38 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ExerciseTagMap = void 0;
+exports.PregnancyCondition = void 0;
 const typeorm_1 = require("typeorm");
-const exercise_entity_1 = require("./exercise.entity");
-const symptom_enum_1 = require("../common/enums/symptom.enum");
-let ExerciseTagMap = class ExerciseTagMap {
-    map_id;
-    exercise_id;
-    symptom_name;
-    effect_type;
-    exercise;
+const pregnancy_info_entity_1 = require("./pregnancy-info.entity");
+const condition_enum_1 = require("../common/enums/condition.enum");
+let PregnancyCondition = class PregnancyCondition {
+    id;
+    pregnancy_id;
+    condition_code;
+    pregnancy;
 };
-exports.ExerciseTagMap = ExerciseTagMap;
+exports.PregnancyCondition = PregnancyCondition;
 __decorate([
     (0, typeorm_1.PrimaryGeneratedColumn)(),
     __metadata("design:type", Number)
-], ExerciseTagMap.prototype, "map_id", void 0);
+], PregnancyCondition.prototype, "id", void 0);
 __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", Number)
-], ExerciseTagMap.prototype, "exercise_id", void 0);
+], PregnancyCondition.prototype, "pregnancy_id", void 0);
 __decorate([
     (0, typeorm_1.Column)({
         type: 'enum',
-        enum: symptom_enum_1.SymptomType,
+        enum: condition_enum_1.ConditionType,
     }),
     __metadata("design:type", String)
-], ExerciseTagMap.prototype, "symptom_name", void 0);
+], PregnancyCondition.prototype, "condition_code", void 0);
 __decorate([
-    (0, typeorm_1.Column)({
-        type: 'enum',
-        enum: ['POSITIVE', 'NEGATIVE'],
-    }),
-    __metadata("design:type", String)
-], ExerciseTagMap.prototype, "effect_type", void 0);
-__decorate([
-    (0, typeorm_1.ManyToOne)(() => exercise_entity_1.Exercise, (exercise) => exercise.tagMaps),
-    (0, typeorm_1.JoinColumn)({ name: 'exercise_id' }),
-    __metadata("design:type", exercise_entity_1.Exercise)
-], ExerciseTagMap.prototype, "exercise", void 0);
-exports.ExerciseTagMap = ExerciseTagMap = __decorate([
-    (0, typeorm_1.Entity)('exercise_tag_map')
-], ExerciseTagMap);
-//# sourceMappingURL=exercise-tag-map.entity.js.map
+    (0, typeorm_1.ManyToOne)(() => pregnancy_info_entity_1.PregnancyInfo, pregnancy => pregnancy.conditions, { onDelete: 'CASCADE' }),
+    (0, typeorm_1.JoinColumn)({ name: 'pregnancy_id' }),
+    __metadata("design:type", pregnancy_info_entity_1.PregnancyInfo)
+], PregnancyCondition.prototype, "pregnancy", void 0);
+exports.PregnancyCondition = PregnancyCondition = __decorate([
+    (0, typeorm_1.Entity)('pregnancy_condition')
+], PregnancyCondition);
+//# sourceMappingURL=pregnancy-condition.entity.js.map

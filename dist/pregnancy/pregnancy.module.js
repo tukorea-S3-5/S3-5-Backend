@@ -15,13 +15,14 @@ const pregnancy_controller_1 = require("./pregnancy.controller");
 const auth_module_1 = require("../auth/auth.module");
 const pregnancy_weight_log_entity_1 = require("../entities/pregnancy-weight-log.entity");
 const user_entity_1 = require("../user/user.entity");
+const pregnancy_condition_entity_1 = require("../entities/pregnancy-condition.entity");
 let PregnancyModule = class PregnancyModule {
 };
 exports.PregnancyModule = PregnancyModule;
 exports.PregnancyModule = PregnancyModule = __decorate([
     (0, common_1.Module)({
         imports: [
-            typeorm_1.TypeOrmModule.forFeature([pregnancy_info_entity_1.PregnancyInfo, pregnancy_weight_log_entity_1.PregnancyWeightLog, user_entity_1.User]),
+            typeorm_1.TypeOrmModule.forFeature([pregnancy_info_entity_1.PregnancyInfo, pregnancy_condition_entity_1.PregnancyCondition, pregnancy_weight_log_entity_1.PregnancyWeightLog, user_entity_1.User]),
             auth_module_1.AuthModule,
         ],
         controllers: [pregnancy_controller_1.PregnancyController],

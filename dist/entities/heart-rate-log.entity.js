@@ -9,34 +9,37 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SymptomLog = void 0;
+exports.HeartRateLog = void 0;
 const typeorm_1 = require("typeorm");
-let SymptomLog = class SymptomLog {
-    symptom_id;
+let HeartRateLog = class HeartRateLog {
+    hr_id;
     user_id;
-    symptoms;
-    created_at;
+    bpm;
+    status;
+    measured_at;
 };
-exports.SymptomLog = SymptomLog;
+exports.HeartRateLog = HeartRateLog;
 __decorate([
     (0, typeorm_1.PrimaryGeneratedColumn)(),
     __metadata("design:type", Number)
-], SymptomLog.prototype, "symptom_id", void 0);
+], HeartRateLog.prototype, "hr_id", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'uuid' }),
     __metadata("design:type", String)
-], SymptomLog.prototype, "user_id", void 0);
+], HeartRateLog.prototype, "user_id", void 0);
 __decorate([
-    (0, typeorm_1.Column)({
-        type: 'json',
-    }),
-    __metadata("design:type", Array)
-], SymptomLog.prototype, "symptoms", void 0);
+    (0, typeorm_1.Column)({ type: 'int' }),
+    __metadata("design:type", Number)
+], HeartRateLog.prototype, "bpm", void 0);
 __decorate([
-    (0, typeorm_1.CreateDateColumn)(),
+    (0, typeorm_1.Column)({ type: 'varchar', length: 20, nullable: true }),
+    __metadata("design:type", String)
+], HeartRateLog.prototype, "status", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'timestamp' }),
     __metadata("design:type", Date)
-], SymptomLog.prototype, "created_at", void 0);
-exports.SymptomLog = SymptomLog = __decorate([
-    (0, typeorm_1.Entity)('symptom_log')
-], SymptomLog);
-//# sourceMappingURL=symptom-log.entity.js.map
+], HeartRateLog.prototype, "measured_at", void 0);
+exports.HeartRateLog = HeartRateLog = __decorate([
+    (0, typeorm_1.Entity)('heart_rate_log')
+], HeartRateLog);
+//# sourceMappingURL=heart-rate-log.entity.js.map

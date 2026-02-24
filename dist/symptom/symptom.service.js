@@ -22,13 +22,11 @@ let SymptomService = class SymptomService {
     constructor(symptomRepository) {
         this.symptomRepository = symptomRepository;
     }
-    async createSymptoms(userId, symptoms) {
-        if (!symptoms || symptoms.length === 0) {
-            throw new common_1.BadRequestException('최소 1개 이상의 증상을 선택해야 합니다.');
-        }
+    async createSymptoms(userId, symptoms = []) {
+        const normalizedSymptoms = symptoms ?? [];
         const symptomLog = this.symptomRepository.create({
             user_id: userId,
-            symptoms,
+            symptoms: normalizedSymptoms,
         });
         return this.symptomRepository.save(symptomLog);
     }
@@ -44,9 +42,9 @@ let SymptomService = class SymptomService {
             order: { created_at: 'DESC' },
         });
         if (!latest) {
-            throw new common_1.BadRequestException('입력된 증상이 없습니다.');
+            return [];
         }
-        return latest.symptoms;
+        return latest.symptoms ?? [];
     }
 };
 exports.SymptomService = SymptomService;
