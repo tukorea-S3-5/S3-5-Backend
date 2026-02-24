@@ -1,11 +1,13 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, In } from 'typeorm';
+import { Repository } from 'typeorm';
 
 import { Exercise } from '../entities/exercise.entity';
 import { ExerciseTagMap } from '../entities/exercise-tag-map.entity';
 import { PregnancyInfo } from '../entities/pregnancy-info.entity';
 import { SymptomLog } from '../entities/symptom-log.entity';
+import { ConditionType } from 'src/common/enums/condition.enum';
+import { SymptomType } from 'src/common/enums/symptom.enum';
 
 @Injectable()
 export class RecommendService {
@@ -23,14 +25,36 @@ export class RecommendService {
     private readonly symptomRepository: Repository<SymptomLog>,
   ) {}
 
+  /**
+   * 질환 강도 허용 여부 판단
+   */
+  private isIntensityAllowed(
+    intensity: string | null,
+    conditions: ConditionType[],
+  ): boolean {
+
+    const level = intensity ?? 'LOW';
+
+    if (conditions.includes(ConditionType.HYPERTENSION)) {
+      return level === 'LOW';
+    }
+
+    if (
+      conditions.includes(ConditionType.ANEMIA) ||
+      conditions.includes(ConditionType.GESTATIONAL_DIABETES)
+    ) {
+      return level !== 'HIGH';
+    }
+
+    return true;
+  }
+
   async recommend(userId: string) {
 
-    /**
-     * 1️. 최신 임신 정보 조회
-     */
     const pregnancy = await this.pregnancyRepository.findOne({
       where: { user_id: userId },
       order: { updated_at: 'DESC' },
+      relations: ['conditions'],
     });
 
     if (!pregnancy) {
@@ -38,90 +62,88 @@ export class RecommendService {
     }
 
     const trimester = pregnancy.trimester;
+    const conditionCodes: ConditionType[] =
+      pregnancy.conditions?.map(c => c.condition_code) ?? [];
 
-    /**
-     * 2️. 최신 증상 세트 조회 (JSON 배열)
-     */
     const latestSymptom = await this.symptomRepository.findOne({
       where: { user_id: userId },
-      order: { created_at: 'DESC' },  
+      order: { created_at: 'DESC' },
     });
 
-    if (!latestSymptom) {
-      throw new BadRequestException('증상이 입력되지 않았습니다.');
-    }
+    const symptoms: SymptomType[] =
+      latestSymptom?.symptoms ?? [];
 
-    const symptoms: string[] = latestSymptom.symptoms; // 바로 배열
+    const exercises = await this.exerciseRepository.find();
+    const tagMaps = await this.tagRepository.find();
 
-    /**
-     * 3️. 전체 운동 조회
-     */
-    let exercises = await this.exerciseRepository.find();
-
-    /**
-     * 4️. 분기 필터
-     */
-    exercises = exercises.filter((exercise) =>
-      exercise.allowed_trimesters?.includes(trimester),
-    );
-
-    if (trimester === 2) {
-      exercises = exercises.filter(
-        (exercise) => exercise.position_type !== 'supine',
-      );
-    }
-
-    if (trimester === 3) {
-      exercises = exercises.filter(
-        (exercise) => exercise.fall_risk === false,
-      );
-    }
-
-    /**
-     * 5️. 증상 매핑 조회
-     */
-    const exerciseIds = exercises.map((e) => e.exercise_id);
-
-    const tagMaps = await this.tagRepository.find({
-      where: {
-        exercise_id: In(exerciseIds),
-      },
-    });
-
-    /**
-     * 6️. 분류
-     */
     const recommend: Exercise[] = [];
     const caution: Exercise[] = [];
     const notRecommend: Exercise[] = [];
 
     for (const exercise of exercises) {
-      let score = 0;
-      let isNegative = false;
 
-      const relatedTags = tagMaps.filter(
-        (tag) =>
-          tag.exercise_id === exercise.exercise_id &&
-          symptoms.includes(tag.symptom_name),
-      );
-
-      for (const tag of relatedTags) {
-        if (tag.effect_type === 'NEGATIVE') {
-          isNegative = true;
-          break;
-        }
-
-        if (tag.effect_type === 'POSITIVE') {
-          score += 1;
-        }
-      }
-
-      if (isNegative) {
+      /**
+       * 1. 분기 허용 여부
+       */
+      if (!exercise.allowed_trimesters?.includes(trimester)) {
         notRecommend.push(exercise);
         continue;
       }
 
-      if (score > 0) {
+      /**
+       * 2. 2분기 supine 제한
+       */
+      if (trimester === 2 && exercise.position_type === 'supine') {
+        notRecommend.push(exercise);
+        continue;
+      }
+
+      /**
+       * 3. 3분기 낙상 위험
+       */
+      if (trimester === 3 && exercise.fall_risk) {
+        notRecommend.push(exercise);
+        continue;
+      }
+
+      /**
+       * 4. 질환 강도 제한
+       */
+      if (!this.isIntensityAllowed(exercise.intensity, conditionCodes)) {
+        notRecommend.push(exercise);
+        continue;
+      }
+
+      /**
+       * 5. 증상 기반 판정
+       */
+      const relatedTags = tagMaps.filter(
+        tag =>
+          tag.exercise_id === exercise.exercise_id &&
+          symptoms.includes(tag.symptom_name),
+      );
+
+      let hasNegative = false;
+      let positiveScore = 0;
+
+      for (const tag of relatedTags) {
+
+        if (tag.effect_type === 'NEGATIVE') {
+          hasNegative = true;
+          break;
+        }
+
+        if (tag.effect_type === 'POSITIVE') {
+          positiveScore++;
+        }
+      }
+
+      if (hasNegative) {
+        notRecommend.push(exercise);
+        continue;
+      }
+
+      if (positiveScore > 0) {
         recommend.push(exercise);
         continue;
       }

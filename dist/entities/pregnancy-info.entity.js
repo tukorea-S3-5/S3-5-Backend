@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.PregnancyInfo = void 0;
 const typeorm_1 = require("typeorm");
 const user_entity_1 = require("../user/user.entity");
+const pregnancy_condition_entity_1 = require("./pregnancy-condition.entity");
 let PregnancyInfo = class PregnancyInfo {
     pregnancy_id;
     user_id;
@@ -25,11 +26,11 @@ let PregnancyInfo = class PregnancyInfo {
     height;
     pre_weight;
     bmi;
-    created_at;
-    updated_at;
     fitness_level;
     max_allowed_bpm;
-    contraindication;
+    conditions;
+    created_at;
+    updated_at;
 };
 exports.PregnancyInfo = PregnancyInfo;
 __decorate([
@@ -82,14 +83,6 @@ __decorate([
     __metadata("design:type", Number)
 ], PregnancyInfo.prototype, "bmi", void 0);
 __decorate([
-    (0, typeorm_1.CreateDateColumn)(),
-    __metadata("design:type", Date)
-], PregnancyInfo.prototype, "created_at", void 0);
-__decorate([
-    (0, typeorm_1.UpdateDateColumn)(),
-    __metadata("design:type", Date)
-], PregnancyInfo.prototype, "updated_at", void 0);
-__decorate([
     (0, typeorm_1.Column)({ type: 'varchar', length: 20 }),
     __metadata("design:type", String)
 ], PregnancyInfo.prototype, "fitness_level", void 0);
@@ -98,9 +91,17 @@ __decorate([
     __metadata("design:type", Number)
 ], PregnancyInfo.prototype, "max_allowed_bpm", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'boolean', default: false }),
-    __metadata("design:type", Boolean)
-], PregnancyInfo.prototype, "contraindication", void 0);
+    (0, typeorm_1.OneToMany)(() => pregnancy_condition_entity_1.PregnancyCondition, condition => condition.pregnancy),
+    __metadata("design:type", Array)
+], PregnancyInfo.prototype, "conditions", void 0);
+__decorate([
+    (0, typeorm_1.CreateDateColumn)(),
+    __metadata("design:type", Date)
+], PregnancyInfo.prototype, "created_at", void 0);
+__decorate([
+    (0, typeorm_1.UpdateDateColumn)(),
+    __metadata("design:type", Date)
+], PregnancyInfo.prototype, "updated_at", void 0);
 exports.PregnancyInfo = PregnancyInfo = __decorate([
     (0, typeorm_1.Entity)('pregnancy_info')
 ], PregnancyInfo);

@@ -12,16 +12,20 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreateSymptomDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
+const symptom_enum_1 = require("../../common/enums/symptom.enum");
 class CreateSymptomDto {
     symptoms;
 }
 exports.CreateSymptomDto = CreateSymptomDto;
 __decorate([
-    (0, swagger_1.ApiProperty)({
-        example: ["배뭉침", "요통", "피로감"]
+    (0, swagger_1.ApiPropertyOptional)({
+        enum: symptom_enum_1.SymptomType,
+        isArray: true,
+        description: '오늘의 증상 코드 배열 (없으면 빈 배열)',
     }),
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsArray)(),
-    (0, class_validator_1.IsString)({ each: true }),
+    (0, class_validator_1.IsEnum)(symptom_enum_1.SymptomType, { each: true }),
     __metadata("design:type", Array)
 ], CreateSymptomDto.prototype, "symptoms", void 0);
 //# sourceMappingURL=create-symptom.dto.js.map

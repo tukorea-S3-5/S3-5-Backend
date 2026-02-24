@@ -20,6 +20,7 @@ const exercise_entity_1 = require("../entities/exercise.entity");
 const exercise_tag_map_entity_1 = require("../entities/exercise-tag-map.entity");
 const pregnancy_info_entity_1 = require("../entities/pregnancy-info.entity");
 const symptom_log_entity_1 = require("../entities/symptom-log.entity");
+const condition_enum_1 = require("../common/enums/condition.enum");
 let RecommendService = class RecommendService {
     exerciseRepository;
     tagRepository;
@@ -31,59 +32,73 @@ let RecommendService = class RecommendService {
         this.pregnancyRepository = pregnancyRepository;
         this.symptomRepository = symptomRepository;
     }
+    isIntensityAllowed(intensity, conditions) {
+        const level = intensity ?? 'LOW';
+        if (conditions.includes(condition_enum_1.ConditionType.HYPERTENSION)) {
+            return level === 'LOW';
+        }
+        if (conditions.includes(condition_enum_1.ConditionType.ANEMIA) ||
+            conditions.includes(condition_enum_1.ConditionType.GESTATIONAL_DIABETES)) {
+            return level !== 'HIGH';
+        }
+        return true;
+    }
     async recommend(userId) {
         const pregnancy = await this.pregnancyRepository.findOne({
             where: { user_id: userId },
             order: { updated_at: 'DESC' },
+            relations: ['conditions'],
         });
         if (!pregnancy) {
             throw new common_1.BadRequestException('임신 정보가 존재하지 않습니다.');
         }
         const trimester = pregnancy.trimester;
+        const conditionCodes = pregnancy.conditions?.map(c => c.condition_code) ?? [];
         const latestSymptom = await this.symptomRepository.findOne({
             where: { user_id: userId },
             order: { created_at: 'DESC' },
         });
-        if (!latestSymptom) {
-            throw new common_1.BadRequestException('증상이 입력되지 않았습니다.');
-        }
-        const symptoms = latestSymptom.symptoms;
-        let exercises = await this.exerciseRepository.find();
-        exercises = exercises.filter((exercise) => exercise.allowed_trimesters?.includes(trimester));
-        if (trimester === 2) {
-            exercises = exercises.filter((exercise) => exercise.position_type !== 'supine');
-        }
-        if (trimester === 3) {
-            exercises = exercises.filter((exercise) => exercise.fall_risk === false);
-        }
-        const exerciseIds = exercises.map((e) => e.exercise_id);
-        const tagMaps = await this.tagRepository.find({
-            where: {
-                exercise_id: (0, typeorm_2.In)(exerciseIds),
-            },
-        });
+        const symptoms = latestSymptom?.symptoms ?? [];
+        const exercises = await this.exerciseRepository.find();
+        const tagMaps = await this.tagRepository.find();
         const recommend = [];
         const caution = [];
         const notRecommend = [];
         for (const exercise of exercises) {
-            let score = 0;
-            let isNegative = false;
-            const relatedTags = tagMaps.filter((tag) => tag.exercise_id === exercise.exercise_id &&
-                symptoms.includes(tag.symptom_name));
-            for (const tag of relatedTags) {
-                if (tag.effect_type === 'NEGATIVE') {
-                    isNegative = true;
-                    break;
-                }
-                if (tag.effect_type === 'POSITIVE') {
-                    score += 1;
-                }
-            }
-            if (isNegative) {
+            if (!exercise.allowed_trimesters?.includes(trimester)) {
                 notRecommend.push(exercise);
                 continue;
             }
-            if (score > 0) {
+            if (trimester === 2 && exercise.position_type === 'supine') {
+                notRecommend.push(exercise);
+                continue;
+            }
+            if (trimester === 3 && exercise.fall_risk) {
+                notRecommend.push(exercise);
+                continue;
+            }
+            if (!this.isIntensityAllowed(exercise.intensity, conditionCodes)) {
+                notRecommend.push(exercise);
+                continue;
+            }
+            const relatedTags = tagMaps.filter(tag => tag.exercise_id === exercise.exercise_id &&
+                symptoms.includes(tag.symptom_name));
+            let hasNegative = false;
+            let positiveScore = 0;
+            for (const tag of relatedTags) {
+                if (tag.effect_type === 'NEGATIVE') {
+                    hasNegative = true;
+                    break;
+                }
+                if (tag.effect_type === 'POSITIVE') {
+                    positiveScore++;
+                }
+            }
+            if (hasNegative) {
+                notRecommend.push(exercise);
+                continue;
+            }
+            if (positiveScore > 0) {
                 recommend.push(exercise);
                 continue;
             }

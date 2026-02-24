@@ -15,6 +15,7 @@ export declare class PregnancyController {
         due_date: Date;
         is_multiple: boolean | null;
         max_allowed_bpm: number;
+        conditions: import("../common/enums/condition.enum").ConditionType[];
     } | null>;
     updateMyLatest(req: any, dto: UpdatePregnancyDto): Promise<import("../entities/pregnancy-info.entity").PregnancyInfo | null>;
 }

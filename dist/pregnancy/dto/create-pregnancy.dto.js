@@ -12,13 +12,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreatePregnancyDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
+const condition_enum_1 = require("../../common/enums/condition.enum");
 class CreatePregnancyDto {
     last_menstrual_period;
     height;
     pre_weight;
     is_multiple;
     fitness_level;
-    contraindication;
+    conditions;
 }
 exports.CreatePregnancyDto = CreatePregnancyDto;
 __decorate([
@@ -47,12 +48,17 @@ __decorate([
         example: 'ACTIVE',
         description: '임신 전 운동 여부 (ACTIVE 또는 SEDENTARY)',
     }),
-    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreatePregnancyDto.prototype, "fitness_level", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: false, description: '상대적 금기사항 유무' }),
-    (0, class_validator_1.IsBoolean)(),
-    __metadata("design:type", Boolean)
-], CreatePregnancyDto.prototype, "contraindication", void 0);
+    (0, swagger_1.ApiPropertyOptional)({
+        enum: condition_enum_1.ConditionType,
+        isArray: true,
+        example: ['HYPERTENSION', 'ANEMIA'],
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsEnum)(condition_enum_1.ConditionType, { each: true }),
+    __metadata("design:type", Array)
+], CreatePregnancyDto.prototype, "conditions", void 0);
 //# sourceMappingURL=create-pregnancy.dto.js.map

@@ -1,4 +1,5 @@
 import { User } from '../user/user.entity';
+import { PregnancyCondition } from './pregnancy-condition.entity';
 export declare class PregnancyInfo {
     pregnancy_id: number;
     user_id: string;
@@ -12,9 +13,9 @@ export declare class PregnancyInfo {
     height: number;
     pre_weight: number;
     bmi: number;
-    created_at: Date;
-    updated_at: Date;
     fitness_level: 'ACTIVE' | 'SEDENTARY';
     max_allowed_bpm: number;
-    contraindication: boolean;
+    conditions: PregnancyCondition[];
+    created_at: Date;
+    updated_at: Date;
 }
