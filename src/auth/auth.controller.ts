@@ -8,7 +8,9 @@ import {
   Request,
   BadRequestException,
   InternalServerErrorException,
+  Res,
 } from '@nestjs/common';
+import type { Response } from 'express';
 import { CreateUserDto } from './dto/create-user.dto';
 import {
   ApiBadRequestResponse,
@@ -21,7 +23,6 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
-import { LoginDto } from './dto/login.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { Public } from 'src/common/decorators/public.decorator';
 import { JwtRefreshGuard } from './jwt-refresh.guard';
@@ -30,6 +31,7 @@ import type {
   RequestWithUser,
   RequestWithValidatedUser,
 } from './interfaces/auth.interface';
+import { LoginDto } from './dto/login.dto';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -64,7 +66,7 @@ export class AuthController {
   }
 
   // ================= 로그인 API =================
-  // 로컬 가드가 Body의 내용을 보고, 인증에 성공하면 그 결과물(유저 정보)을 req.user에 전달 후 로그인 로직 처리."
+  // 로컬 가드가 Body의 내용을 보고, 인증에 성공하면 그 결과물(유저 정보)을 req.user에 전달 후 로그인 로직 처리
   @ApiOperation({ summary: '로그인' })
   @HttpCode(HttpStatus.OK)
   @ApiResponse({ status: 200, description: '로그인 성공 (토큰 발급)' })
@@ -73,11 +75,23 @@ export class AuthController {
   @UseGuards(AuthGuard('local'))
   @Post('login')
   async login(
+    @Body() LoginDto: LoginDto,
     @Request() req: RequestWithValidatedUser,
-    @Body() loginDto: LoginDto,
+    @Res({ passthrough: true }) res: Response,
   ) {
-    console.log(loginDto, req.user);
-    return this.authService.login(req.user);
+    const tokens = await this.authService.login(req.user);
+
+    // refreshToken을 httpOnly 쿠키로 저장
+    res.cookie('refreshToken', tokens.refreshToken, {
+      httpOnly: true,
+      secure: false, // 배포(https)면 true
+      sameSite: 'lax', // 배포(https)면 'none'
+      path: '/', // 배포(https)면 '/auth/refresh'
+      maxAge: 1000 * 60 * 60 * 24 * 30,
+    });
+
+    console.log(req.user);
+    return { accessToken: tokens.accessToken };
   }
 
   // ================= 리프레시 토큰 갱신 API =================
@@ -90,11 +104,24 @@ export class AuthController {
     summary: '토큰 갱신',
     description: '새로운 Access/Refresh Token을 발급',
   })
-  async refreshTokens(@Request() req: RequestWithRefreshUser) {
+  async refreshTokens(
+    @Request() req: RequestWithRefreshUser,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     const userId = req.user.sub;
     const refreshToken = req.user.refreshToken;
 
-    return this.authService.refreshTokens(userId, refreshToken);
+    const tokens = await this.authService.refreshTokens(userId, refreshToken);
+
+    res.cookie('refreshToken', tokens.refreshToken, {
+      httpOnly: true,
+      secure: false, // 배포(https)면 true
+      sameSite: 'lax', // 배포(https)면 'none'
+      path: '/', // 배포(https)면 '/auth/refresh'
+      maxAge: 1000 * 60 * 60 * 24 * 30,
+    });
+
+    return { accessToken: tokens.accessToken };
   }
 
   // ================= 로그아웃 API =================
@@ -102,11 +129,15 @@ export class AuthController {
   @ApiBearerAuth('access-token')
   @Post('logout')
   @HttpCode(HttpStatus.OK)
-  async logout(@Request() req: RequestWithUser) {
+  async logout(
+    @Request() req: RequestWithUser,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     const userId = req.user.user_id;
     console.log('로그아웃 요청 사용자 ID:', userId);
 
     await this.authService.logout(userId);
+    res.clearCookie('refreshToken', { path: '/' }); // 배포(https)면 '/auth/refresh'
     return { message: '로그아웃 성공' };
   }
 }
