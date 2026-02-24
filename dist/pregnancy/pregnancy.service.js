@@ -31,7 +31,10 @@ let PregnancyService = class PregnancyService {
         this.pregnancyConditionRepository = pregnancyConditionRepository;
         this.userRepository = userRepository;
     }
-    calculateAge(birthDate) {
+    calculateAge(birthInput) {
+        const birthDate = birthInput instanceof Date
+            ? birthInput
+            : new Date(birthInput);
         const today = new Date();
         let age = today.getFullYear() - birthDate.getFullYear();
         const monthDiff = today.getMonth() - birthDate.getMonth();
@@ -60,27 +63,40 @@ let PregnancyService = class PregnancyService {
         }
         return maxBpm;
     }
+    calculateWeek(lmpInput) {
+        const lmp = lmpInput instanceof Date
+            ? lmpInput
+            : new Date(lmpInput);
+        const today = new Date();
+        const diffDays = (today.getTime() - lmp.getTime()) /
+            (1000 * 60 * 60 * 24);
+        const week = Math.floor(diffDays / 7);
+        return week < 0 ? 0 : week;
+    }
+    calculateTrimester(week) {
+        if (week <= 13)
+            return 1;
+        if (week <= 26)
+            return 2;
+        return 3;
+    }
     async create(userId, dto) {
         const user = await this.userRepository.findOne({
             where: { user_id: userId },
         });
-        if (!user)
+        if (!user) {
             throw new common_1.NotFoundException('사용자를 찾을 수 없습니다.');
+        }
         const heightMeter = dto.height / 100;
         const bmi = dto.pre_weight / (heightMeter * heightMeter);
-        const age = this.calculateAge(new Date(user.birth_date));
+        const age = this.calculateAge(user.birth_date);
         const maxBpm = this.calculateMaxBpm(age, dto.fitness_level, bmi);
         const lmp = new Date(dto.last_menstrual_period);
-        const today = new Date();
-        const diffDays = (today.getTime() - lmp.getTime()) / (1000 * 60 * 60 * 24);
-        const week = Math.floor(diffDays / 7);
         const dueDate = new Date(lmp.getTime() + 280 * 24 * 60 * 60 * 1000);
         const pregnancy = await this.pregnancyRepository.save(this.pregnancyRepository.create({
             user_id: userId,
             last_menstrual_period: lmp,
             pregnancy_start_date: lmp,
-            week,
-            trimester: Math.ceil(week / 13),
             due_date: dueDate,
             height: dto.height,
             pre_weight: dto.pre_weight,
@@ -89,7 +105,7 @@ let PregnancyService = class PregnancyService {
             fitness_level: dto.fitness_level,
             max_allowed_bpm: maxBpm,
         }));
-        if (dto.conditions && dto.conditions.length > 0) {
+        if (dto.conditions?.length) {
             for (const code of dto.conditions) {
                 await this.pregnancyConditionRepository.save(this.pregnancyConditionRepository.create({
                     pregnancy_id: pregnancy.pregnancy_id,
@@ -107,25 +123,30 @@ let PregnancyService = class PregnancyService {
         });
         if (!pregnancy)
             return null;
+        const week = this.calculateWeek(pregnancy.last_menstrual_period);
+        const trimester = this.calculateTrimester(week);
+        const user = await this.userRepository.findOne({
+            where: { user_id: userId },
+        });
+        const age = user ? this.calculateAge(user.birth_date) : 0;
+        const recalculatedMaxBpm = this.calculateMaxBpm(age, pregnancy.fitness_level, pregnancy.bmi);
         const latestWeightLog = await this.weightRepository.findOne({
             where: { pregnancy_id: pregnancy.pregnancy_id },
             order: { week: 'DESC' },
         });
         const startWeight = pregnancy.pre_weight;
-        const currentWeight = latestWeightLog
-            ? latestWeightLog.weight
-            : startWeight;
+        const currentWeight = latestWeightLog?.weight ?? startWeight;
         const totalGain = Number((currentWeight - startWeight).toFixed(1));
         return {
             pregnancy_id: pregnancy.pregnancy_id,
-            week: pregnancy.week,
-            trimester: pregnancy.trimester,
+            week,
+            trimester,
             pre_weight: startWeight,
             current_weight: currentWeight,
             total_gain: totalGain,
             due_date: pregnancy.due_date,
             is_multiple: pregnancy.is_multiple,
-            max_allowed_bpm: pregnancy.max_allowed_bpm,
+            max_allowed_bpm: recalculatedMaxBpm,
             conditions: pregnancy.conditions?.map(c => c.condition_code) ?? [],
         };
     }
@@ -141,13 +162,16 @@ let PregnancyService = class PregnancyService {
             pregnancy.pre_weight = dto.pre_weight;
             const heightMeter = pregnancy.height / 100;
             pregnancy.bmi =
-                dto.pre_weight / (heightMeter * heightMeter);
+                dto.pre_weight /
+                    (heightMeter * heightMeter);
         }
         if (dto.is_multiple !== undefined) {
-            pregnancy.is_multiple = dto.is_multiple;
+            pregnancy.is_multiple =
+                dto.is_multiple;
         }
         if (dto.due_date) {
-            pregnancy.due_date = new Date(dto.due_date);
+            pregnancy.due_date =
+                new Date(dto.due_date);
         }
         return this.pregnancyRepository.save(pregnancy);
     }

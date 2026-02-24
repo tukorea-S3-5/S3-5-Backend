@@ -6,8 +6,6 @@ export declare class PregnancyInfo {
     user: User;
     last_menstrual_period: Date;
     pregnancy_start_date: Date;
-    week: number;
-    trimester: number;
     due_date: Date;
     is_multiple: boolean | null;
     height: number;

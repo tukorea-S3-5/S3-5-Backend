@@ -32,6 +32,16 @@ let RecommendService = class RecommendService {
         this.pregnancyRepository = pregnancyRepository;
         this.symptomRepository = symptomRepository;
     }
+    calculateWeek(lmp) {
+        const today = new Date();
+        const diffDays = (today.getTime() - lmp.getTime()) /
+            (1000 * 60 * 60 * 24);
+        return Math.floor(diffDays / 7);
+    }
+    calculateTrimester(lmp) {
+        const week = this.calculateWeek(lmp);
+        return Math.ceil(week / 13);
+    }
     isIntensityAllowed(intensity, conditions) {
         const level = intensity ?? 'LOW';
         if (conditions.includes(condition_enum_1.ConditionType.HYPERTENSION)) {
@@ -52,7 +62,7 @@ let RecommendService = class RecommendService {
         if (!pregnancy) {
             throw new common_1.BadRequestException('임신 정보가 존재하지 않습니다.');
         }
-        const trimester = pregnancy.trimester;
+        const trimester = this.calculateTrimester(pregnancy.last_menstrual_period);
         const conditionCodes = pregnancy.conditions?.map(c => c.condition_code) ?? [];
         const latestSymptom = await this.symptomRepository.findOne({
             where: { user_id: userId },
@@ -69,11 +79,13 @@ let RecommendService = class RecommendService {
                 notRecommend.push(exercise);
                 continue;
             }
-            if (trimester === 2 && exercise.position_type === 'supine') {
+            if (trimester === 2 &&
+                exercise.position_type === 'supine') {
                 notRecommend.push(exercise);
                 continue;
             }
-            if (trimester === 3 && exercise.fall_risk) {
+            if (trimester === 3 &&
+                exercise.fall_risk) {
                 notRecommend.push(exercise);
                 continue;
             }
@@ -102,7 +114,8 @@ let RecommendService = class RecommendService {
                 recommend.push(exercise);
                 continue;
             }
-            if (symptoms.length === 0 || exercise.intensity === 'LOW') {
+            if (symptoms.length === 0 ||
+                exercise.intensity === 'LOW') {
                 recommend.push(exercise);
                 continue;
             }
