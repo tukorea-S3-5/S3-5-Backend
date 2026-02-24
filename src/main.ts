@@ -2,12 +2,18 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
+import cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  app.enableCors({
+    origin: ['http://localhost:5173', 'http://localhost:3000'], // 프론트 주소
+    credentials: true, // 쿠키 전송 허용
+  });
+
   // CORS 허용
-  app.enableCors();
+  app.use(cookieParser());
 
   // DTO 유효성 검사 전역 적용
   app.useGlobalPipes(
@@ -38,7 +44,11 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+  SwaggerModule.setup('api', app, document, {
+    swaggerOptions: {
+      withCredentials: true,
+    },
+  });
 
   const port = process.env.SERVER_PORT || 3000;
   await app.listen(port);
