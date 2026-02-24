@@ -19,8 +19,6 @@ let PregnancyInfo = class PregnancyInfo {
     user;
     last_menstrual_period;
     pregnancy_start_date;
-    week;
-    trimester;
     due_date;
     is_multiple;
     height;
@@ -54,14 +52,6 @@ __decorate([
     (0, typeorm_1.Column)({ type: 'date' }),
     __metadata("design:type", Date)
 ], PregnancyInfo.prototype, "pregnancy_start_date", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ type: 'int' }),
-    __metadata("design:type", Number)
-], PregnancyInfo.prototype, "week", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ type: 'int' }),
-    __metadata("design:type", Number)
-], PregnancyInfo.prototype, "trimester", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'date', nullable: true }),
     __metadata("design:type", Date)

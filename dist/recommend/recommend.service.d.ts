@@ -9,6 +9,8 @@ export declare class RecommendService {
     private readonly pregnancyRepository;
     private readonly symptomRepository;
     constructor(exerciseRepository: Repository<Exercise>, tagRepository: Repository<ExerciseTagMap>, pregnancyRepository: Repository<PregnancyInfo>, symptomRepository: Repository<SymptomLog>);
+    private calculateWeek;
+    private calculateTrimester;
     private isIntensityAllowed;
     recommend(userId: string): Promise<{
         recommend: Exercise[];

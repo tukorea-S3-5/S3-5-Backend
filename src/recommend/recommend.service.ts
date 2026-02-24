@@ -11,6 +11,7 @@ import { SymptomType } from 'src/common/enums/symptom.enum';
 
 @Injectable()
 export class RecommendService {
+
   constructor(
     @InjectRepository(Exercise)
     private readonly exerciseRepository: Repository<Exercise>,
@@ -26,6 +27,26 @@ export class RecommendService {
   ) {}
 
   /**
+   * 임신 주차 계산 (LMP 기준)
+   */
+  private calculateWeek(lmp: Date): number {
+    const today = new Date();
+    const diffDays =
+      (today.getTime() - lmp.getTime()) /
+      (1000 * 60 * 60 * 24);
+
+    return Math.floor(diffDays / 7);
+  }
+
+  /**
+   * 분기 계산
+   */
+  private calculateTrimester(lmp: Date): number {
+    const week = this.calculateWeek(lmp);
+    return Math.ceil(week / 13);
+  }
+
+  /**
    * 질환 강도 허용 여부 판단
    */
   private isIntensityAllowed(
@@ -35,10 +56,12 @@ export class RecommendService {
 
     const level = intensity ?? 'LOW';
 
+    // 고혈압 → LOW만 허용
     if (conditions.includes(ConditionType.HYPERTENSION)) {
       return level === 'LOW';
     }
 
+    // 빈혈 / 임신성 당뇨 → HIGH 제외
     if (
       conditions.includes(ConditionType.ANEMIA) ||
       conditions.includes(ConditionType.GESTATIONAL_DIABETES)
@@ -49,6 +72,12 @@ export class RecommendService {
     return true;
   }
 
+  /**
+   * 운동 추천 메인 로직
+   * - 분기 동적 계산
+   * - 질환 필터
+   * - 증상 필터
+   */
   async recommend(userId: string) {
 
     const pregnancy = await this.pregnancyRepository.findOne({
@@ -61,20 +90,34 @@ export class RecommendService {
       throw new BadRequestException('임신 정보가 존재하지 않습니다.');
     }
 
-    const trimester = pregnancy.trimester;
-    const conditionCodes: ConditionType[] =
-      pregnancy.conditions?.map(c => c.condition_code) ?? [];
+    /**
+     * DB에서 trimester를 읽지 않음
+     * LMP 기준으로 매번 계산
+     */
+    const trimester =
+      this.calculateTrimester(
+        pregnancy.last_menstrual_period,
+      );
 
-    const latestSymptom = await this.symptomRepository.findOne({
-      where: { user_id: userId },
-      order: { created_at: 'DESC' },
-    });
+    const conditionCodes: ConditionType[] =
+      pregnancy.conditions?.map(
+        c => c.condition_code,
+      ) ?? [];
+
+    const latestSymptom =
+      await this.symptomRepository.findOne({
+        where: { user_id: userId },
+        order: { created_at: 'DESC' },
+      });
 
     const symptoms: SymptomType[] =
       latestSymptom?.symptoms ?? [];
 
-    const exercises = await this.exerciseRepository.find();
-    const tagMaps = await this.tagRepository.find();
+    const exercises =
+      await this.exerciseRepository.find();
+
+    const tagMaps =
+      await this.tagRepository.find();
 
     const recommend: Exercise[] = [];
     const caution: Exercise[] = [];
@@ -83,7 +126,7 @@ export class RecommendService {
     for (const exercise of exercises) {
 
       /**
-       * 1. 분기 허용 여부
+       * 1️. 분기 허용 여부
        */
       if (!exercise.allowed_trimesters?.includes(trimester)) {
         notRecommend.push(exercise);
@@ -91,31 +134,42 @@ export class RecommendService {
       }
 
       /**
-       * 2. 2분기 supine 제한
+       * 2️. 2분기 supine 제한
        */
-      if (trimester === 2 && exercise.position_type === 'supine') {
+      if (
+        trimester === 2 &&
+        exercise.position_type === 'supine'
+      ) {
         notRecommend.push(exercise);
         continue;
       }
 
       /**
-       * 3. 3분기 낙상 위험
+       * 3️. 3분기 낙상 위험 제한
        */
-      if (trimester === 3 && exercise.fall_risk) {
+      if (
+        trimester === 3 &&
+        exercise.fall_risk
+      ) {
         notRecommend.push(exercise);
         continue;
       }
 
       /**
-       * 4. 질환 강도 제한
+       * 4️. 질환 강도 제한
        */
-      if (!this.isIntensityAllowed(exercise.intensity, conditionCodes)) {
+      if (
+        !this.isIntensityAllowed(
+          exercise.intensity,
+          conditionCodes,
+        )
+      ) {
         notRecommend.push(exercise);
         continue;
       }
 
       /**
-       * 5. 증상 기반 판정
+       * 5️. 증상 기반 판정
        */
       const relatedTags = tagMaps.filter(
         tag =>
@@ -143,25 +197,24 @@ export class RecommendService {
         continue;
       }
 
-      // if (positiveScore > 0) {
-      //   recommend.push(exercise);
-      //   continue;
-      // }
-
-      // caution.push(exercise);
-
+      // 긍정 효과 있으면 추천
       if (positiveScore > 0) {
         recommend.push(exercise);
         continue;
       }
-      
-      // 증상 없거나, 관련 없어도
-      // 안전하면 기본 recommend
-      if (symptoms.length === 0 || exercise.intensity === 'LOW') {
+
+      /**
+       * 증상 없거나,
+       * LOW 강도면 기본 추천
+       */
+      if (
+        symptoms.length === 0 ||
+        exercise.intensity === 'LOW'
+      ) {
         recommend.push(exercise);
         continue;
       }
-      
+
       caution.push(exercise);
     }
 

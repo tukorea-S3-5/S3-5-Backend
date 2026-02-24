@@ -13,6 +13,8 @@ export declare class PregnancyService {
     constructor(pregnancyRepository: Repository<PregnancyInfo>, weightRepository: Repository<PregnancyWeightLog>, pregnancyConditionRepository: Repository<PregnancyCondition>, userRepository: Repository<User>);
     private calculateAge;
     private calculateMaxBpm;
+    private calculateWeek;
+    private calculateTrimester;
     create(userId: string, dto: CreatePregnancyDto): Promise<PregnancyInfo>;
     findLatestByUser(userId: string): Promise<{
         pregnancy_id: number;
