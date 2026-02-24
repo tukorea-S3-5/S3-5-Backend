@@ -17,20 +17,18 @@ const config_1 = require("@nestjs/config");
 let JwtRefreshStrategy = class JwtRefreshStrategy extends (0, passport_1.PassportStrategy)(passport_jwt_1.Strategy, 'jwt-refresh') {
     constructor(configService) {
         super({
-            jwtFromRequest: passport_jwt_1.ExtractJwt.fromAuthHeaderAsBearerToken(),
+            jwtFromRequest: passport_jwt_1.ExtractJwt.fromExtractors([
+                (req) => req?.cookies?.refreshToken,
+            ]),
             ignoreExpiration: false,
             secretOrKey: configService.getOrThrow('JWT_REFRESH_SECRET'),
             passReqToCallback: true,
         });
     }
     validate(req, payload) {
-        const authHeader = req.get('authorization');
-        if (!authHeader)
-            throw new common_1.ForbiddenException('Token not found');
-        const refreshToken = authHeader.replace('Bearer', '').trim();
-        if (!refreshToken) {
-            throw new common_1.ForbiddenException('Refresh token malformed');
-        }
+        const refreshToken = req.cookies?.refreshToken;
+        if (!refreshToken)
+            throw new common_1.ForbiddenException('Refresh token not found in cookies');
         return { ...payload, refreshToken };
     }
 };

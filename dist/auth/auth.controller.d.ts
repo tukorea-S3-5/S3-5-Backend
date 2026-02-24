@@ -1,22 +1,21 @@
+import type { Response } from 'express';
 import { CreateUserDto } from './dto/create-user.dto';
 import { AuthService } from './auth.service';
-import { LoginDto } from './dto/login.dto';
 import type { RequestWithRefreshUser, RequestWithUser, RequestWithValidatedUser } from './interfaces/auth.interface';
+import { LoginDto } from './dto/login.dto';
 export declare class AuthController {
     private readonly authService;
     constructor(authService: AuthService);
     signUp(createUserDto: CreateUserDto): Promise<{
         message: string;
     }>;
-    login(req: RequestWithValidatedUser, loginDto: LoginDto): Promise<{
+    login(LoginDto: LoginDto, req: RequestWithValidatedUser, res: Response): Promise<{
         accessToken: string;
-        refreshToken: string;
     }>;
-    refreshTokens(req: RequestWithRefreshUser): Promise<{
+    refreshTokens(req: RequestWithRefreshUser, res: Response): Promise<{
         accessToken: string;
-        refreshToken: string;
     }>;
-    logout(req: RequestWithUser): Promise<{
+    logout(req: RequestWithUser, res: Response): Promise<{
         message: string;
     }>;
 }

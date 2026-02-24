@@ -17,10 +17,10 @@ const common_1 = require("@nestjs/common");
 const create_user_dto_1 = require("./dto/create-user.dto");
 const swagger_1 = require("@nestjs/swagger");
 const auth_service_1 = require("./auth.service");
-const login_dto_1 = require("./dto/login.dto");
 const passport_1 = require("@nestjs/passport");
 const public_decorator_1 = require("../common/decorators/public.decorator");
 const jwt_refresh_guard_1 = require("./jwt-refresh.guard");
+const login_dto_1 = require("./dto/login.dto");
 let AuthController = class AuthController {
     authService;
     constructor(authService) {
@@ -39,19 +39,36 @@ let AuthController = class AuthController {
             throw new common_1.InternalServerErrorException('회원가입 처리에 실패했습니다.');
         }
     }
-    async login(req, loginDto) {
-        console.log(loginDto, req.user);
-        return this.authService.login(req.user);
+    async login(LoginDto, req, res) {
+        const tokens = await this.authService.login(req.user);
+        res.cookie('refreshToken', tokens.refreshToken, {
+            httpOnly: true,
+            secure: false,
+            sameSite: 'lax',
+            path: '/',
+            maxAge: 1000 * 60 * 60 * 24 * 30,
+        });
+        console.log(req.user);
+        return { accessToken: tokens.accessToken };
     }
-    async refreshTokens(req) {
+    async refreshTokens(req, res) {
         const userId = req.user.sub;
         const refreshToken = req.user.refreshToken;
-        return this.authService.refreshTokens(userId, refreshToken);
+        const tokens = await this.authService.refreshTokens(userId, refreshToken);
+        res.cookie('refreshToken', tokens.refreshToken, {
+            httpOnly: true,
+            secure: false,
+            sameSite: 'lax',
+            path: '/',
+            maxAge: 1000 * 60 * 60 * 24 * 30,
+        });
+        return { accessToken: tokens.accessToken };
     }
-    async logout(req) {
+    async logout(req, res) {
         const userId = req.user.user_id;
         console.log('로그아웃 요청 사용자 ID:', userId);
         await this.authService.logout(userId);
+        res.clearCookie('refreshToken', { path: '/' });
         return { message: '로그아웃 성공' };
     }
 };
@@ -78,10 +95,11 @@ __decorate([
     (0, public_decorator_1.Public)(),
     (0, common_1.UseGuards)((0, passport_1.AuthGuard)('local')),
     (0, common_1.Post)('login'),
-    __param(0, (0, common_1.Request)()),
-    __param(1, (0, common_1.Body)()),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Request)()),
+    __param(2, (0, common_1.Res)({ passthrough: true })),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, login_dto_1.LoginDto]),
+    __metadata("design:paramtypes", [login_dto_1.LoginDto, Object, Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "login", null);
 __decorate([
@@ -95,8 +113,9 @@ __decorate([
         description: '새로운 Access/Refresh Token을 발급',
     }),
     __param(0, (0, common_1.Request)()),
+    __param(1, (0, common_1.Res)({ passthrough: true })),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "refreshTokens", null);
 __decorate([
@@ -105,8 +124,9 @@ __decorate([
     (0, common_1.Post)('logout'),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
     __param(0, (0, common_1.Request)()),
+    __param(1, (0, common_1.Res)({ passthrough: true })),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "logout", null);
 exports.AuthController = AuthController = __decorate([
