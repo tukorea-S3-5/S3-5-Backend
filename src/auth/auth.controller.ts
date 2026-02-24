@@ -87,7 +87,7 @@ export class AuthController {
       secure: false, // 배포(https)면 true
       sameSite: 'lax', // 배포(https)면 'none'
       path: '/', // 배포(https)면 '/auth/refresh'
-      maxAge: 1000 * 60 * 60 * 24 * 30,
+      maxAge: 1000 * 60 * 60 * 24 * 7,
     });
 
     console.log(req.user);
@@ -118,7 +118,7 @@ export class AuthController {
       secure: false, // 배포(https)면 true
       sameSite: 'lax', // 배포(https)면 'none'
       path: '/', // 배포(https)면 '/auth/refresh'
-      maxAge: 1000 * 60 * 60 * 24 * 30,
+      maxAge: 1000 * 60 * 60 * 24 * 7,
     });
 
     return { accessToken: tokens.accessToken };
