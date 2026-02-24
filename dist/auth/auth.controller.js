@@ -46,7 +46,7 @@ let AuthController = class AuthController {
             secure: false,
             sameSite: 'lax',
             path: '/',
-            maxAge: 1000 * 60 * 60 * 24 * 30,
+            maxAge: 1000 * 60 * 60 * 24 * 7,
         });
         console.log(req.user);
         return { accessToken: tokens.accessToken };
@@ -60,7 +60,7 @@ let AuthController = class AuthController {
             secure: false,
             sameSite: 'lax',
             path: '/',
-            maxAge: 1000 * 60 * 60 * 24 * 30,
+            maxAge: 1000 * 60 * 60 * 24 * 7,
         });
         return { accessToken: tokens.accessToken };
     }
