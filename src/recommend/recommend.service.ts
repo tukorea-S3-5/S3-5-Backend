@@ -29,12 +29,19 @@ export class RecommendService {
   /**
    * 임신 주차 계산 (LMP 기준)
    */
-  private calculateWeek(lmp: Date): number {
+  private calculateWeek(lmpInput: Date | string): number {
+
+    const lmp =
+      lmpInput instanceof Date
+        ? lmpInput
+        : new Date(lmpInput);
+  
     const today = new Date();
+  
     const diffDays =
       (today.getTime() - lmp.getTime()) /
       (1000 * 60 * 60 * 24);
-
+  
     return Math.floor(diffDays / 7);
   }
 

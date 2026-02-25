@@ -32,7 +32,10 @@ let RecommendService = class RecommendService {
         this.pregnancyRepository = pregnancyRepository;
         this.symptomRepository = symptomRepository;
     }
-    calculateWeek(lmp) {
+    calculateWeek(lmpInput) {
+        const lmp = lmpInput instanceof Date
+            ? lmpInput
+            : new Date(lmpInput);
         const today = new Date();
         const diffDays = (today.getTime() - lmp.getTime()) /
             (1000 * 60 * 60 * 24);
