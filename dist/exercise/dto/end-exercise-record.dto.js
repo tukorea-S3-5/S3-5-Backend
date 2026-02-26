@@ -17,7 +17,7 @@ class EndExerciseRecordDto {
 }
 exports.EndExerciseRecordDto = EndExerciseRecordDto;
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: 1 }),
+    (0, swagger_1.ApiProperty)({ example: 10 }),
     (0, class_validator_1.IsInt)(),
     __metadata("design:type", Number)
 ], EndExerciseRecordDto.prototype, "record_id", void 0);
