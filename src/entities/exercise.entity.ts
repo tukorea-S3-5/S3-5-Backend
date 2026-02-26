@@ -1,11 +1,7 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  OneToMany,
-} from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 import { ExerciseTagMap } from './exercise-tag-map.entity';
 import { ExerciseStep } from './exercise-step.entity';
+import { ExerciseCategory } from 'src/common/enums/exercise-category.enum';
 
 /**
  * 운동 마스터 테이블
@@ -29,10 +25,12 @@ export class Exercise {
 
   /**
    * 운동 카테고리
-   * 예: Cardio, Yoga, Strength, Relaxation
    */
-  @Column({ type: 'varchar', length: 50 })
-  category_name: string;
+  @Column({
+    type: 'enum',
+    enum: ExerciseCategory,
+  })
+  category_name: ExerciseCategory;
 
   /**
    * 운동 강도
@@ -81,14 +79,17 @@ export class Exercise {
   difficulty_label: string | null;
 
   /**
+   * 영상 URL
+   */
+  @Column({ type: 'varchar', length: 500, nullable: true })
+  video_url: string | null;
+
+  /**
    * 운동 단계 리스트 (1:N 관계)
    * exercise_step 테이블과 연결
    * 단계별 따라가기 기능에서 사용
    */
-  @OneToMany(
-    () => ExerciseStep,
-    (step) => step.exercise,
-  )
+  @OneToMany(() => ExerciseStep, (step) => step.exercise)
   steps: ExerciseStep[];
 
   /**
@@ -96,9 +97,6 @@ export class Exercise {
    * exercise_tag_map 테이블과 연결
    * Rule Engine에서 사용
    */
-  @OneToMany(
-    () => ExerciseTagMap,
-    (tagMap) => tagMap.exercise,
-  )
+  @OneToMany(() => ExerciseTagMap, (tagMap) => tagMap.exercise)
   tagMaps: ExerciseTagMap[];
 }

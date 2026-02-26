@@ -1,4 +1,5 @@
 export declare class StartExerciseRecordDto {
-    exercise_name: string;
+    session_id: number;
+    exercise_id: number;
     order_index: number;
 }

@@ -32,6 +32,7 @@ CREATE TABLE `exercise` (
   `allowed_trimesters` json DEFAULT NULL,
   `description` text COLLATE utf8mb4_unicode_ci,
   `difficulty_label` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `video_url` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`exercise_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -42,7 +43,15 @@ CREATE TABLE `exercise` (
 
 LOCK TABLES `exercise` WRITE;
 /*!40000 ALTER TABLE `exercise` DISABLE KEYS */;
-INSERT INTO `exercise` VALUES (1,'걷기','유산소','LOW','STANDING',0,'[1, 2, 3]','임산부에게 안전한 기본 유산소 운동','초급'),(2,'실내 자전거','유산소','LOW','SITTING',0,'[2, 3]','무릎 부담이 적은 저충격 유산소 운동','초급'),(3,'수영','유산소','LOW','WATER',0,'[2, 3]','관절 부담이 적은 전신 운동','중급'),(4,'임산부 요가','요가','MEDIUM','MIXED',0,'[1, 2, 3]','유연성과 안정성을 위한 요가','중급'),(5,'플랭크 변형','근력','MEDIUM','PRONE',1,'[2, 3]','코어 안정성 강화 운동','중급'),(6,'벽 스쿼트','근력','MEDIUM','STANDING',1,'[2, 3]','하체 안정성 강화 운동','중급'),(7,'케겔 운동','근력','LOW','SITTING',0,'[1, 2, 3]','골반저근 강화 운동','초급'),(8,'호흡 명상','회복','LOW','SITTING',0,'[1, 2, 3]','심박 안정과 스트레스 완화','초급');
+INSERT INTO `exercise` VALUES 
+(1,'걷기','유산소','LOW','STANDING',0,'[1, 2, 3]','임산부에게 안전한 기본 유산소 운동','초급', 'https://youtu.be/bX7dhZH_U4E?si=Hrgk7uvNUNyyOyEy'),
+(2,'실내 자전거','유산소','LOW','SITTING',0,'[2, 3]','무릎 부담이 적은 저충격 유산소 운동','초급', NULL),
+(3,'수영','유산소','LOW','WATER',0,'[2, 3]','관절 부담이 적은 전신 운동','중급', NULL),
+(4,'임산부 요가','요가','MEDIUM','MIXED',0,'[2, 3]','유연성과 안정성을 위한 요가','중급', 'https://youtu.be/t7j3p188jr4?si=zcbi67lcfff-RTQr'),
+(5,'플랭크 변형','근력','MEDIUM','PRONE',1,'[2, 3]','코어 안정성 강화 운동','중급', NULL),
+(6,'벽 스쿼트','근력','MEDIUM','STANDING',1,'[2, 3]','하체 안정성 강화 운동','중급', NULL),
+(7,'케겔 운동','근력','LOW','SITTING',0,'[1, 2, 3]','골반저근 강화 운동','초급', 'https://youtu.be/pxjSZ-B8-5Y?si=ffuQRIJL6X74Riln'),
+(8,'호흡 명상','기능성/이완','LOW','SITTING',0,'[1, 2, 3]','심박 안정과 스트레스 완화','초급', NULL);
 /*!40000 ALTER TABLE `exercise` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;

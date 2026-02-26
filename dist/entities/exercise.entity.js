@@ -13,6 +13,7 @@ exports.Exercise = void 0;
 const typeorm_1 = require("typeorm");
 const exercise_tag_map_entity_1 = require("./exercise-tag-map.entity");
 const exercise_step_entity_1 = require("./exercise-step.entity");
+const exercise_category_enum_1 = require("../common/enums/exercise-category.enum");
 let Exercise = class Exercise {
     exercise_id;
     exercise_name;
@@ -23,6 +24,7 @@ let Exercise = class Exercise {
     allowed_trimesters;
     description;
     difficulty_label;
+    video_url;
     steps;
     tagMaps;
 };
@@ -36,7 +38,10 @@ __decorate([
     __metadata("design:type", String)
 ], Exercise.prototype, "exercise_name", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', length: 50 }),
+    (0, typeorm_1.Column)({
+        type: 'enum',
+        enum: exercise_category_enum_1.ExerciseCategory,
+    }),
     __metadata("design:type", String)
 ], Exercise.prototype, "category_name", void 0);
 __decorate([
@@ -63,6 +68,10 @@ __decorate([
     (0, typeorm_1.Column)({ type: 'varchar', length: 20, nullable: true }),
     __metadata("design:type", Object)
 ], Exercise.prototype, "difficulty_label", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'varchar', length: 500, nullable: true }),
+    __metadata("design:type", Object)
+], Exercise.prototype, "video_url", void 0);
 __decorate([
     (0, typeorm_1.OneToMany)(() => exercise_step_entity_1.ExerciseStep, (step) => step.exercise),
     __metadata("design:type", Array)

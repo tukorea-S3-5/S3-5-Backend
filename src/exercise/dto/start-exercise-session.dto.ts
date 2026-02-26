@@ -12,7 +12,7 @@ export class StartExerciseSessionDto {
    * 예: ["요가", "걷기", "케겔"]
    */
   @ApiProperty({
-    example: ['요가', '걷기', '케겔'],
+    example: ['요가', '걷기', '케겔 운동'],
     description: '이번 세션에서 진행할 운동 목록',
   })
   @IsArray()

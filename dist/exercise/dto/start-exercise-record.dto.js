@@ -13,15 +13,21 @@ exports.StartExerciseRecordDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
 class StartExerciseRecordDto {
-    exercise_name;
+    session_id;
+    exercise_id;
     order_index;
 }
 exports.StartExerciseRecordDto = StartExerciseRecordDto;
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: '요가' }),
+    (0, swagger_1.ApiProperty)({ example: 1 }),
+    (0, class_validator_1.IsInt)(),
+    __metadata("design:type", Number)
+], StartExerciseRecordDto.prototype, "session_id", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 1 }),
     (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], StartExerciseRecordDto.prototype, "exercise_name", void 0);
+    __metadata("design:type", Number)
+], StartExerciseRecordDto.prototype, "exercise_id", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 1 }),
     (0, class_validator_1.IsInt)(),
