@@ -15,8 +15,38 @@ export declare class ExerciseController {
     endRecord(body: {
         record_id: number;
     }): Promise<import("../entities/exercise-record.entity").ExerciseRecord>;
+    pauseRecord(body: {
+        record_id: number;
+    }): Promise<import("../entities/exercise-record.entity").ExerciseRecord>;
+    resumeRecord(body: {
+        record_id: number;
+    }): Promise<import("../entities/exercise-record.entity").ExerciseRecord>;
+    abortSession(body: {
+        session_id: number;
+    }): Promise<import("../entities/exercise-session.entity").ExerciseSession>;
     getHistory(req: any): Promise<{
-        sessions: import("../entities/exercise-session.entity").ExerciseSession[];
-        single_records: import("../entities/exercise-record.entity").ExerciseRecord[];
+        sessions: {
+            total_duration_formatted: string;
+            session_id: number;
+            user_id: string;
+            status: "ONGOING" | "COMPLETED" | "ABORTED";
+            started_at: Date;
+            ended_at: Date | null;
+            total_duration: number;
+            records: import("../entities/exercise-record.entity").ExerciseRecord[];
+        }[];
+    }>;
+    getCurrentSession(req: any): Promise<{
+        message: string;
+    } | {
+        total_duration_formatted: string;
+        session_id: number;
+        user_id: string;
+        status: "ONGOING" | "COMPLETED" | "ABORTED";
+        started_at: Date;
+        ended_at: Date | null;
+        total_duration: number;
+        records: import("../entities/exercise-record.entity").ExerciseRecord[];
+        message?: undefined;
     }>;
 }

@@ -18,6 +18,7 @@ let ExerciseSession = class ExerciseSession {
     status;
     started_at;
     ended_at;
+    total_duration;
     records;
 };
 exports.ExerciseSession = ExerciseSession;
@@ -30,7 +31,11 @@ __decorate([
     __metadata("design:type", String)
 ], ExerciseSession.prototype, "user_id", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', length: 20 }),
+    (0, typeorm_1.Column)({
+        type: 'varchar',
+        length: 20,
+        default: 'ONGOING',
+    }),
     __metadata("design:type", String)
 ], ExerciseSession.prototype, "status", void 0);
 __decorate([
@@ -41,6 +46,10 @@ __decorate([
     (0, typeorm_1.Column)({ type: 'timestamp', nullable: true }),
     __metadata("design:type", Object)
 ], ExerciseSession.prototype, "ended_at", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'int', default: 0 }),
+    __metadata("design:type", Number)
+], ExerciseSession.prototype, "total_duration", void 0);
 __decorate([
     (0, typeorm_1.OneToMany)(() => exercise_record_entity_1.ExerciseRecord, (record) => record.session),
     __metadata("design:type", Array)

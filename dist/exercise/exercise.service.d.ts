@@ -16,8 +16,33 @@ export declare class ExerciseService {
         records: ExerciseRecord[];
     }>;
     endRecord(recordId: number): Promise<ExerciseRecord>;
-    getHistory(userId: string): Promise<{
-        sessions: ExerciseSession[];
-        single_records: ExerciseRecord[];
+    pauseRecord(recordId: number): Promise<ExerciseRecord>;
+    resumeRecord(recordId: number): Promise<ExerciseRecord>;
+    abortSession(sessionId: number): Promise<ExerciseSession>;
+    getCurrentSession(userId: string): Promise<{
+        message: string;
+    } | {
+        total_duration_formatted: string;
+        session_id: number;
+        user_id: string;
+        status: "ONGOING" | "COMPLETED" | "ABORTED";
+        started_at: Date;
+        ended_at: Date | null;
+        total_duration: number;
+        records: ExerciseRecord[];
+        message?: undefined;
     }>;
+    getHistory(userId: string): Promise<{
+        sessions: {
+            total_duration_formatted: string;
+            session_id: number;
+            user_id: string;
+            status: "ONGOING" | "COMPLETED" | "ABORTED";
+            started_at: Date;
+            ended_at: Date | null;
+            total_duration: number;
+            records: ExerciseRecord[];
+        }[];
+    }>;
+    private formatDuration;
 }

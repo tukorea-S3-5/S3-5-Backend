@@ -31,8 +31,20 @@ let ExerciseController = class ExerciseController {
     endRecord(body) {
         return this.exerciseService.endRecord(body.record_id);
     }
+    pauseRecord(body) {
+        return this.exerciseService.pauseRecord(body.record_id);
+    }
+    resumeRecord(body) {
+        return this.exerciseService.resumeRecord(body.record_id);
+    }
+    abortSession(body) {
+        return this.exerciseService.abortSession(body.session_id);
+    }
     getHistory(req) {
         return this.exerciseService.getHistory(req.user.user_id);
+    }
+    getCurrentSession(req) {
+        return this.exerciseService.getCurrentSession(req.user.user_id);
     }
 };
 exports.ExerciseController = ExerciseController;
@@ -81,6 +93,54 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], ExerciseController.prototype, "endRecord", null);
 __decorate([
+    (0, common_1.Post)('record/pause'),
+    (0, swagger_1.ApiOperation)({ summary: '운동 일시정지' }),
+    (0, swagger_1.ApiBody)({
+        schema: {
+            type: 'object',
+            properties: {
+                record_id: { type: 'number' },
+            },
+        },
+    }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], ExerciseController.prototype, "pauseRecord", null);
+__decorate([
+    (0, common_1.Post)('record/resume'),
+    (0, swagger_1.ApiOperation)({ summary: '운동 재개' }),
+    (0, swagger_1.ApiBody)({
+        schema: {
+            type: 'object',
+            properties: {
+                record_id: { type: 'number' },
+            },
+        },
+    }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], ExerciseController.prototype, "resumeRecord", null);
+__decorate([
+    (0, common_1.Post)('session/abort'),
+    (0, swagger_1.ApiOperation)({ summary: '운동 세션 중단' }),
+    (0, swagger_1.ApiBody)({
+        schema: {
+            type: 'object',
+            properties: {
+                session_id: { type: 'number' },
+            },
+        },
+    }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], ExerciseController.prototype, "abortSession", null);
+__decorate([
     (0, common_1.Get)('history'),
     (0, swagger_1.ApiOperation)({ summary: '운동 기록 조회' }),
     __param(0, (0, common_1.Req)()),
@@ -88,6 +148,14 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], ExerciseController.prototype, "getHistory", null);
+__decorate([
+    (0, common_1.Get)('session/current'),
+    (0, swagger_1.ApiOperation)({ summary: '현재 진행 중 세션 조회' }),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], ExerciseController.prototype, "getCurrentSession", null);
 exports.ExerciseController = ExerciseController = __decorate([
     (0, swagger_1.ApiTags)('Exercise'),
     (0, swagger_1.ApiBearerAuth)('access-token'),
