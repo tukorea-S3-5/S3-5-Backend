@@ -10,6 +10,7 @@ import { ExerciseRecord } from './exercise-record.entity';
 /**
  * 전체 운동 세션
  * - 추천 기반 전체 운동 묶음
+ * - 세션 단위 시간 관리
  */
 @Entity('exercise_session')
 export class ExerciseSession {
@@ -24,10 +25,16 @@ export class ExerciseSession {
 
   /**
    * 세션 상태
-   * ONGOING / COMPLETED
+   * ONGOING   : 진행 중
+   * COMPLETED : 정상 종료
+   * ABORTED   : 중단 종료
    */
-  @Column({ type: 'varchar', length: 20 })
-  status: string;
+  @Column({
+    type: 'varchar',
+    length: 20,
+    default: 'ONGOING',
+  })
+  status: 'ONGOING' | 'COMPLETED' | 'ABORTED';
 
   /**
    * 세션 시작 시각
@@ -41,6 +48,13 @@ export class ExerciseSession {
    */
   @Column({ type: 'timestamp', nullable: true })
   ended_at: Date | null;
+
+  /**
+   * 세션 총 운동 시간 (초 단위)
+   * - COMPLETED / ABORTED 시 계산
+   */
+  @Column({ type: 'int', default: 0 })
+  total_duration: number;
 
   /**
    * 세션에 포함된 운동 기록
