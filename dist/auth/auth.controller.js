@@ -27,17 +27,8 @@ let AuthController = class AuthController {
         this.authService = authService;
     }
     async signUp(createUserDto) {
-        try {
-            await this.authService.signUp(createUserDto);
-            return { message: '회원가입이 성공적으로 완료되었습니다.' };
-        }
-        catch (error) {
-            if (error instanceof common_1.BadRequestException) {
-                throw new common_1.BadRequestException(error.message);
-            }
-            console.error('SignUp Error:', error);
-            throw new common_1.InternalServerErrorException('회원가입 처리에 실패했습니다.');
-        }
+        await this.authService.signUp(createUserDto);
+        return { message: '회원가입이 성공적으로 완료되었습니다.' };
     }
     async login(LoginDto, req, res) {
         const tokens = await this.authService.login(req.user);

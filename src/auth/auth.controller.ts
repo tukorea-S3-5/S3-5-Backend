@@ -6,8 +6,6 @@ import {
   Post,
   UseGuards,
   Request,
-  BadRequestException,
-  InternalServerErrorException,
   Res,
 } from '@nestjs/common';
 import type { Response } from 'express';
@@ -50,19 +48,8 @@ export class AuthController {
   async signUp(
     @Body() createUserDto: CreateUserDto,
   ): Promise<{ message: string }> {
-    try {
-      await this.authService.signUp(createUserDto);
-      return { message: '회원가입이 성공적으로 완료되었습니다.' };
-    } catch (error) {
-      if (error instanceof BadRequestException) {
-        // 중복 유저 에러라면 400 Bad Request로 변환
-        throw new BadRequestException(error.message);
-      }
-
-      // 그 외 예상치 못한 모든 에러 500 Internal Server Error로 처리
-      console.error('SignUp Error:', error);
-      throw new InternalServerErrorException('회원가입 처리에 실패했습니다.');
-    }
+    await this.authService.signUp(createUserDto);
+    return { message: '회원가입이 성공적으로 완료되었습니다.' };
   }
 
   // ================= 로그인 API =================

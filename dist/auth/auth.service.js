@@ -41,7 +41,7 @@ let AuthService = class AuthService {
         }
         catch (error) {
             if (error.code === 'ER_DUP_ENTRY' || error.errno === 1062) {
-                throw new common_1.BadRequestException('이미 존재하는 이메일입니다.');
+                throw new common_1.ConflictException('이미 존재하는 이메일입니다.');
             }
             else {
                 console.error('회원가입 중 예상치 못한 DB 에러 발생:', error);
