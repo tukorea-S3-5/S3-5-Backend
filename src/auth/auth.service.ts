@@ -4,7 +4,6 @@ import {
   Injectable,
   InternalServerErrorException,
   NotFoundException,
-  // UnauthorizedException, // 현재 코드에선 안 쓰여서 주석 처리
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
