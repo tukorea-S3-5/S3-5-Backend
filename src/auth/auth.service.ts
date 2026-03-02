@@ -1,5 +1,5 @@
 import {
-  BadRequestException,
+  ConflictException,
   ForbiddenException,
   Injectable,
   InternalServerErrorException,
@@ -49,7 +49,7 @@ export class AuthService {
     } catch (error) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       if (error.code === 'ER_DUP_ENTRY' || error.errno === 1062) {
-        throw new BadRequestException('이미 존재하는 이메일입니다.');
+        throw new ConflictException('이미 존재하는 이메일입니다.');
       } else {
         console.error('회원가입 중 예상치 못한 DB 에러 발생:', error);
         throw new InternalServerErrorException('회원가입 처리에 실패했습니다.');
