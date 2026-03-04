@@ -18,4 +18,16 @@ export declare class PregnancyController {
         conditions: import("../common/enums/condition.enum").ConditionType[];
     } | null>;
     updateMyLatest(req: any, dto: UpdatePregnancyDto): Promise<import("../entities/pregnancy-info.entity").PregnancyInfo | null>;
+    getGuideline(req: any): Promise<{
+        week: number;
+        trimester: number;
+        title: any;
+        guidelines: any;
+    }>;
+    getWeeklyHealth(req: any): Promise<{
+        week: number;
+        recommended_weight_gain: string;
+        common_symptoms: string[];
+        today_tip: string;
+    }>;
 }

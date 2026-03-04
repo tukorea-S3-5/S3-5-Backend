@@ -11,6 +11,7 @@ export declare class PregnancyService {
     private readonly pregnancyConditionRepository;
     private readonly userRepository;
     constructor(pregnancyRepository: Repository<PregnancyInfo>, weightRepository: Repository<PregnancyWeightLog>, pregnancyConditionRepository: Repository<PregnancyCondition>, userRepository: Repository<User>);
+    private readonly GUIDELINES;
     private calculateAge;
     private calculateMaxBpm;
     private calculateWeek;
@@ -29,4 +30,19 @@ export declare class PregnancyService {
         conditions: import("../common/enums/condition.enum").ConditionType[];
     } | null>;
     updateLatestByUser(userId: string, dto: UpdatePregnancyDto): Promise<PregnancyInfo | null>;
+    getGuideline(userId: string): Promise<{
+        week: number;
+        trimester: number;
+        title: any;
+        guidelines: any;
+    }>;
+    private calculateRecommendedWeight;
+    private getCommonSymptoms;
+    private getDefaultTip;
+    getWeeklyHealth(userId: string): Promise<{
+        week: number;
+        recommended_weight_gain: string;
+        common_symptoms: string[];
+        today_tip: string;
+    }>;
 }
