@@ -25,7 +25,7 @@ import { UpdatePregnancyDto } from './dto/update-pregnancy.dto';
 export class PregnancyController {
   constructor(
     private readonly pregnancyService: PregnancyService,
-  ) {}
+  ) { }
 
   /**
    * 임신 정보 등록
@@ -69,6 +69,28 @@ export class PregnancyController {
     return this.pregnancyService.updateLatestByUser(
       req.user.user_id,
       dto,
+    );
+  }
+
+  /**
+   * 분기별 운동 가이드라인 조회
+   */
+  @Get('guideline')
+  @ApiOperation({ summary: '분기별 운동 가이드라인 조회' })
+  getGuideline(@Req() req) {
+    return this.pregnancyService.getGuideline(
+      req.user.user_id,
+    );
+  }
+
+  /**
+   * 주차별 건강 정보 조회
+   */
+  @Get('weekly-health')
+  @ApiOperation({ summary: '주차별 건강 정보 조회' })
+  getWeeklyHealth(@Req() req) {
+    return this.pregnancyService.getWeeklyHealth(
+      req.user.user_id,
     );
   }
 }

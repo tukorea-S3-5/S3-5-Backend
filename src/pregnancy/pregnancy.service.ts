@@ -24,7 +24,49 @@ export class PregnancyService {
 
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-  ) {}
+  ) { }
+
+  /**
+ * 분기별 운동 가이드라인 상수 (ACOG 기준)
+ */
+  private readonly GUIDELINES = {
+    1: {
+      title: '1분기 운동 가이드라인 (ACOG)',
+      items: [
+        '심박수 급상승 유발 운동 피하기',
+        '복부 압박 동작 최소화',
+        '어지러움·출혈 발생 시 즉시 중단',
+        '충분한 휴식과 수분 섭취 병행',
+      ],
+    },
+    2: {
+      title: '2분기 운동 가이드라인 (ACOG)',
+      items: [
+        '중간 강도 유산소 운동 가능',
+        '복부 직접 압박 동작 피하기',
+        '균형 유지 어려운 동작 주의',
+        '규칙적인 스트레칭 병행',
+      ],
+    },
+    3: {
+      title: '3분기 운동 가이드라인 (ACOG)',
+      items: [
+        '운동 강도와 시간을 점진적으로 줄이기',
+        '낙상 위험이 높은 운동 피하기',
+        '골반저근 운동(케겔) 지속',
+        '조기 진통 징후 시 즉시 운동 중단',
+      ],
+    },
+    4: {
+      title: '4분기 운동 가이드라인 (ACOG)',
+      items: [
+        '무리한 운동 중단, 안정 위주 활동',
+        '짧은 시간 가벼운 보행 권장',
+        '복부 긴장 유발 동작 금지',
+        '진통 증상 발생 시 즉시 의료 상담',
+      ],
+    },
+  };
 
   /**
    * 현재 나이 계산
@@ -279,5 +321,123 @@ export class PregnancyService {
     return this.pregnancyRepository.save(
       pregnancy,
     );
+  }
+
+  /**
+ * 분기별 운동 가이드라인 조회
+ */
+  async getGuideline(userId: string) {
+
+    const pregnancy = await this.pregnancyRepository.findOne({
+      where: { user_id: userId },
+      order: { pregnancy_id: 'DESC' },
+    });
+
+    if (!pregnancy) {
+      throw new NotFoundException('임신 정보가 없습니다.');
+    }
+
+    const week =
+      this.calculateWeek(
+        pregnancy.last_menstrual_period,
+      );
+
+    const trimester =
+      this.calculateTrimester(week);
+
+    const guideline =
+      this.GUIDELINES[trimester];
+
+    return {
+      week,
+      trimester,
+      title: guideline.title,
+      guidelines: guideline.items,
+    };
+  }
+
+  /**
+* BMI 기준 권장 체중 증가량 계산
+*/
+  private calculateRecommendedWeight(pregnancy: any): string {
+    const bmi = pregnancy.bmi;
+
+    if (bmi < 18.5) return '12.5–18kg';
+    if (bmi < 25) return '11.5–16kg';
+    if (bmi < 30) return '7–11.5kg';
+    return '5–9kg';
+  }
+  /**
+ * 분기별 흔한 증상
+ */
+  private getCommonSymptoms(trimester: number): string[] {
+
+    const symptoms = {
+      1: [
+        '입덧',
+        '피로감',
+        '유방 통증',
+      ],
+      2: [
+        '요통',
+        '다리 경련',
+        '부종 시작',
+      ],
+      3: [
+        '강한 수축',
+        '양수 터짐 가능',
+        '진통',
+      ],
+      4: [
+        '진통 간격 단축',
+        '복부 압박감',
+        '출산 임박 신호',
+      ],
+    };
+
+    return symptoms[trimester] ?? [];
+  }
+  /**
+   * 분기별 기본 건강 팁
+   */
+  private getDefaultTip(trimester: number): string {
+
+    const tips = {
+      1: '무리한 활동을 줄이고 충분한 휴식을 취하세요.',
+      2: '규칙적인 가벼운 운동을 유지하세요.',
+      3: '수분 섭취를 늘리고 낙상에 주의하세요.',
+      4: '진통 증상이 느껴지면 즉시 병원을 방문하세요.',
+    };
+
+    return tips[trimester] ?? '건강 상태를 주의 깊게 관찰하세요.';
+  }
+  /**
+ * 주차별 건강 정보 조회
+ */
+  async getWeeklyHealth(userId: string) {
+
+    const latest = await this.findLatestByUser(userId);
+
+    if (!latest) {
+      throw new NotFoundException('임신 정보가 없습니다.');
+    }
+
+    const { week, trimester } = latest;
+
+    const recommendedWeight =
+      this.calculateRecommendedWeight(latest);
+
+    const symptoms =
+      this.getCommonSymptoms(trimester);
+
+    const tip =
+      this.getDefaultTip(trimester);
+
+    return {
+      week,
+      recommended_weight_gain: recommendedWeight,
+      common_symptoms: symptoms,
+      today_tip: tip,
+    };
   }
 }

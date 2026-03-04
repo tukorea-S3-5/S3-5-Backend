@@ -33,6 +33,12 @@ let PregnancyController = class PregnancyController {
     updateMyLatest(req, dto) {
         return this.pregnancyService.updateLatestByUser(req.user.user_id, dto);
     }
+    getGuideline(req) {
+        return this.pregnancyService.getGuideline(req.user.user_id);
+    }
+    getWeeklyHealth(req) {
+        return this.pregnancyService.getWeeklyHealth(req.user.user_id);
+    }
 };
 exports.PregnancyController = PregnancyController;
 __decorate([
@@ -61,6 +67,22 @@ __decorate([
     __metadata("design:paramtypes", [Object, update_pregnancy_dto_1.UpdatePregnancyDto]),
     __metadata("design:returntype", void 0)
 ], PregnancyController.prototype, "updateMyLatest", null);
+__decorate([
+    (0, common_1.Get)('guideline'),
+    (0, swagger_1.ApiOperation)({ summary: '분기별 운동 가이드라인 조회' }),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], PregnancyController.prototype, "getGuideline", null);
+__decorate([
+    (0, common_1.Get)('weekly-health'),
+    (0, swagger_1.ApiOperation)({ summary: '주차별 건강 정보 조회' }),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], PregnancyController.prototype, "getWeeklyHealth", null);
 exports.PregnancyController = PregnancyController = __decorate([
     (0, swagger_1.ApiTags)('Pregnancy'),
     (0, swagger_1.ApiBearerAuth)('access-token'),
