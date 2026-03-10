@@ -45,16 +45,16 @@ export declare class PregnancyService {
         common_symptoms: string[];
         today_tip: string;
     }>;
-    private getExpectedWeeklyGain;
+    private calculateGuidelineWeight;
     calculateWeightTrend(userId: string): Promise<{
         slope: number;
         status: string;
         based_on?: undefined;
-        expected_weekly_gain?: undefined;
+        expected_slope?: undefined;
     } | {
         based_on: string;
         slope: number;
-        expected_weekly_gain: number;
+        expected_slope: number;
         status: string;
     }>;
 }

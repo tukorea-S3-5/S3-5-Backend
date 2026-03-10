@@ -441,26 +441,75 @@ export class PregnancyService {
     };
   }
 
-  /**
- * BMI 기반 주당 권장 체중 증가량 계산
- */
-  private getExpectedWeeklyGain(bmi: number): number {
+  private calculateGuidelineWeight(
+    preWeight: number,
+    bmi: number,
+    currentWeek: number,
+  ) {
 
-    let totalGain = 0;
+    const totalGainMap = {
+      UNDER: { min: 12.7, max: 18.1 },
+      NORMAL: { min: 11.3, max: 15.8 },
+      OVER: { min: 6.8, max: 11.3 },
+      OBESE: { min: 5.0, max: 9.0 },
+    };
 
-    if (bmi < 18.5) totalGain = 15;
-    else if (bmi < 25) totalGain = 13.5;
-    else if (bmi < 30) totalGain = 9;
-    else totalGain = 7;
+    let category: keyof typeof totalGainMap;
 
-    return totalGain / 40; // 40주 기준
+    if (bmi < 18.5) category = 'UNDER';
+    else if (bmi < 25) category = 'NORMAL';
+    else if (bmi < 30) category = 'OVER';
+    else category = 'OBESE';
+
+    const totalMin = totalGainMap[category].min;
+    const totalMax = totalGainMap[category].max;
+
+    // 0~12주
+    if (currentWeek <= 12) {
+      return {
+        min: preWeight + 0.5,
+        max: preWeight + 2.0,
+      };
+    }
+
+    // 13~40주 선형 보간
+    const week12Min = preWeight + 0.5;
+    const week12Max = preWeight + 2.0;
+
+    const ratio = (currentWeek - 12) / 28;
+
+    const weekMin =
+      week12Min + (preWeight + totalMin - week12Min) * ratio;
+
+    const weekMax =
+      week12Max + (preWeight + totalMax - week12Max) * ratio;
+
+    return {
+      min: Number(weekMin.toFixed(1)),
+      max: Number(weekMax.toFixed(1)),
+    };
   }
+
+  //   /**
+  //  * BMI 기반 주당 권장 체중 증가량 계산
+  //  */
+  //   private getExpectedWeeklyGain(bmi: number): number {
+
+  //     let totalGain = 0;
+
+  //     if (bmi < 18.5) totalGain = 15;
+  //     else if (bmi < 25) totalGain = 13.5;
+  //     else if (bmi < 30) totalGain = 9;
+  //     else totalGain = 7;
+
+  //     return totalGain / 40; // 40주 기준
+  //   }
 
   /**
  * 최근 4주 기준 체중 증가 추세 분석
  */
   async calculateWeightTrend(userId: string) {
-    
+
     const pregnancy = await this.pregnancyRepository.findOne({
       where: { user_id: userId },
       order: { pregnancy_id: 'DESC' },
@@ -472,12 +521,8 @@ export class PregnancyService {
 
     const logs = await this.weightRepository.find({
       where: { pregnancy_id: pregnancy.pregnancy_id },
-      order: { week: 'DESC' }, // 최근 주차부터
+      order: { week: 'DESC' },
     });
-
-    // console.log("현재 userId:", userId);
-    // console.log("선택된 pregnancy:", pregnancy?.pregnancy_id);
-    // console.log("logs 개수:", logs.length);
 
     if (logs.length < 2) {
       return {
@@ -486,9 +531,7 @@ export class PregnancyService {
       };
     }
 
-    // 최근 4개만 사용
     const recentLogs = logs.slice(0, 4).reverse();
-    // reverse() 해서 week 오름차순으로 정렬
 
     const first = recentLogs[0];
     const last = recentLogs[recentLogs.length - 1];
@@ -506,23 +549,41 @@ export class PregnancyService {
       (last.weight - first.weight) /
       weekDiff;
 
-    const expectedWeeklyGain =
-      this.getExpectedWeeklyGain(pregnancy.bmi);
+    /* -----------------------------
+       IOM 선형 보간 기반 기대 증가량 계산
+       ----------------------------- */
+
+    const guidelineAtLastWeek =
+      this.calculateGuidelineWeight(
+        pregnancy.pre_weight,
+        pregnancy.bmi,
+        last.week,
+      );
+
+    const guidelineAtFirstWeek =
+      this.calculateGuidelineWeight(
+        pregnancy.pre_weight,
+        pregnancy.bmi,
+        first.week,
+      );
+
+    const expectedSlope =
+      (guidelineAtLastWeek.max - guidelineAtFirstWeek.min) /
+      weekDiff;
 
     let status = '정상 추세';
 
-    if (slope > expectedWeeklyGain * 1.2) {
+    if (slope > expectedSlope * 1.2) {
       status = '과도 증가 추세';
-    } else if (slope < expectedWeeklyGain * 0.8) {
+    } else if (slope < expectedSlope * 0.8) {
       status = '증가 부족 추세';
     }
 
     return {
       based_on: `${recentLogs.length}주 기준`,
       slope: Number(slope.toFixed(2)),
-      expected_weekly_gain: expectedWeeklyGain,
+      expected_slope: Number(expectedSlope.toFixed(2)),
       status,
     };
-
   }
 }

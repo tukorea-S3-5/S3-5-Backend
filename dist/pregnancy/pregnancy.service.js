@@ -291,17 +291,39 @@ let PregnancyService = class PregnancyService {
             today_tip: tip,
         };
     }
-    getExpectedWeeklyGain(bmi) {
-        let totalGain = 0;
+    calculateGuidelineWeight(preWeight, bmi, currentWeek) {
+        const totalGainMap = {
+            UNDER: { min: 12.7, max: 18.1 },
+            NORMAL: { min: 11.3, max: 15.8 },
+            OVER: { min: 6.8, max: 11.3 },
+            OBESE: { min: 5.0, max: 9.0 },
+        };
+        let category;
         if (bmi < 18.5)
-            totalGain = 15;
+            category = 'UNDER';
         else if (bmi < 25)
-            totalGain = 13.5;
+            category = 'NORMAL';
         else if (bmi < 30)
-            totalGain = 9;
+            category = 'OVER';
         else
-            totalGain = 7;
-        return totalGain / 40;
+            category = 'OBESE';
+        const totalMin = totalGainMap[category].min;
+        const totalMax = totalGainMap[category].max;
+        if (currentWeek <= 12) {
+            return {
+                min: preWeight + 0.5,
+                max: preWeight + 2.0,
+            };
+        }
+        const week12Min = preWeight + 0.5;
+        const week12Max = preWeight + 2.0;
+        const ratio = (currentWeek - 12) / 28;
+        const weekMin = week12Min + (preWeight + totalMin - week12Min) * ratio;
+        const weekMax = week12Max + (preWeight + totalMax - week12Max) * ratio;
+        return {
+            min: Number(weekMin.toFixed(1)),
+            max: Number(weekMax.toFixed(1)),
+        };
     }
     async calculateWeightTrend(userId) {
         const pregnancy = await this.pregnancyRepository.findOne({
@@ -333,18 +355,21 @@ let PregnancyService = class PregnancyService {
         }
         const slope = (last.weight - first.weight) /
             weekDiff;
-        const expectedWeeklyGain = this.getExpectedWeeklyGain(pregnancy.bmi);
+        const guidelineAtLastWeek = this.calculateGuidelineWeight(pregnancy.pre_weight, pregnancy.bmi, last.week);
+        const guidelineAtFirstWeek = this.calculateGuidelineWeight(pregnancy.pre_weight, pregnancy.bmi, first.week);
+        const expectedSlope = (guidelineAtLastWeek.max - guidelineAtFirstWeek.min) /
+            weekDiff;
         let status = '정상 추세';
-        if (slope > expectedWeeklyGain * 1.2) {
+        if (slope > expectedSlope * 1.2) {
             status = '과도 증가 추세';
         }
-        else if (slope < expectedWeeklyGain * 0.8) {
+        else if (slope < expectedSlope * 0.8) {
             status = '증가 부족 추세';
         }
         return {
             based_on: `${recentLogs.length}주 기준`,
             slope: Number(slope.toFixed(2)),
-            expected_weekly_gain: expectedWeeklyGain,
+            expected_slope: Number(expectedSlope.toFixed(2)),
             status,
         };
     }
