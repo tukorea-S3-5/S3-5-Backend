@@ -291,6 +291,63 @@ let PregnancyService = class PregnancyService {
             today_tip: tip,
         };
     }
+    getExpectedWeeklyGain(bmi) {
+        let totalGain = 0;
+        if (bmi < 18.5)
+            totalGain = 15;
+        else if (bmi < 25)
+            totalGain = 13.5;
+        else if (bmi < 30)
+            totalGain = 9;
+        else
+            totalGain = 7;
+        return totalGain / 40;
+    }
+    async calculateWeightTrend(userId) {
+        const pregnancy = await this.pregnancyRepository.findOne({
+            where: { user_id: userId },
+            order: { pregnancy_id: 'DESC' },
+        });
+        if (!pregnancy) {
+            throw new common_1.NotFoundException('임신 정보가 없습니다.');
+        }
+        const logs = await this.weightRepository.find({
+            where: { pregnancy_id: pregnancy.pregnancy_id },
+            order: { week: 'DESC' },
+        });
+        if (logs.length < 2) {
+            return {
+                slope: 0,
+                status: '데이터 부족',
+            };
+        }
+        const recentLogs = logs.slice(0, 4).reverse();
+        const first = recentLogs[0];
+        const last = recentLogs[recentLogs.length - 1];
+        const weekDiff = last.week - first.week;
+        if (weekDiff <= 0) {
+            return {
+                slope: 0,
+                status: '분석 불가',
+            };
+        }
+        const slope = (last.weight - first.weight) /
+            weekDiff;
+        const expectedWeeklyGain = this.getExpectedWeeklyGain(pregnancy.bmi);
+        let status = '정상 추세';
+        if (slope > expectedWeeklyGain * 1.2) {
+            status = '과도 증가 추세';
+        }
+        else if (slope < expectedWeeklyGain * 0.8) {
+            status = '증가 부족 추세';
+        }
+        return {
+            based_on: `${recentLogs.length}주 기준`,
+            slope: Number(slope.toFixed(2)),
+            expected_weekly_gain: expectedWeeklyGain,
+            status,
+        };
+    }
 };
 exports.PregnancyService = PregnancyService;
 exports.PregnancyService = PregnancyService = __decorate([

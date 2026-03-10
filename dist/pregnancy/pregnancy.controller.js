@@ -39,6 +39,9 @@ let PregnancyController = class PregnancyController {
     getWeeklyHealth(req) {
         return this.pregnancyService.getWeeklyHealth(req.user.user_id);
     }
+    async getWeightTrend(req) {
+        return this.pregnancyService.calculateWeightTrend(req.user.user_id);
+    }
 };
 exports.PregnancyController = PregnancyController;
 __decorate([
@@ -83,6 +86,14 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], PregnancyController.prototype, "getWeeklyHealth", null);
+__decorate([
+    (0, common_1.Get)('weight-trend'),
+    (0, swagger_1.ApiOperation)({ summary: '최근 4주 기준 체중 증가 추세 분석 조회' }),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], PregnancyController.prototype, "getWeightTrend", null);
 exports.PregnancyController = PregnancyController = __decorate([
     (0, swagger_1.ApiTags)('Pregnancy'),
     (0, swagger_1.ApiBearerAuth)('access-token'),
