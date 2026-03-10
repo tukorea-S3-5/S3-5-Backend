@@ -34,11 +34,11 @@ export declare class PregnancyController {
         slope: number;
         status: string;
         based_on?: undefined;
-        expected_weekly_gain?: undefined;
+        expected_slope?: undefined;
     } | {
         based_on: string;
         slope: number;
-        expected_weekly_gain: number;
+        expected_slope: number;
         status: string;
     }>;
 }
