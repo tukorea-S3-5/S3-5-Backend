@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SymptomLog } from '../entities/symptom-log.entity';
-import { SymptomType } from 'src/common/enums/symptom.enum';
+import { SymptomType } from '../common/enums/symptom.enum';
 
 @Injectable()
 export class SymptomService {

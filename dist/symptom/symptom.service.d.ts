@@ -1,6 +1,6 @@
 import { Repository } from 'typeorm';
 import { SymptomLog } from '../entities/symptom-log.entity';
-import { SymptomType } from 'src/common/enums/symptom.enum';
+import { SymptomType } from '../common/enums/symptom.enum';
 export declare class SymptomService {
     private readonly symptomRepository;
     constructor(symptomRepository: Repository<SymptomLog>);

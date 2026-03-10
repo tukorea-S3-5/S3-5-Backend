@@ -6,7 +6,7 @@ import {
     JoinColumn,
   } from 'typeorm';
   import { PregnancyInfo } from './pregnancy-info.entity';
-  import { ConditionType } from 'src/common/enums/condition.enum';
+  import { ConditionType } from '../common/enums/condition.enum';
   /**
    * PregnancyCondition
    *

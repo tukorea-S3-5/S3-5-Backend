@@ -1,6 +1,6 @@
 import { ExerciseTagMap } from './exercise-tag-map.entity';
 import { ExerciseStep } from './exercise-step.entity';
-import { ExerciseCategory } from 'src/common/enums/exercise-category.enum';
+import { ExerciseCategory } from '../common/enums/exercise-category.enum';
 export declare class Exercise {
     exercise_id: number;
     exercise_name: string;
