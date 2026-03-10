@@ -1,5 +1,5 @@
 import { PregnancyInfo } from './pregnancy-info.entity';
-import { ConditionType } from 'src/common/enums/condition.enum';
+import { ConditionType } from '../common/enums/condition.enum';
 export declare class PregnancyCondition {
     id: number;
     pregnancy_id: number;

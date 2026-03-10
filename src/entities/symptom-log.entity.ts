@@ -4,7 +4,7 @@ import {
   Column,
   CreateDateColumn,
 } from 'typeorm';
-import { SymptomType } from 'src/common/enums/symptom.enum';
+import { SymptomType } from '../common/enums/symptom.enum';
 
 /**
  * 증상 세트 기록 테이블

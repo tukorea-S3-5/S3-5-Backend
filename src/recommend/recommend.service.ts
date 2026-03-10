@@ -7,7 +7,7 @@ import { ExerciseTagMap } from '../entities/exercise-tag-map.entity';
 import { PregnancyInfo } from '../entities/pregnancy-info.entity';
 import { SymptomLog } from '../entities/symptom-log.entity';
 import { ConditionType } from 'src/common/enums/condition.enum';
-import { SymptomType } from 'src/common/enums/symptom.enum';
+import { SymptomType } from '../common/enums/symptom.enum';
 
 @Injectable()
 export class RecommendService {

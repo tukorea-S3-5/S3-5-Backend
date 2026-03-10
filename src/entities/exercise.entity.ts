@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 import { ExerciseTagMap } from './exercise-tag-map.entity';
 import { ExerciseStep } from './exercise-step.entity';
-import { ExerciseCategory } from 'src/common/enums/exercise-category.enum';
+import { ExerciseCategory } from '../common/enums/exercise-category.enum';
 
 /**
  * 운동 마스터 테이블

@@ -4,9 +4,10 @@ import {
   Column,
   ManyToOne,
   JoinColumn,
+  Unique,
 } from 'typeorm';
 import { Exercise } from './exercise.entity';
-import { SymptomType } from 'src/common/enums/symptom.enum';
+import { SymptomType } from '../common/enums/symptom.enum';
 
 /**
  * 운동 ↔ 증상 매핑 테이블
@@ -14,6 +15,7 @@ import { SymptomType } from 'src/common/enums/symptom.enum';
  * 특정 증상에 대해
  * 해당 운동이 긍정/부정 영향을 주는지 정의
  */
+@Unique('unique_exercise_symptom', ['exercise_id', 'symptom_name'])
 @Entity('exercise_tag_map')
 export class ExerciseTagMap {
 
@@ -31,7 +33,6 @@ export class ExerciseTagMap {
 
   /**
    * 증상 코드 (enum)
-   * 예: BACK_PAIN, FATIGUE
    */
   @Column({
     type: 'enum',
@@ -41,8 +42,6 @@ export class ExerciseTagMap {
 
   /**
    * 영향 타입
-   * POSITIVE: 완화
-   * NEGATIVE: 악화 위험
    */
   @Column({
     type: 'enum',

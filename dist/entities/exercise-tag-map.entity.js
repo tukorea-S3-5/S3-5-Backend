@@ -49,6 +49,7 @@ __decorate([
     __metadata("design:type", exercise_entity_1.Exercise)
 ], ExerciseTagMap.prototype, "exercise", void 0);
 exports.ExerciseTagMap = ExerciseTagMap = __decorate([
+    (0, typeorm_1.Unique)('unique_exercise_symptom', ['exercise_id', 'symptom_name']),
     (0, typeorm_1.Entity)('exercise_tag_map')
 ], ExerciseTagMap);
 //# sourceMappingURL=exercise-tag-map.entity.js.map
