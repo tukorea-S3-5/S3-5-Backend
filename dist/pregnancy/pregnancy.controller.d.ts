@@ -30,4 +30,15 @@ export declare class PregnancyController {
         common_symptoms: string[];
         today_tip: string;
     }>;
+    getWeightTrend(req: any): Promise<{
+        slope: number;
+        status: string;
+        based_on?: undefined;
+        expected_weekly_gain?: undefined;
+    } | {
+        based_on: string;
+        slope: number;
+        expected_weekly_gain: number;
+        status: string;
+    }>;
 }

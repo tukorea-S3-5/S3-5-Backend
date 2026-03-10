@@ -440,4 +440,89 @@ export class PregnancyService {
       today_tip: tip,
     };
   }
+
+  /**
+ * BMI 기반 주당 권장 체중 증가량 계산
+ */
+  private getExpectedWeeklyGain(bmi: number): number {
+
+    let totalGain = 0;
+
+    if (bmi < 18.5) totalGain = 15;
+    else if (bmi < 25) totalGain = 13.5;
+    else if (bmi < 30) totalGain = 9;
+    else totalGain = 7;
+
+    return totalGain / 40; // 40주 기준
+  }
+
+  /**
+ * 최근 4주 기준 체중 증가 추세 분석
+ */
+  async calculateWeightTrend(userId: string) {
+    
+    const pregnancy = await this.pregnancyRepository.findOne({
+      where: { user_id: userId },
+      order: { pregnancy_id: 'DESC' },
+    });
+
+    if (!pregnancy) {
+      throw new NotFoundException('임신 정보가 없습니다.');
+    }
+
+    const logs = await this.weightRepository.find({
+      where: { pregnancy_id: pregnancy.pregnancy_id },
+      order: { week: 'DESC' }, // 최근 주차부터
+    });
+
+    // console.log("현재 userId:", userId);
+    // console.log("선택된 pregnancy:", pregnancy?.pregnancy_id);
+    // console.log("logs 개수:", logs.length);
+
+    if (logs.length < 2) {
+      return {
+        slope: 0,
+        status: '데이터 부족',
+      };
+    }
+
+    // 최근 4개만 사용
+    const recentLogs = logs.slice(0, 4).reverse();
+    // reverse() 해서 week 오름차순으로 정렬
+
+    const first = recentLogs[0];
+    const last = recentLogs[recentLogs.length - 1];
+
+    const weekDiff = last.week - first.week;
+
+    if (weekDiff <= 0) {
+      return {
+        slope: 0,
+        status: '분석 불가',
+      };
+    }
+
+    const slope =
+      (last.weight - first.weight) /
+      weekDiff;
+
+    const expectedWeeklyGain =
+      this.getExpectedWeeklyGain(pregnancy.bmi);
+
+    let status = '정상 추세';
+
+    if (slope > expectedWeeklyGain * 1.2) {
+      status = '과도 증가 추세';
+    } else if (slope < expectedWeeklyGain * 0.8) {
+      status = '증가 부족 추세';
+    }
+
+    return {
+      based_on: `${recentLogs.length}주 기준`,
+      slope: Number(slope.toFixed(2)),
+      expected_weekly_gain: expectedWeeklyGain,
+      status,
+    };
+
+  }
 }

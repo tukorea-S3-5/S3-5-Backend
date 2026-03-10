@@ -93,4 +93,18 @@ export class PregnancyController {
       req.user.user_id,
     );
   }
+  /**
+ * 최근 4주 기준 체중 증가 추세 분석 조회
+ * 
+ * - 최근 4주 체중 로그 기반 선형 기울기 계산
+ * - BMI 기준 주당 권장 증가량과 비교
+ * - 과도 증가 / 증가 부족 / 정상 추세 판정
+ */
+  @Get('weight-trend')
+@ApiOperation({ summary: '최근 4주 기준 체중 증가 추세 분석 조회' })
+async getWeightTrend(@Req() req) {
+  return this.pregnancyService.calculateWeightTrend(
+    req.user.user_id,   
+  );
+}
 }
