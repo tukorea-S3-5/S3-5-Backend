@@ -13,8 +13,8 @@ export declare class RecommendService {
     private calculateTrimester;
     private isIntensityAllowed;
     recommend(userId: string): Promise<{
-        recommend: Exercise[];
-        caution: Exercise[];
-        not_recommend: Exercise[];
+        recommend: any[];
+        caution: any[];
+        not_recommend: any[];
     }>;
 }

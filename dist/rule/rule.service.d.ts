@@ -5,5 +5,6 @@ export declare class RuleService {
     private readonly exerciseRepository;
     private readonly tagRepository;
     constructor(exerciseRepository: Repository<Exercise>, tagRepository: Repository<ExerciseTagMap>);
-    generateCandidates(trimester: number, symptoms: string[]): Promise<Exercise[]>;
+    private isIntensityAllowed;
+    generateCandidates(trimester: number, symptoms: string[], bmi: number, fitnessLevel: string): Promise<Exercise[]>;
 }

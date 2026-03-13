@@ -25,15 +25,29 @@ let RuleService = class RuleService {
         this.exerciseRepository = exerciseRepository;
         this.tagRepository = tagRepository;
     }
-    async generateCandidates(trimester, symptoms) {
+    isIntensityAllowed(intensity, bmi, fitnessLevel) {
+        const level = intensity ?? 'LOW';
+        if (bmi >= 25 && level === 'HIGH') {
+            return false;
+        }
+        if (fitnessLevel === 'LOW' && level !== 'LOW') {
+            return false;
+        }
+        if (fitnessLevel === 'MEDIUM' && level === 'HIGH') {
+            return false;
+        }
+        return true;
+    }
+    async generateCandidates(trimester, symptoms, bmi, fitnessLevel) {
         let exercises = await this.exerciseRepository.find();
         exercises = exercises.filter((exercise) => exercise.allowed_trimesters?.includes(trimester));
         if (trimester === 2) {
-            exercises = exercises.filter((exercise) => exercise.position_type !== 'supine');
+            exercises = exercises.filter((exercise) => exercise.position_type !== 'SUPINE');
         }
         if (trimester === 3) {
             exercises = exercises.filter((exercise) => !exercise.fall_risk);
         }
+        exercises = exercises.filter((exercise) => this.isIntensityAllowed(exercise.intensity, bmi, fitnessLevel));
         const exerciseIds = exercises.map((exercise) => exercise.exercise_id);
         if (exerciseIds.length === 0) {
             return [];
@@ -53,7 +67,8 @@ let RuleService = class RuleService {
                     blocked = true;
                     break;
                 }
-                if (tag.effect_type === 'POSITIVE') {
+                if (tag.effect_type === exercise_tag_map_entity_1.EffectType.POSITIVE_STRONG ||
+                    tag.effect_type === exercise_tag_map_entity_1.EffectType.POSITIVE_WEAK) {
                     score += 1;
                 }
             }

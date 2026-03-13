@@ -15,6 +15,13 @@ import { SymptomType } from '../common/enums/symptom.enum';
  * 특정 증상에 대해
  * 해당 운동이 긍정/부정 영향을 주는지 정의
  */
+
+export enum EffectType {
+  POSITIVE_STRONG = 'POSITIVE_STRONG',
+  POSITIVE_WEAK = 'POSITIVE_WEAK',
+  NEGATIVE = 'NEGATIVE',
+}
+
 @Unique('unique_exercise_symptom', ['exercise_id', 'symptom_name'])
 @Entity('exercise_tag_map')
 export class ExerciseTagMap {
@@ -45,9 +52,9 @@ export class ExerciseTagMap {
    */
   @Column({
     type: 'enum',
-    enum: ['POSITIVE', 'NEGATIVE'],
+    enum: EffectType,
   })
-  effect_type: 'POSITIVE' | 'NEGATIVE';
+  effect_type: EffectType;
 
   /**
    * 운동과의 관계
