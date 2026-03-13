@@ -3,20 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
 
 import { Exercise } from '../entities/exercise.entity';
-import { ExerciseTagMap } from '../entities/exercise-tag-map.entity';
+import { ExerciseTagMap, EffectType } from '../entities/exercise-tag-map.entity';
 
-/**
- * 운동 추천 Rule Engine
- *
- * 처리 순서
- * 1. 전체 운동 조회
- * 2. 분기 필터
- * 3. 분기별 안전 필터 (supine / fall_risk)
- * 4. 증상 매핑 조회
- * 5. NEGATIVE 차단
- * 6. POSITIVE 점수 계산
- * 7. 점수순 정렬
- */
 @Injectable()
 export class RuleService {
   constructor(
@@ -28,14 +16,42 @@ export class RuleService {
   ) {}
 
   /**
+   * 개인 강도 허용 여부 판단
+   */
+  private isIntensityAllowed(
+    intensity: string | null,
+    bmi: number,
+    fitnessLevel: string,
+  ): boolean {
+
+    const level = intensity ?? 'LOW';
+
+    // BMI 25 이상 → HIGH 제한
+    if (bmi >= 25 && level === 'HIGH') {
+      return false;
+    }
+
+    // 운동 경험 낮음 → LOW만 허용
+    if (fitnessLevel === 'LOW' && level !== 'LOW') {
+      return false;
+    }
+
+    // 중간 체력 → HIGH 제한
+    if (fitnessLevel === 'MEDIUM' && level === 'HIGH') {
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
    * 추천 후보 생성
-   *
-   * @param trimester 현재 임신 분기
-   * @param symptoms 사용자가 선택한 증상 목록
    */
   async generateCandidates(
     trimester: number,
     symptoms: string[],
+    bmi: number,
+    fitnessLevel: string,
   ): Promise<Exercise[]> {
 
     /**
@@ -53,20 +69,28 @@ export class RuleService {
     /**
      * 3. 분기별 안전 필터
      */
-
-    // 2분기: 누워서 하는 운동 제거
     if (trimester === 2) {
       exercises = exercises.filter(
-        (exercise) => exercise.position_type !== 'supine',
+        (exercise) => exercise.position_type !== 'SUPINE',
       );
     }
 
-    // 3분기: 낙상 위험 운동 제거
     if (trimester === 3) {
       exercises = exercises.filter(
         (exercise) => !exercise.fall_risk,
       );
     }
+
+    /**
+     * 3.5 개인 강도 필터 (BMI + fitness_level)
+     */
+    exercises = exercises.filter((exercise) =>
+      this.isIntensityAllowed(
+        exercise.intensity,
+        bmi,
+        fitnessLevel,
+      ),
+    );
 
     /**
      * 4. 남은 운동 ID 목록
@@ -80,7 +104,7 @@ export class RuleService {
     }
 
     /**
-     * 5. 해당 운동들의 증상 매핑 조회
+     * 5. 증상 매핑 조회
      */
     const tagMaps = await this.tagRepository.find({
       where: {
@@ -104,14 +128,15 @@ export class RuleService {
 
       for (const tag of relatedTags) {
 
-        // NEGATIVE 하나라도 있으면 차단
         if (tag.effect_type === 'NEGATIVE') {
           blocked = true;
           break;
         }
 
-        // POSITIVE는 점수 증가
-        if (tag.effect_type === 'POSITIVE') {
+        if (
+          tag.effect_type === EffectType.POSITIVE_STRONG ||
+          tag.effect_type === EffectType.POSITIVE_WEAK
+        ) {
           score += 1;
         }
       }
@@ -124,19 +149,19 @@ export class RuleService {
     });
 
     /**
-     * 7. 차단된 운동 제거
+     * 7. 차단 제거
      */
     const filtered = scored.filter(
       (item) => !item.blocked,
     );
 
     /**
-     * 8. 점수 높은 순 정렬
+     * 8. 점수 정렬
      */
     filtered.sort((a, b) => b.score - a.score);
 
     /**
-     * 9. Exercise 객체만 반환
+     * 9. 반환
      */
     return filtered.map((item) => item.exercise);
   }

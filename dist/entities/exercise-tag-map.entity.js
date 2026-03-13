@@ -9,10 +9,16 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ExerciseTagMap = void 0;
+exports.ExerciseTagMap = exports.EffectType = void 0;
 const typeorm_1 = require("typeorm");
 const exercise_entity_1 = require("./exercise.entity");
 const symptom_enum_1 = require("../common/enums/symptom.enum");
+var EffectType;
+(function (EffectType) {
+    EffectType["POSITIVE_STRONG"] = "POSITIVE_STRONG";
+    EffectType["POSITIVE_WEAK"] = "POSITIVE_WEAK";
+    EffectType["NEGATIVE"] = "NEGATIVE";
+})(EffectType || (exports.EffectType = EffectType = {}));
 let ExerciseTagMap = class ExerciseTagMap {
     map_id;
     exercise_id;
@@ -39,7 +45,7 @@ __decorate([
 __decorate([
     (0, typeorm_1.Column)({
         type: 'enum',
-        enum: ['POSITIVE', 'NEGATIVE'],
+        enum: EffectType,
     }),
     __metadata("design:type", String)
 ], ExerciseTagMap.prototype, "effect_type", void 0);
