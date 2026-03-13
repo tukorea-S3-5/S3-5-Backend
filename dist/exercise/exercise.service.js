@@ -30,8 +30,12 @@ let ExerciseService = class ExerciseService {
     }
     async startRecommendedSession(userId) {
         const result = await this.recommendService.recommend(userId);
-        if (!result.recommend.length) {
-            throw new common_1.BadRequestException('추천 운동이 없습니다.');
+        const availableExercises = [
+            ...result.recommend,
+            ...result.caution,
+        ];
+        if (!availableExercises.length) {
+            throw new common_1.BadRequestException('수행 가능한 운동이 없습니다.');
         }
         const session = await this.sessionRepository.save(this.sessionRepository.create({
             user_id: userId,
@@ -39,12 +43,12 @@ let ExerciseService = class ExerciseService {
             total_duration: 0,
         }));
         const createdRecords = [];
-        for (let i = 0; i < result.recommend.length; i++) {
+        for (let i = 0; i < availableExercises.length; i++) {
             const record = await this.recordRepository.save(this.recordRepository.create({
                 user_id: userId,
                 session_id: session.session_id,
-                exercise_id: result.recommend[i].exercise_id,
-                exercise_name: result.recommend[i].exercise_name,
+                exercise_id: availableExercises[i].exercise_id,
+                exercise_name: availableExercises[i].exercise_name,
                 order_index: i + 1,
                 started_at: i === 0 ? new Date() : null,
             }));
@@ -57,9 +61,13 @@ let ExerciseService = class ExerciseService {
     }
     async startSelectedRecords(userId, exerciseIds) {
         const result = await this.recommendService.recommend(userId);
-        const allowedExercises = result.recommend.filter((ex) => exerciseIds.includes(ex.exercise_id));
+        const allowedPool = [
+            ...result.recommend,
+            ...result.caution,
+        ];
+        const allowedExercises = allowedPool.filter((ex) => exerciseIds.includes(ex.exercise_id));
         if (!allowedExercises.length) {
-            throw new common_1.BadRequestException('선택한 운동이 추천 목록에 없습니다.');
+            throw new common_1.BadRequestException('선택한 운동이 수행 가능한 목록에 없습니다.');
         }
         const session = await this.sessionRepository.save(this.sessionRepository.create({
             user_id: userId,
