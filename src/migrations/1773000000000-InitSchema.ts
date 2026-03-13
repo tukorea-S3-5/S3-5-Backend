@@ -35,7 +35,7 @@ export class InitSchema1773000000000 implements MigrationInterface {
       `CREATE TABLE \`health_baseline\` (\`baseline_id\` int NOT NULL AUTO_INCREMENT, \`user_id\` varchar(255) NOT NULL, \`resting_hr\` int NULL, \`risk_flag\` tinyint NULL, \`notes\` text NULL, PRIMARY KEY (\`baseline_id\`)) ENGINE=InnoDB`,
     );
     await queryRunner.query(
-      `CREATE TABLE \`exercise_tag_map\` (\`map_id\` int NOT NULL AUTO_INCREMENT, \`exercise_id\` int NOT NULL, \`symptom_name\` enum ('BACK_PAIN', 'FATIGUE', 'NAUSEA', 'DIZZINESS', 'SWELLING', 'CONSTIPATION', 'PELVIC_PAIN', 'SHORTNESS_OF_BREATH') NOT NULL, \`effect_type\` enum ('POSITIVE', 'NEGATIVE') NOT NULL, UNIQUE INDEX \`unique_exercise_symptom\` (\`exercise_id\`, \`symptom_name\`), PRIMARY KEY (\`map_id\`)) ENGINE=InnoDB`,
+      `CREATE TABLE \`exercise_tag_map\` (\`map_id\` int NOT NULL AUTO_INCREMENT, \`exercise_id\` int NOT NULL, \`symptom_name\` enum ('BACK_PAIN', 'FATIGUE', 'NAUSEA', 'DIZZINESS', 'SWELLING', 'CONSTIPATION', 'PELVIC_PAIN', 'SHORTNESS_OF_BREATH') NOT NULL, \`effect_type\` enum ('POSITIVE_STRONG', 'POSITIVE_WEAK', 'NEGATIVE') NOT NULL, UNIQUE INDEX \`unique_exercise_symptom\` (\`exercise_id\`, \`symptom_name\`), PRIMARY KEY (\`map_id\`)) ENGINE=InnoDB`,
     );
     await queryRunner.query(
       `CREATE TABLE \`exercise_step\` (\`step_id\` int NOT NULL AUTO_INCREMENT, \`exercise_id\` int NOT NULL, \`step_order\` int NOT NULL, \`title\` varchar(100) NOT NULL, \`description\` text NOT NULL, PRIMARY KEY (\`step_id\`)) ENGINE=InnoDB`,
