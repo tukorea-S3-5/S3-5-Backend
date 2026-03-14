@@ -24,6 +24,19 @@ export class ExerciseService {
    * - record 목록 반환
    */
   async startRecommendedSession(userId: string) {
+
+    // 기존 ONGOING 세션 존재 여부 확인 (중복 세션 방지)
+    const existingSession = await this.sessionRepository.findOne({
+      where: {
+        user_id: userId,
+        status: 'ONGOING',
+      },
+    });
+
+    if (existingSession) {
+      throw new BadRequestException('이미 진행 중인 세션이 있습니다.');
+    }
+
     const result = await this.recommendService.recommend(userId);
 
     // recommend + caution 모두 허용
@@ -76,6 +89,19 @@ export class ExerciseService {
     userId: string,
     exerciseIds: number[],
   ) {
+
+    // 기존 ONGOING 세션 존재 여부 확인 (중복 세션 방지)
+    const existingSession = await this.sessionRepository.findOne({
+      where: {
+        user_id: userId,
+        status: 'ONGOING',
+      },
+    });
+
+    if (existingSession) {
+      throw new BadRequestException('이미 진행 중인 세션이 있습니다.');
+    }
+
     const result = await this.recommendService.recommend(userId);
 
     // recommend + caution 풀 생성
@@ -240,6 +266,7 @@ export class ExerciseService {
 
     return record;
   }
+
   /**
 * 운동 재개
 */
@@ -260,7 +287,6 @@ export class ExerciseService {
       throw new BadRequestException('이미 진행 중입니다.');
     }
 
-    // 세션 상태 체크 추가
     if (record.session_id) {
       const session = await this.sessionRepository.findOne({
         where: { session_id: record.session_id },
