@@ -34,11 +34,11 @@ export class InsertExerciseMasterData1773125905312 implements MigrationInterface
     await queryRunner.query(`
             INSERT INTO exercise_tag_map (exercise_id, symptom_name, effect_type)
             VALUES
-            -- 1. 걷기: 전신 순환을 돕는 훌륭한 운동이나 특정 부위 타겟팅은 아니므로 WEAK
+            -- 1. 걷기: 전신 순환을 돕는 운동이나 특정 부위 타겟팅은 아니므로 WEAK
             (1,'BACK_PAIN','POSITIVE_WEAK'),
             (1,'SWELLING','POSITIVE_WEAK'),
             (1,'FATIGUE','POSITIVE_WEAK'),
-            (1,'NAUSEA','POSITIVE_WEAK'),
+            (1,'CONSTIPATION','POSITIVE_WEAK'),
 
             -- 2. 실내 자전거: 하체 근육 펌핑으로 붓기 제거에 직접적(STRONG), 장운동 촉진은 보조적(WEAK)
             (2,'SWELLING','POSITIVE_STRONG'),
@@ -48,46 +48,47 @@ export class InsertExerciseMasterData1773125905312 implements MigrationInterface
             (3,'BACK_PAIN','POSITIVE_STRONG'),
             (3,'SWELLING','POSITIVE_STRONG'),
             (3,'FATIGUE','POSITIVE_WEAK'),
+            (3,'CONSTIPATION','POSITIVE_WEAK'),
 
-            -- 4. 임산부 요가: 요통 및 골반 이완에 특화된 동작들이므로 STRONG
+            -- 4. 임산부 요가: 요통 및 골반 이완에 특화된 동작들 (PELVIC_PAIN 골반통은 컨텐츠에 따라 다름!! 영상보고 없애든지 weak로 변경해야함!)
             (4,'BACK_PAIN','POSITIVE_STRONG'),
-            (4,'PELVIC_PAIN','POSITIVE_STRONG'),
+            (4,'PELVIC_PAIN','POSITIVE_WEAK'),
 
             -- 5. 플랭크 변형: 코어(복횡근)를 직접 강화하여 요통을 방지하므로 STRONG
             (5,'BACK_PAIN','POSITIVE_STRONG'),
             
-            -- 6 & 7. 골반/하체 강화: 환도선다(골반통) 및 골반 기저근 직접 타겟팅 STRONG
-            (6,'PELVIC_PAIN','POSITIVE_STRONG'), -- 벽 스쿼트
+            -- 6 & 7. 골반/하체 강화: 환도선다(골반통) 및 골반 기저근 타겟팅
+            (6,'PELVIC_PAIN','POSITIVE_WEAK'), -- 벽 스쿼트
             (7,'PELVIC_PAIN','POSITIVE_STRONG'), -- 케겔 운동
 
-            -- 8. 호흡 명상: 스트레스 호르몬을 낮추어 피로도 직접 개선 STRONG
-            (8,'FATIGUE','POSITIVE_STRONG'),
+            -- 8. 호흡 명상: 스트레스 호르몬을 낮추어 피로도 개선
+            (8,'FATIGUE','POSITIVE_WEAK'),
 
             -- 9 & 10. 가벼운 하체 움직임: 장 운동을 간접적으로 돕는 WEAK
             (9,'CONSTIPATION','POSITIVE_WEAK'), -- 사이드 워킹
             (10,'CONSTIPATION','POSITIVE_WEAK'), -- 힐 레이즈
 
-            -- 11 & 12. 상체 스트레칭: 목 긴장 완화는 두통/피로에 직빵(STRONG), 팔은 보조적(WEAK)
+            -- 11 & 12. 상체 스트레칭: 목 긴장 완화는 두통/피로, 팔은 보조적
             (11,'FATIGUE','POSITIVE_WEAK'), -- 팔 스트레칭
-            (12,'FATIGUE','POSITIVE_STRONG'), -- 목 스트레칭
+            (12,'FATIGUE','POSITIVE_WEAK'), -- 목 스트레칭
 
-            -- 13 & 14. 코어/둔근 타겟팅: 요통과 골반통에 의학적으로 가장 추천되는 부위 STRONG
+            -- 13. 코어/둔근 타겟팅: 요통에 의학적으로 가장 추천되는 부위
             (13,'BACK_PAIN','POSITIVE_STRONG'), -- 브릿지 변형 (둔근/허리 강화)
-            (14,'PELVIC_PAIN','POSITIVE_STRONG'), -- 레그 리프트 (중둔근 강화로 골반 안정화)
 
-            -- 15 & 16. 가벼운 근력 보조: 전신 활력 증진 WEAK
-            (15,'PELVIC_PAIN','POSITIVE_WEAK'), -- 의자 스쿼트
+            -- 15 & 16. 가벼운 근력 보조: 전신 활력 증진
+            (15,'PELVIC_PAIN','POSITIVE_WEAK'), -- 의자 스쿼트(통증 없는 경우에 한함)
             (16,'FATIGUE','POSITIVE_WEAK'), -- 앉은 상태 팔 운동
 
-            -- 17. 골반 틸트: 임산부 요통 처방 1순위 물리치료 동작이므로 무조건 STRONG
+            -- 17. 골반 틸트: 임산부 요통 처방 물리치료 동작
             (17,'BACK_PAIN','POSITIVE_STRONG'),
 
-            -- 18 & 19. 가벼운 전신 움직임: WEAK
+            -- 18 & 19. 가벼운 전신 움직임
             (18,'BACK_PAIN','POSITIVE_WEAK'), -- 벽 기대 스트레칭
+            (18,'FATIGUE','POSITIVE_WEAK'), -- 벽 기대 스트레칭
             (19,'FATIGUE','POSITIVE_WEAK'), -- 가벼운 스텝 운동
 
-            -- 20. 명상/전신 스트레칭: 피로 해소 및 수면 질 향상에 직접적 STRONG
-            (20,'FATIGUE','POSITIVE_STRONG'),
+            -- 20. 명상/전신 스트레칭: 피로 해소 및 수면 질 향상
+            (20,'FATIGUE','POSITIVE_WEAK'),
 
             -- NEGATIVE: 해당 증상 시 절대 금지 (악화 위험)
             -- 의학적 근거: 환도선다(골반통) 산모는 비대칭 하중 및 한 발 지지 운동 시 골반 불안정성 증가로 통증 악화
