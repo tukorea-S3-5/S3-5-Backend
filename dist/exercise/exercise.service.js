@@ -29,6 +29,15 @@ let ExerciseService = class ExerciseService {
         this.recommendService = recommendService;
     }
     async startRecommendedSession(userId) {
+        const existingSession = await this.sessionRepository.findOne({
+            where: {
+                user_id: userId,
+                status: 'ONGOING',
+            },
+        });
+        if (existingSession) {
+            throw new common_1.BadRequestException('이미 진행 중인 세션이 있습니다.');
+        }
         const result = await this.recommendService.recommend(userId);
         const availableExercises = [
             ...result.recommend,
@@ -60,6 +69,15 @@ let ExerciseService = class ExerciseService {
         };
     }
     async startSelectedRecords(userId, exerciseIds) {
+        const existingSession = await this.sessionRepository.findOne({
+            where: {
+                user_id: userId,
+                status: 'ONGOING',
+            },
+        });
+        if (existingSession) {
+            throw new common_1.BadRequestException('이미 진행 중인 세션이 있습니다.');
+        }
         const result = await this.recommendService.recommend(userId);
         const allowedPool = [
             ...result.recommend,
