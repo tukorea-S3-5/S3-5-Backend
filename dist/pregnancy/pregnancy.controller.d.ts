@@ -14,6 +14,7 @@ export declare class PregnancyController {
         total_gain: number;
         due_date: Date;
         is_multiple: boolean | null;
+        bmi: number;
         max_allowed_bpm: number;
         conditions: import("../common/enums/condition.enum").ConditionType[];
     } | null>;
@@ -27,18 +28,55 @@ export declare class PregnancyController {
     getWeeklyHealth(req: any): Promise<{
         week: number;
         recommended_weight_gain: string;
+        guideline_range_today: {
+            min: number;
+            max: number;
+        };
+        current_weight_status: string;
         common_symptoms: string[];
         today_tip: string;
     }>;
     getWeightTrend(req: any): Promise<{
+        current_position: {
+            range: {
+                min: number;
+                max: number;
+            };
+            status: string;
+        };
         slope: number;
         status: string;
+        slope_status?: undefined;
         based_on?: undefined;
-        expected_slope?: undefined;
+        recommended_weekly_range?: undefined;
+    } | {
+        current_position: {
+            range: {
+                min: number;
+                max: number;
+            };
+            status: string;
+        };
+        slope: number;
+        slope_status: string;
+        status?: undefined;
+        based_on?: undefined;
+        recommended_weekly_range?: undefined;
     } | {
         based_on: string;
+        current_position: {
+            range: {
+                min: number;
+                max: number;
+            };
+            status: string;
+        };
         slope: number;
-        expected_slope: number;
-        status: string;
+        recommended_weekly_range: {
+            min: number;
+            max: number;
+        };
+        slope_status: string;
+        status?: undefined;
     }>;
 }
