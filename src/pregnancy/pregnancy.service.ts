@@ -7,7 +7,7 @@ import { PregnancyWeightLog } from '../entities/pregnancy-weight-log.entity';
 import { PregnancyCondition } from '../entities/pregnancy-condition.entity';
 import { CreatePregnancyDto } from './dto/create-pregnancy.dto';
 import { UpdatePregnancyDto } from './dto/update-pregnancy.dto';
-import { User } from 'src/user/user.entity';
+import { User } from '../user/user.entity';
 
 @Injectable()
 export class PregnancyService {
@@ -273,6 +273,7 @@ export class PregnancyService {
       total_gain: totalGain,
       due_date: pregnancy.due_date,
       is_multiple: pregnancy.is_multiple,
+      bmi: pregnancy.bmi,
       max_allowed_bpm: recalculatedMaxBpm,
       conditions:
         pregnancy.conditions?.map(
@@ -357,19 +358,8 @@ export class PregnancyService {
   }
 
   /**
-* BMI 기준 권장 체중 증가량 계산
-*/
-  private calculateRecommendedWeight(pregnancy: any): string {
-    const bmi = pregnancy.bmi;
-
-    if (bmi < 18.5) return '12.5–18kg';
-    if (bmi < 25) return '11.5–16kg';
-    if (bmi < 30) return '7–11.5kg';
-    return '5–9kg';
-  }
-  /**
- * 분기별 흔한 증상
- */
+   * 분기별 흔한 증상
+   */
   private getCommonSymptoms(trimester: number): string[] {
 
     const symptoms = {
@@ -397,6 +387,7 @@ export class PregnancyService {
 
     return symptoms[trimester] ?? [];
   }
+
   /**
    * 분기별 기본 건강 팁
    */
@@ -412,47 +403,58 @@ export class PregnancyService {
     return tips[trimester] ?? '건강 상태를 주의 깊게 관찰하세요.';
   }
   /**
- * 주차별 건강 정보 조회
- */
-  async getWeeklyHealth(userId: string) {
+* BMI 기준 권장 체중 증가량 계산
+*/
+  private calculateRecommendedWeight(pregnancy: any): string {
 
-    const latest = await this.findLatestByUser(userId);
+    const bmi = pregnancy.bmi;
+    const week = pregnancy.week;
+    const isMultiple = pregnancy.is_multiple === true;
 
-    if (!latest) {
-      throw new NotFoundException('임신 정보가 없습니다.');
+    // 1분기 특수 처리
+    if (week <= 12) {
+      return '1분기 총 권장 증가량 0.5–2.0kg';
     }
 
-    const { week, trimester } = latest;
+    // 단태아
+    if (!isMultiple) {
+      if (bmi < 18.5) return '12.7–18.1kg';
+      if (bmi < 25) return '11.3–15.8kg';
+      if (bmi < 30) return '6.8–11.3kg';
+      return '5.0–9.0kg';
+    }
 
-    const recommendedWeight =
-      this.calculateRecommendedWeight(latest);
-
-    const symptoms =
-      this.getCommonSymptoms(trimester);
-
-    const tip =
-      this.getDefaultTip(trimester);
-
-    return {
-      week,
-      recommended_weight_gain: recommendedWeight,
-      common_symptoms: symptoms,
-      today_tip: tip,
-    };
+    // 다태아
+    if (bmi < 18.5) return '23–28kg';
+    if (bmi < 25) return '17–25kg';
+    if (bmi < 30) return '14–23kg';
+    return '11–19kg';
   }
 
   private calculateGuidelineWeight(
     preWeight: number,
     bmi: number,
     currentWeek: number,
+    isMultiple: boolean,
   ) {
 
-    const totalGainMap = {
+    // 단태아 총 증가량
+    const singletonGainMap = {
       UNDER: { min: 12.7, max: 18.1 },
       NORMAL: { min: 11.3, max: 15.8 },
       OVER: { min: 6.8, max: 11.3 },
       OBESE: { min: 5.0, max: 9.0 },
     };
+
+    // 다태아 총 증가량
+    const twinGainMap = {
+      UNDER: { min: 23, max: 28 },
+      NORMAL: { min: 17, max: 25 },
+      OVER: { min: 14, max: 23 },
+      OBESE: { min: 11, max: 19 },
+    };
+
+    const totalGainMap = isMultiple ? twinGainMap : singletonGainMap;
 
     let category: keyof typeof totalGainMap;
 
@@ -490,24 +492,57 @@ export class PregnancyService {
     };
   }
 
-  //   /**
-  //  * BMI 기반 주당 권장 체중 증가량 계산
-  //  */
-  //   private getExpectedWeeklyGain(bmi: number): number {
+  /**
+ * 주차별 건강 정보 조회
+ */
+  async getWeeklyHealth(userId: string) {
 
-  //     let totalGain = 0;
+    const latest = await this.findLatestByUser(userId);
 
-  //     if (bmi < 18.5) totalGain = 15;
-  //     else if (bmi < 25) totalGain = 13.5;
-  //     else if (bmi < 30) totalGain = 9;
-  //     else totalGain = 7;
+    if (!latest) {
+      throw new NotFoundException('임신 정보가 없습니다.');
+    }
 
-  //     return totalGain / 40; // 40주 기준
-  //   }
+    const { week, trimester } = latest;
+
+    const recommendedWeight =
+      this.calculateRecommendedWeight(latest);
+
+    const symptoms =
+      this.getCommonSymptoms(trimester);
+
+    const tip =
+      this.getDefaultTip(trimester);
+
+    const guidelineRange =
+      this.calculateGuidelineWeight(
+        latest.pre_weight,
+        latest.bmi,
+        latest.week,
+        latest.is_multiple === true,
+      );
+
+    let weightStatus = '정상 범위';
+
+    if (latest.current_weight < guidelineRange.min) {
+      weightStatus = '권장 범위 미달';
+    } else if (latest.current_weight > guidelineRange.max) {
+      weightStatus = '권장 범위 초과';
+    }
+
+    return {
+      week,
+      recommended_weight_gain: recommendedWeight,
+      guideline_range_today: guidelineRange,
+      current_weight_status: weightStatus,
+      common_symptoms: symptoms,
+      today_tip: tip,
+    };
+  }
 
   /**
- * 최근 4주 기준 체중 증가 추세 분석
- */
+  * 최근 4주 기준 체중 증가 추세 분석
+  */
   async calculateWeightTrend(userId: string) {
 
     const pregnancy = await this.pregnancyRepository.findOne({
@@ -519,27 +554,61 @@ export class PregnancyService {
       throw new NotFoundException('임신 정보가 없습니다.');
     }
 
+    const week =
+      this.calculateWeek(
+        pregnancy.last_menstrual_period,
+      );
+
     const logs = await this.weightRepository.find({
       where: { pregnancy_id: pregnancy.pregnancy_id },
       order: { week: 'DESC' },
     });
 
+    const latestLog = logs[0];
+    const currentWeight =
+      latestLog?.weight ?? pregnancy.pre_weight;
+
+    // 현재 위치 (선형 보간)
+    const guidelineRange =
+      this.calculateGuidelineWeight(
+        pregnancy.pre_weight,
+        pregnancy.bmi,
+        week,
+        pregnancy.is_multiple === true,
+      );
+
+    let currentPositionStatus = '정상 범위';
+
+    if (currentWeight < guidelineRange.min) {
+      currentPositionStatus = '권장 범위 미달';
+    } else if (currentWeight > guidelineRange.max) {
+      currentPositionStatus = '권장 범위 초과';
+    }
+
+    // 증가 속도 분석
+
     if (logs.length < 2) {
       return {
+        current_position: {
+          range: guidelineRange,
+          status: currentPositionStatus,
+        },
         slope: 0,
         status: '데이터 부족',
       };
     }
 
     const recentLogs = logs.slice(0, 4).reverse();
-
     const first = recentLogs[0];
     const last = recentLogs[recentLogs.length - 1];
-
     const weekDiff = last.week - first.week;
 
     if (weekDiff <= 0) {
       return {
+        current_position: {
+          range: guidelineRange,
+          status: currentPositionStatus,
+        },
         slope: 0,
         status: '분석 불가',
       };
@@ -549,41 +618,59 @@ export class PregnancyService {
       (last.weight - first.weight) /
       weekDiff;
 
-    /* -----------------------------
-       IOM 선형 보간 기반 기대 증가량 계산
-       ----------------------------- */
+    // 1분기 속도 판단 제외
+    if (week <= 12) {
+      return {
+        current_position: {
+          range: guidelineRange,
+          status: currentPositionStatus,
+        },
+        slope: Number(slope.toFixed(2)),
+        slope_status: '1분기는 증가 속도 판단 제외',
+      };
+    }
 
-    const guidelineAtLastWeek =
-      this.calculateGuidelineWeight(
-        pregnancy.pre_weight,
-        pregnancy.bmi,
-        last.week,
-      );
+    const bmi = pregnancy.bmi;
+    const isMultiple = pregnancy.is_multiple === true;
 
-    const guidelineAtFirstWeek =
-      this.calculateGuidelineWeight(
-        pregnancy.pre_weight,
-        pregnancy.bmi,
-        first.week,
-      );
+    let minSlope = 0;
+    let maxSlope = 0;
 
-    const expectedSlope =
-      (guidelineAtLastWeek.max - guidelineAtFirstWeek.min) /
-      weekDiff;
+    // 단태아
+    if (!isMultiple) {
+      if (bmi < 18.5) { minSlope = 0.45; maxSlope = 0.59; }
+      else if (bmi < 25) { minSlope = 0.36; maxSlope = 0.45; }
+      else if (bmi < 30) { minSlope = 0.22; maxSlope = 0.31; }
+      else { minSlope = 0.18; maxSlope = 0.27; }
+    }
+    // 다태아
+    else {
+      if (bmi < 18.5) { minSlope = 0.75; maxSlope = 0.93; }
+      else if (bmi < 25) { minSlope = 0.54; maxSlope = 0.82; }
+      else if (bmi < 30) { minSlope = 0.43; maxSlope = 0.75; }
+      else { minSlope = 0.32; maxSlope = 0.61; }
+    }
 
-    let status = '정상 추세';
+    let slopeStatus = '정상 추세';
 
-    if (slope > expectedSlope * 1.2) {
-      status = '과도 증가 추세';
-    } else if (slope < expectedSlope * 0.8) {
-      status = '증가 부족 추세';
+    if (slope > maxSlope) {
+      slopeStatus = '과도 증가 추세';
+    } else if (slope < minSlope) {
+      slopeStatus = '증가 부족 추세';
     }
 
     return {
       based_on: `${recentLogs.length}주 기준`,
+      current_position: {
+        range: guidelineRange,
+        status: currentPositionStatus,
+      },
       slope: Number(slope.toFixed(2)),
-      expected_slope: Number(expectedSlope.toFixed(2)),
-      status,
+      recommended_weekly_range: {
+        min: minSlope,
+        max: maxSlope,
+      },
+      slope_status: slopeStatus,
     };
   }
 }
