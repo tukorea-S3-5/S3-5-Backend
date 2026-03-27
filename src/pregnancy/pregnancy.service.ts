@@ -57,15 +57,6 @@ export class PregnancyService {
         '조기 진통 징후 시 즉시 운동 중단',
       ],
     },
-    4: {
-      title: '4분기 운동 가이드라인 (ACOG)',
-      items: [
-        '무리한 운동 중단, 안정 위주 활동',
-        '짧은 시간 가벼운 보행 권장',
-        '복부 긴장 유발 동작 금지',
-        '진통 증상 발생 시 즉시 의료 상담',
-      ],
-    },
   };
 
   /**
@@ -146,7 +137,7 @@ export class PregnancyService {
    */
   private calculateTrimester(week: number): number {
     if (week <= 13) return 1;
-    if (week <= 26) return 2;
+    if (week <= 27) return 2;
     return 3;
   }
 
@@ -378,11 +369,6 @@ export class PregnancyService {
         '양수 터짐 가능',
         '진통',
       ],
-      4: [
-        '진통 간격 단축',
-        '복부 압박감',
-        '출산 임박 신호',
-      ],
     };
 
     return symptoms[trimester] ?? [];
@@ -397,7 +383,6 @@ export class PregnancyService {
       1: '무리한 활동을 줄이고 충분한 휴식을 취하세요.',
       2: '규칙적인 가벼운 운동을 유지하세요.',
       3: '수분 섭취를 늘리고 낙상에 주의하세요.',
-      4: '진통 증상이 느껴지면 즉시 병원을 방문하세요.',
     };
 
     return tips[trimester] ?? '건강 상태를 주의 깊게 관찰하세요.';
@@ -412,7 +397,7 @@ export class PregnancyService {
     const isMultiple = pregnancy.is_multiple === true;
 
     // 1분기 특수 처리
-    if (week <= 12) {
+    if (week <= 13) {
       return '1분기 총 권장 증가량 0.5–2.0kg';
     }
 
