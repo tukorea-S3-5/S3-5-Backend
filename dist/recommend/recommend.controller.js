@@ -17,6 +17,7 @@ const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
 const passport_1 = require("@nestjs/passport");
 const recommend_service_1 = require("./recommend.service");
+const recommend_response_dto_1 = require("./dto/recommend-response.dto");
 let RecommendController = class RecommendController {
     recommendService;
     constructor(recommendService) {
@@ -30,6 +31,11 @@ exports.RecommendController = RecommendController;
 __decorate([
     (0, common_1.Get)(),
     (0, swagger_1.ApiOperation)({ summary: '운동 추천 (저장된 최신 증상 기반)' }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: '운동 추천 결과',
+        type: recommend_response_dto_1.RecommendResponseDto,
+    }),
     __param(0, (0, common_1.Req)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),

@@ -42,7 +42,7 @@ let ReportService = class ReportService {
         const totalDuration = records.reduce((sum, record) => sum + (record.duration ?? 0), 0);
         const exerciseSummary = records.map((record) => ({
             exercise_name: record.exercise_name,
-            duration: record.duration,
+            duration: record.duration ?? null,
             avg_heart_rate: null,
             max_heart_rate: null,
         }));

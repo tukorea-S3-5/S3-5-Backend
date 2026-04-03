@@ -3,6 +3,7 @@ import { Exercise } from '../entities/exercise.entity';
 import { ExerciseTagMap } from '../entities/exercise-tag-map.entity';
 import { PregnancyInfo } from '../entities/pregnancy-info.entity';
 import { SymptomLog } from '../entities/symptom-log.entity';
+import { RecommendResponseDto } from './dto/recommend-response.dto';
 export declare class RecommendService {
     private readonly exerciseRepository;
     private readonly tagRepository;
@@ -12,9 +13,5 @@ export declare class RecommendService {
     private calculateWeek;
     private calculateTrimester;
     private isIntensityAllowed;
-    recommend(userId: string): Promise<{
-        recommend: any[];
-        caution: any[];
-        not_recommend: any[];
-    }>;
+    recommend(userId: string): Promise<RecommendResponseDto>;
 }

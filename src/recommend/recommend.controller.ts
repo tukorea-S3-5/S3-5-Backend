@@ -8,9 +8,11 @@ import {
   ApiTags,
   ApiOperation,
   ApiBearerAuth,
+  ApiResponse,
 } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { RecommendService } from './recommend.service';
+import { RecommendResponseDto } from './dto/recommend-response.dto';
 
 @ApiTags('Recommend')
 @ApiBearerAuth('access-token')
@@ -28,6 +30,11 @@ export class RecommendController {
    */
   @Get()
   @ApiOperation({ summary: '운동 추천 (저장된 최신 증상 기반)' })
+  @ApiResponse({
+    status: 200,
+    description: '운동 추천 결과',
+    type: RecommendResponseDto,
+  })
   async recommend(@Req() req) {
     return this.recommendService.recommend(
       req.user.user_id,
