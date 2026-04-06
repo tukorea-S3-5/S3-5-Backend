@@ -8,6 +8,8 @@ import { PregnancyInfo } from '../entities/pregnancy-info.entity';
 import { SymptomLog } from '../entities/symptom-log.entity';
 import { ConditionType } from 'src/common/enums/condition.enum';
 import { SymptomType } from '../common/enums/symptom.enum';
+import { RecommendResponseDto } from './dto/recommend-response.dto';
+import { ExerciseResultDto } from './dto/exercise-result.dto';
 
 @Injectable()
 export class RecommendService {
@@ -101,7 +103,7 @@ export class RecommendService {
  * - 질환 필터
  * - 증상 필터
  */
-  async recommend(userId: string) {
+  async recommend(userId: string): Promise<RecommendResponseDto> {
 
     const pregnancy = await this.pregnancyRepository.findOne({
       where: { user_id: userId },
@@ -138,9 +140,9 @@ export class RecommendService {
     const tagMaps =
       await this.tagRepository.find();
 
-    const recommend: any[] = [];
-    const caution: any[] = [];
-    const notRecommend: any[] = [];
+    const recommend: ExerciseResultDto[] = [];
+    const caution: ExerciseResultDto[] = [];
+    const notRecommend: ExerciseResultDto[] = [];
 
     outerLoop:
     for (const exercise of exercises) {
@@ -154,7 +156,9 @@ export class RecommendService {
 
       if (!exercise.allowed_trimesters?.includes(trimester)) {
         notRecommend.push({
-          ...exercise,
+          exercise_id: exercise.exercise_id,
+          name: exercise.exercise_name,
+          intensity: exercise.intensity,
           reason: ['임신 분기 제한'],
         });
         continue;
@@ -162,7 +166,9 @@ export class RecommendService {
 
       if (trimester === 2 && exercise.position_type === 'SUPINE') {
         notRecommend.push({
-          ...exercise,
+          exercise_id: exercise.exercise_id,
+          name: exercise.exercise_name,
+          intensity: exercise.intensity,
           reason: ['2분기 supine 제한'],
         });
         continue;
@@ -170,7 +176,9 @@ export class RecommendService {
 
       if (trimester === 3 && exercise.fall_risk) {
         notRecommend.push({
-          ...exercise,
+          exercise_id: exercise.exercise_id,
+          name: exercise.exercise_name,
+          intensity: exercise.intensity,
           reason: ['3분기 낙상 위험'],
         });
         continue;
@@ -185,7 +193,9 @@ export class RecommendService {
         )
       ) {
         notRecommend.push({
-          ...exercise,
+          exercise_id: exercise.exercise_id,
+          name: exercise.exercise_name,
+          intensity: exercise.intensity,
           reason: ['강도 제한'],
         });
         continue;
@@ -212,7 +222,9 @@ export class RecommendService {
 
         if (tag.effect_type === 'NEGATIVE') {
           notRecommend.push({
-            ...exercise,
+            exercise_id: exercise.exercise_id,
+            name: exercise.exercise_name,
+            intensity: exercise.intensity,
             reason: ['해당 증상 악화 가능성'],
           });
           continue outerLoop;
@@ -233,19 +245,25 @@ export class RecommendService {
        * 4. 최종 분류
        */
 
+      const mapped: ExerciseResultDto = {
+        exercise_id: exercise.exercise_id,
+        name: exercise.exercise_name,
+        intensity: exercise.intensity,
+        reason: reasons.length ? reasons : ['현재 상태에 적합한 운동'],
+      };
+
       if (score >= 3) {
-        recommend.push({
-          ...exercise,
-          reason: reasons.length ? reasons : ['현재 상태에 적합한 운동'],
-        });
+        recommend.push(mapped);
       } else if (score >= 1) {
         caution.push({
-          ...exercise,
+          ...mapped,
           reason: reasons.length ? reasons : ['안전 범위 내 운동'],
         });
       } else {
         notRecommend.push({
-          ...exercise,
+          exercise_id: exercise.exercise_id,
+          name: exercise.exercise_name,
+          intensity: exercise.intensity,
           reason: ['현재 상태에 적합하지 않음'],
         });
       }

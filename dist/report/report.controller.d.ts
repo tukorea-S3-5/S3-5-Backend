@@ -1,16 +1,7 @@
 import { ReportService } from './report.service';
+import { SessionReportResponseDto } from './dto/session-report-response.dto';
 export declare class ReportController {
     private readonly reportService;
     constructor(reportService: ReportService);
-    getSessionReport(req: any, id: string): Promise<{
-        total_duration: number;
-        avg_heart_rate: null;
-        max_heart_rate: null;
-        exercises: {
-            exercise_name: string;
-            duration: number | null;
-            avg_heart_rate: null;
-            max_heart_rate: null;
-        }[];
-    }>;
+    getSessionReport(req: any, id: string): Promise<SessionReportResponseDto>;
 }

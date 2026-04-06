@@ -80,7 +80,11 @@ let RuleService = class RuleService {
         });
         const filtered = scored.filter((item) => !item.blocked);
         filtered.sort((a, b) => b.score - a.score);
-        return filtered.map((item) => item.exercise);
+        return filtered.map((item) => ({
+            exercise_id: item.exercise.exercise_id,
+            exercise_name: item.exercise.exercise_name,
+            intensity: item.exercise.intensity,
+        }));
     }
 };
 exports.RuleService = RuleService;

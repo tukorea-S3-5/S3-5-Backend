@@ -24,6 +24,8 @@ const symptom_module_1 = require("./symptom/symptom.module");
 const rule_module_1 = require("./rule/rule.module");
 const recommend_module_1 = require("./recommend/recommend.module");
 const report_module_1 = require("./report/report.module");
+const ai_module_1 = require("./ai/ai.module");
+const community_module_1 = require("./community/community.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -59,6 +61,8 @@ exports.AppModule = AppModule = __decorate([
             rule_module_1.RuleModule,
             recommend_module_1.RecommendModule,
             report_module_1.ReportModule,
+            ai_module_1.AiModule,
+            community_module_1.CommunityModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [

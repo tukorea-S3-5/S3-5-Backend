@@ -4,6 +4,7 @@ import { Repository, In } from 'typeorm';
 
 import { Exercise } from '../entities/exercise.entity';
 import { ExerciseTagMap, EffectType } from '../entities/exercise-tag-map.entity';
+import { RuleCandidateDto } from './dto/rule-candidate.dto';
 
 @Injectable()
 export class RuleService {
@@ -52,7 +53,7 @@ export class RuleService {
     symptoms: string[],
     bmi: number,
     fitnessLevel: string,
-  ): Promise<Exercise[]> {
+  ): Promise<RuleCandidateDto[]> {
 
     /**
      * 1. 전체 운동 조회
@@ -163,6 +164,10 @@ export class RuleService {
     /**
      * 9. 반환
      */
-    return filtered.map((item) => item.exercise);
+    return filtered.map((item) => ({
+      exercise_id: item.exercise.exercise_id,
+      exercise_name: item.exercise.exercise_name,
+      intensity: item.exercise.intensity,
+    }));
   }
 }

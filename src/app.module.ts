@@ -15,6 +15,8 @@ import { SymptomModule } from './symptom/symptom.module';
 import { RuleModule } from './rule/rule.module';
 import { RecommendModule } from './recommend/recommend.module';
 import { ReportModule } from './report/report.module';
+import { AiModule } from './ai/ai.module';
+import { CommunityModule } from './community/community.module';
 
 @Module({
   imports: [
@@ -53,6 +55,8 @@ import { ReportModule } from './report/report.module';
     RuleModule,
     RecommendModule,
     ReportModule,
+    AiModule,
+    CommunityModule,
   ],
   controllers: [AppController],
   providers: [

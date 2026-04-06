@@ -17,12 +17,13 @@ const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
 const passport_1 = require("@nestjs/passport");
 const report_service_1 = require("./report.service");
+const session_report_response_dto_1 = require("./dto/session-report-response.dto");
 let ReportController = class ReportController {
     reportService;
     constructor(reportService) {
         this.reportService = reportService;
     }
-    getSessionReport(req, id) {
+    async getSessionReport(req, id) {
         return this.reportService.generateSessionReport(req.user.user_id, Number(id));
     }
 };
@@ -30,11 +31,16 @@ exports.ReportController = ReportController;
 __decorate([
     (0, common_1.Get)('session/:id'),
     (0, swagger_1.ApiOperation)({ summary: '세션 리포트 조회' }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: '세션 리포트 반환',
+        type: session_report_response_dto_1.SessionReportResponseDto,
+    }),
     __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, String]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], ReportController.prototype, "getSessionReport", null);
 exports.ReportController = ReportController = __decorate([
     (0, swagger_1.ApiTags)('Report'),

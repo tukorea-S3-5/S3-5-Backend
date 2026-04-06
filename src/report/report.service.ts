@@ -4,6 +4,8 @@ import { Repository } from 'typeorm';
 
 import { ExerciseSession } from '../entities/exercise-session.entity';
 import { ExerciseRecord } from '../entities/exercise-record.entity';
+import { SessionReportResponseDto } from './dto/session-report-response.dto';
+import { SessionExerciseDto } from './dto/session-exercise.dto';
 
 @Injectable()
 export class ReportService {
@@ -20,7 +22,11 @@ export class ReportService {
    * - 총 운동 시간
    * - 운동별 수행 시간
    */
-  async generateSessionReport(userId: string, sessionId: number) {
+  async generateSessionReport(
+    userId: string,
+    sessionId: number,
+  ): Promise<SessionReportResponseDto> {
+
     /**
      * 1. 세션 존재 여부 확인
      */
@@ -54,12 +60,14 @@ export class ReportService {
     /**
      * 4. 운동별 정리
      */
-    const exerciseSummary = records.map((record) => ({
-      exercise_name: record.exercise_name,
-      duration: record.duration,
-      avg_heart_rate: null, // IoT 연동 전
-      max_heart_rate: null, // IoT 연동 전
-    }));
+    const exerciseSummary: SessionExerciseDto[] = records.map(
+      (record) => ({
+        exercise_name: record.exercise_name,
+        duration: record.duration ?? null,
+        avg_heart_rate: null, // IoT 연동 전
+        max_heart_rate: null, // IoT 연동 전
+      }),
+    );
 
     /**
      * 5. 반환
