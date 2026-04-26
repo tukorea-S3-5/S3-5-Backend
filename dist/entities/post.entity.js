@@ -11,12 +11,18 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Post = void 0;
 const typeorm_1 = require("typeorm");
+const user_entity_1 = require("../user/user.entity");
+const comment_entity_1 = require("./comment.entity");
+const post_like_entity_1 = require("./post-like.entity");
 let Post = class Post {
     id;
     userId;
+    user;
     title;
     content;
     category;
+    comments;
+    likesList;
     views;
     likes;
     createdAt;
@@ -32,6 +38,11 @@ __decorate([
     __metadata("design:type", String)
 ], Post.prototype, "userId", void 0);
 __decorate([
+    (0, typeorm_1.ManyToOne)(() => user_entity_1.User, (user) => user.posts, { eager: true }),
+    (0, typeorm_1.JoinColumn)({ name: 'userId' }),
+    __metadata("design:type", user_entity_1.User)
+], Post.prototype, "user", void 0);
+__decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", String)
 ], Post.prototype, "title", void 0);
@@ -43,6 +54,14 @@ __decorate([
     (0, typeorm_1.Column)({ default: 'FREE' }),
     __metadata("design:type", String)
 ], Post.prototype, "category", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => comment_entity_1.Comment, (comment) => comment.post),
+    __metadata("design:type", Array)
+], Post.prototype, "comments", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => post_like_entity_1.PostLike, (like) => like.post),
+    __metadata("design:type", Array)
+], Post.prototype, "likesList", void 0);
 __decorate([
     (0, typeorm_1.Column)({ default: 0 }),
     __metadata("design:type", Number)

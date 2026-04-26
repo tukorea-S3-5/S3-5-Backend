@@ -45,6 +45,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.User = void 0;
 const typeorm_1 = require("typeorm");
 const bcrypt = __importStar(require("bcrypt"));
+const post_entity_1 = require("../entities/post.entity");
+const comment_entity_1 = require("../entities/comment.entity");
+const post_like_entity_1 = require("../entities/post-like.entity");
 let User = class User {
     user_id;
     email;
@@ -53,6 +56,9 @@ let User = class User {
     birth_date;
     created_at;
     currentRefreshToken;
+    posts;
+    comments;
+    likes;
     async hashPassword(plainTextPassword) {
         this.password = await bcrypt.hash(plainTextPassword, 10);
     }
@@ -70,6 +76,8 @@ let User = class User {
     removeRefreshToken() {
         this.currentRefreshToken = null;
     }
+    restingHeartRate;
+    restingHeartRateUpdatedAt;
 };
 exports.User = User;
 __decorate([
@@ -97,9 +105,34 @@ __decorate([
     __metadata("design:type", Date)
 ], User.prototype, "created_at", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ nullable: true, type: 'varchar', length: 300, select: false }),
+    (0, typeorm_1.Column)({
+        nullable: true,
+        type: 'varchar',
+        length: 300,
+        select: false,
+    }),
     __metadata("design:type", Object)
 ], User.prototype, "currentRefreshToken", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => post_entity_1.Post, (post) => post.user),
+    __metadata("design:type", Array)
+], User.prototype, "posts", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => comment_entity_1.Comment, (comment) => comment.user),
+    __metadata("design:type", Array)
+], User.prototype, "comments", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => post_like_entity_1.PostLike, (like) => like.user),
+    __metadata("design:type", Array)
+], User.prototype, "likes", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'int', nullable: true }),
+    __metadata("design:type", Object)
+], User.prototype, "restingHeartRate", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'timestamp', nullable: true }),
+    __metadata("design:type", Object)
+], User.prototype, "restingHeartRateUpdatedAt", void 0);
 exports.User = User = __decorate([
     (0, typeorm_1.Entity)('user')
 ], User);

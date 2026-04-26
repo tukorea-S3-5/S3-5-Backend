@@ -17,6 +17,7 @@ import { RecommendModule } from './recommend/recommend.module';
 import { ReportModule } from './report/report.module';
 import { AiModule } from './ai/ai.module';
 import { CommunityModule } from './community/community.module';
+import { HeartRateModule } from './heart-rate/heart-rate.module';
 
 @Module({
   imports: [
@@ -57,6 +58,7 @@ import { CommunityModule } from './community/community.module';
     ReportModule,
     AiModule,
     CommunityModule,
+    HeartRateModule,
   ],
   controllers: [AppController],
   providers: [

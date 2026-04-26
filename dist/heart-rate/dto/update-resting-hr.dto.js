@@ -9,23 +9,21 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CreateCommentDto = void 0;
-const swagger_1 = require("@nestjs/swagger");
+exports.UpdateRestingHrDto = void 0;
 const class_validator_1 = require("class-validator");
-class CreateCommentDto {
-    postId;
-    content;
+const swagger_1 = require("@nestjs/swagger");
+class UpdateRestingHrDto {
+    restingHeartRate;
 }
-exports.CreateCommentDto = CreateCommentDto;
+exports.UpdateRestingHrDto = UpdateRestingHrDto;
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: 1 }),
-    (0, class_validator_1.IsNumber)(),
+    (0, swagger_1.ApiProperty)({
+        example: 62,
+        description: '안정 심박수 (30~150)',
+    }),
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.Min)(30),
+    (0, class_validator_1.Max)(150),
     __metadata("design:type", Number)
-], CreateCommentDto.prototype, "postId", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: '저도 같은 고민이에요 ㅠㅠ' }),
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.IsNotEmpty)(),
-    __metadata("design:type", String)
-], CreateCommentDto.prototype, "content", void 0);
-//# sourceMappingURL=create-comment.dto.js.map
+], UpdateRestingHrDto.prototype, "restingHeartRate", void 0);
+//# sourceMappingURL=update-resting-hr.dto.js.map
