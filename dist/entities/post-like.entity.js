@@ -11,10 +11,14 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PostLike = void 0;
 const typeorm_1 = require("typeorm");
+const post_entity_1 = require("./post.entity");
+const user_entity_1 = require("../user/user.entity");
 let PostLike = class PostLike {
     id;
     userId;
     postId;
+    post;
+    user;
     createdAt;
 };
 exports.PostLike = PostLike;
@@ -31,11 +35,21 @@ __decorate([
     __metadata("design:type", Number)
 ], PostLike.prototype, "postId", void 0);
 __decorate([
+    (0, typeorm_1.ManyToOne)(() => post_entity_1.Post, (post) => post.likesList),
+    (0, typeorm_1.JoinColumn)({ name: 'postId' }),
+    __metadata("design:type", post_entity_1.Post)
+], PostLike.prototype, "post", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => user_entity_1.User, (user) => user.likes),
+    (0, typeorm_1.JoinColumn)({ name: 'userId' }),
+    __metadata("design:type", user_entity_1.User)
+], PostLike.prototype, "user", void 0);
+__decorate([
     (0, typeorm_1.CreateDateColumn)(),
     __metadata("design:type", Date)
 ], PostLike.prototype, "createdAt", void 0);
 exports.PostLike = PostLike = __decorate([
-    (0, typeorm_1.Entity)(),
+    (0, typeorm_1.Entity)('post_likes'),
     (0, typeorm_1.Unique)(['userId', 'postId'])
 ], PostLike);
 //# sourceMappingURL=post-like.entity.js.map

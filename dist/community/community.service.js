@@ -28,18 +28,24 @@ let CommunityService = class CommunityService {
         this.commentRepository = commentRepository;
         this.likeRepository = likeRepository;
     }
-    async createPost(dto) {
-        const post = this.postRepository.create(dto);
+    async createPost(title, content, userId) {
+        const post = this.postRepository.create({
+            title,
+            content,
+            userId,
+        });
         return await this.postRepository.save(post);
     }
     async getAllPosts() {
         return await this.postRepository.find({
+            relations: ['user'],
             order: { createdAt: 'DESC' },
         });
     }
     async getPostById(id) {
         const post = await this.postRepository.findOne({
             where: { id },
+            relations: ['user'],
         });
         if (!post) {
             throw new common_1.NotFoundException('게시글을 찾을 수 없습니다.');
@@ -52,8 +58,12 @@ let CommunityService = class CommunityService {
         });
         return { post, comments };
     }
-    async createComment(dto) {
-        const comment = this.commentRepository.create(dto);
+    async createComment(postId, content, userId) {
+        const comment = this.commentRepository.create({
+            postId,
+            content,
+            userId,
+        });
         return await this.commentRepository.save(comment);
     }
     async toggleLike(postId, userId) {

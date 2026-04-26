@@ -26,6 +26,7 @@ const recommend_module_1 = require("./recommend/recommend.module");
 const report_module_1 = require("./report/report.module");
 const ai_module_1 = require("./ai/ai.module");
 const community_module_1 = require("./community/community.module");
+const heart_rate_module_1 = require("./heart-rate/heart-rate.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -63,6 +64,7 @@ exports.AppModule = AppModule = __decorate([
             report_module_1.ReportModule,
             ai_module_1.AiModule,
             community_module_1.CommunityModule,
+            heart_rate_module_1.HeartRateModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [

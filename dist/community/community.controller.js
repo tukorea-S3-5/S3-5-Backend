@@ -24,8 +24,9 @@ let CommunityController = class CommunityController {
     constructor(communityService) {
         this.communityService = communityService;
     }
-    createPost(dto) {
-        return this.communityService.createPost(dto);
+    createPost(dto, req) {
+        const userId = req.user.user_id;
+        return this.communityService.createPost(dto.title, dto.content, userId);
     }
     getAllPosts() {
         return this.communityService.getAllPosts();
@@ -33,8 +34,9 @@ let CommunityController = class CommunityController {
     getPost(id) {
         return this.communityService.getPostById(id);
     }
-    createComment(dto) {
-        return this.communityService.createComment(dto);
+    createComment(dto, req) {
+        const userId = req.user.user_id;
+        return this.communityService.createComment(dto.postId, dto.content, userId);
     }
     toggleLike(id, req) {
         const userId = req.user.user_id;
@@ -45,10 +47,10 @@ exports.CommunityController = CommunityController;
 __decorate([
     (0, common_1.Post)('posts'),
     (0, swagger_1.ApiOperation)({ summary: '게시글 작성' }),
-    (0, swagger_1.ApiResponse)({ status: 201, description: '게시글 작성 성공' }),
     __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [create_post_dto_1.CreatePostDto]),
+    __metadata("design:paramtypes", [create_post_dto_1.CreatePostDto, Object]),
     __metadata("design:returntype", void 0)
 ], CommunityController.prototype, "createPost", null);
 __decorate([
@@ -70,14 +72,14 @@ __decorate([
     (0, common_1.Post)('comments'),
     (0, swagger_1.ApiOperation)({ summary: '댓글 작성' }),
     __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [create_comment_dto_1.CreateCommentDto]),
+    __metadata("design:paramtypes", [create_comment_dto_1.CreateCommentDto, Object]),
     __metadata("design:returntype", void 0)
 ], CommunityController.prototype, "createComment", null);
 __decorate([
     (0, common_1.Post)('posts/:id/like'),
     (0, swagger_1.ApiOperation)({ summary: '게시글 좋아요 토글' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: '좋아요 토글 성공' }),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
