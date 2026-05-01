@@ -57,7 +57,7 @@ let ExerciseService = class ExerciseService {
                 user_id: userId,
                 session_id: session.session_id,
                 exercise_id: availableExercises[i].exercise_id,
-                exercise_name: availableExercises[i].name,
+                exercise_name: availableExercises[i].exercise_name,
                 order_index: i + 1,
                 started_at: i === 0 ? new Date() : null,
             }));
@@ -98,7 +98,7 @@ let ExerciseService = class ExerciseService {
                 user_id: userId,
                 session_id: session.session_id,
                 exercise_id: allowedExercises[i].exercise_id,
-                exercise_name: allowedExercises[i].name,
+                exercise_name: allowedExercises[i].exercise_name,
                 order_index: i + 1,
                 started_at: i === 0 ? new Date() : null,
             }));
