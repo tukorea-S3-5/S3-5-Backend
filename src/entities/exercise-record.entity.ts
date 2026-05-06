@@ -15,7 +15,6 @@ import { ExerciseSession } from './exercise-session.entity';
  */
 @Entity('exercise_record')
 export class ExerciseRecord {
-
   /**
    * 운동 기록 PK
    */
@@ -33,11 +32,9 @@ export class ExerciseRecord {
   /**
    * 세션 관계
    */
-  @ManyToOne(
-    () => ExerciseSession,
-    (session) => session.records,
-    { onDelete: 'SET NULL' },
-  )
+  @ManyToOne(() => ExerciseSession, (session) => session.records, {
+    onDelete: 'SET NULL',
+  })
   @JoinColumn({ name: 'session_id' })
   session: ExerciseSession | null;
 
@@ -84,4 +81,12 @@ export class ExerciseRecord {
    */
   @Column({ type: 'int', nullable: true })
   duration: number | null;
+
+  // 평균 심박수
+  @Column({ type: 'int', nullable: true })
+  avg_heart_rate: number | null;
+
+  // 최고 심박수
+  @Column({ type: 'int', nullable: true })
+  max_heart_rate: number | null;
 }

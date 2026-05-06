@@ -17,6 +17,7 @@ const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
 const passport_1 = require("@nestjs/passport");
 const exercise_service_1 = require("./exercise.service");
+const end_exercise_record_dto_1 = require("./dto/end-exercise-record.dto");
 let ExerciseController = class ExerciseController {
     exerciseService;
     constructor(exerciseService) {
@@ -28,8 +29,8 @@ let ExerciseController = class ExerciseController {
     startSelectedRecords(req, body) {
         return this.exerciseService.startSelectedRecords(req.user.user_id, body.exercise_ids);
     }
-    endRecord(body) {
-        return this.exerciseService.endRecord(body.record_id);
+    endRecord(dto) {
+        return this.exerciseService.endRecord(dto.record_id, dto.heart_rates);
     }
     pauseRecord(body) {
         return this.exerciseService.pauseRecord(body.record_id);
@@ -38,7 +39,7 @@ let ExerciseController = class ExerciseController {
         return this.exerciseService.resumeRecord(body.record_id);
     }
     abortSession(body) {
-        return this.exerciseService.abortSession(body.session_id);
+        return this.exerciseService.abortSession(body.session_id, body.heart_rates);
     }
     getHistory(req) {
         return this.exerciseService.getHistory(req.user.user_id);
@@ -79,17 +80,10 @@ __decorate([
 __decorate([
     (0, common_1.Post)('record/end'),
     (0, swagger_1.ApiOperation)({ summary: '운동 종료 (하나씩)' }),
-    (0, swagger_1.ApiBody)({
-        schema: {
-            type: 'object',
-            properties: {
-                record_id: { type: 'number' },
-            },
-        },
-    }),
+    (0, swagger_1.ApiBody)({ type: end_exercise_record_dto_1.EndExerciseRecordDto }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [end_exercise_record_dto_1.EndExerciseRecordDto]),
     __metadata("design:returntype", void 0)
 ], ExerciseController.prototype, "endRecord", null);
 __decorate([
@@ -132,7 +126,13 @@ __decorate([
             type: 'object',
             properties: {
                 session_id: { type: 'number' },
+                heart_rates: {
+                    type: 'array',
+                    items: { type: 'number' },
+                    example: [82, 85, 88, 90, 87],
+                },
             },
+            required: ['session_id'],
         },
     }),
     __param(0, (0, common_1.Body)()),

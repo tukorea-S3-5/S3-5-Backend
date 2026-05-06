@@ -1,4 +1,5 @@
 import { ExerciseService } from './exercise.service';
+import { EndExerciseRecordDto } from './dto/end-exercise-record.dto';
 export declare class ExerciseController {
     private readonly exerciseService;
     constructor(exerciseService: ExerciseService);
@@ -12,9 +13,7 @@ export declare class ExerciseController {
         session: import("../entities/exercise-session.entity").ExerciseSession;
         records: import("../entities/exercise-record.entity").ExerciseRecord[];
     }>;
-    endRecord(body: {
-        record_id: number;
-    }): Promise<import("../entities/exercise-record.entity").ExerciseRecord>;
+    endRecord(dto: EndExerciseRecordDto): Promise<import("../entities/exercise-record.entity").ExerciseRecord>;
     pauseRecord(body: {
         record_id: number;
     }): Promise<import("../entities/exercise-record.entity").ExerciseRecord>;
@@ -23,6 +22,7 @@ export declare class ExerciseController {
     }): Promise<import("../entities/exercise-record.entity").ExerciseRecord>;
     abortSession(body: {
         session_id: number;
+        heart_rates?: number[];
     }): Promise<import("../entities/exercise-session.entity").ExerciseSession>;
     getHistory(req: any): Promise<{
         sessions: {

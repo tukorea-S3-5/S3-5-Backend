@@ -11,6 +11,12 @@ export class SessionReportResponseDto {
   @ApiProperty({ nullable: true })
   max_heart_rate: number | null;
 
+  @ApiProperty({
+    example: 'COMPLETED',
+    description: '세션 상태 (COMPLETED | ABORTED)',
+  })
+  status: string;
+
   @ApiProperty({ type: [SessionExerciseDto] })
   exercises: SessionExerciseDto[];
 }

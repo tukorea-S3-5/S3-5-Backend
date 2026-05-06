@@ -39,10 +39,7 @@ let ExerciseService = class ExerciseService {
             throw new common_1.BadRequestException('이미 진행 중인 세션이 있습니다.');
         }
         const result = await this.recommendService.recommend(userId);
-        const availableExercises = [
-            ...result.recommend,
-            ...result.caution,
-        ];
+        const availableExercises = [...result.recommend, ...result.caution];
         if (!availableExercises.length) {
             throw new common_1.BadRequestException('수행 가능한 운동이 없습니다.');
         }
@@ -79,10 +76,7 @@ let ExerciseService = class ExerciseService {
             throw new common_1.BadRequestException('이미 진행 중인 세션이 있습니다.');
         }
         const result = await this.recommendService.recommend(userId);
-        const allowedPool = [
-            ...result.recommend,
-            ...result.caution,
-        ];
+        const allowedPool = [...result.recommend, ...result.caution];
         const allowedExercises = allowedPool.filter((ex) => exerciseIds.includes(ex.exercise_id));
         if (!allowedExercises.length) {
             throw new common_1.BadRequestException('선택한 운동이 수행 가능한 목록에 없습니다.');
@@ -109,7 +103,7 @@ let ExerciseService = class ExerciseService {
             records: createdRecords,
         };
     }
-    async endRecord(recordId) {
+    async endRecord(recordId, heartRates) {
         const record = await this.recordRepository.findOne({
             where: { record_id: recordId },
         });
@@ -123,16 +117,18 @@ let ExerciseService = class ExerciseService {
             throw new common_1.BadRequestException('이미 종료된 운동입니다.');
         }
         record.ended_at = new Date();
-        const additional = Math.floor((record.ended_at.getTime() -
-            record.started_at.getTime()) / 1000);
+        const additional = Math.floor((record.ended_at.getTime() - record.started_at.getTime()) / 1000);
         record.duration = (record.duration ?? 0) + additional;
+        const heartRateSummary = this.calculateHeartRateSummary(heartRates);
+        if (heartRateSummary) {
+            record.avg_heart_rate = heartRateSummary.avgHeartRate;
+            record.max_heart_rate = heartRateSummary.maxHeartRate;
+        }
         await this.recordRepository.save(record);
         const nextRecord = await this.recordRepository.findOne({
             where: {
                 user_id: record.user_id,
-                session_id: record.session_id === null
-                    ? (0, typeorm_2.IsNull)()
-                    : record.session_id,
+                session_id: record.session_id === null ? (0, typeorm_2.IsNull)() : record.session_id,
                 order_index: record.order_index + 1,
                 started_at: (0, typeorm_2.IsNull)(),
             },
@@ -144,9 +140,7 @@ let ExerciseService = class ExerciseService {
         else {
             const session = await this.sessionRepository.findOne({
                 where: {
-                    session_id: record.session_id === null
-                        ? undefined
-                        : record.session_id,
+                    session_id: record.session_id === null ? undefined : record.session_id,
                 },
                 relations: ['records'],
             });
@@ -205,7 +199,7 @@ let ExerciseService = class ExerciseService {
         await this.recordRepository.save(record);
         return record;
     }
-    async abortSession(sessionId) {
+    async abortSession(sessionId, heartRates) {
         const session = await this.sessionRepository.findOne({
             where: { session_id: sessionId },
             relations: ['records'],
@@ -218,12 +212,19 @@ let ExerciseService = class ExerciseService {
         for (const record of session.records) {
             if (record.started_at && !record.ended_at) {
                 record.ended_at = now;
-                record.duration = Math.floor((now.getTime() - record.started_at.getTime()) / 1000);
+                const additional = Math.floor((now.getTime() - record.started_at.getTime()) / 1000);
+                record.duration = (record.duration ?? 0) + additional;
+                const heartRateSummary = this.calculateHeartRateSummary(heartRates);
+                if (heartRateSummary) {
+                    record.avg_heart_rate = heartRateSummary.avgHeartRate;
+                    record.max_heart_rate = heartRateSummary.maxHeartRate;
+                }
             }
-            if (!record.duration) {
-                record.duration = 0;
+            if (!record.started_at && !record.ended_at) {
+                record.ended_at = now;
+                record.duration = record.duration ?? 0;
             }
-            totalDuration += record.duration;
+            totalDuration += record.duration ?? 0;
             await this.recordRepository.save(record);
         }
         session.status = 'ABORTED';
@@ -282,6 +283,17 @@ let ExerciseService = class ExerciseService {
             parts.push(`${s}초`);
         }
         return parts.join(' ');
+    }
+    calculateHeartRateSummary(heartRates) {
+        if (!heartRates?.length)
+            return null;
+        const validHeartRates = heartRates.filter((bpm) => Number.isInteger(bpm) && bpm > 50 && bpm < 180);
+        if (!validHeartRates.length)
+            return null;
+        const sum = validHeartRates.reduce((acc, bpm) => acc + bpm, 0);
+        const avgHeartRate = Math.round(sum / validHeartRates.length);
+        const maxHeartRate = Math.max(...validHeartRates);
+        return { avgHeartRate, maxHeartRate };
     }
 };
 exports.ExerciseService = ExerciseService;

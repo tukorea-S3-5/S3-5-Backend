@@ -16,6 +16,7 @@ class SessionReportResponseDto {
     total_duration;
     avg_heart_rate;
     max_heart_rate;
+    status;
     exercises;
 }
 exports.SessionReportResponseDto = SessionReportResponseDto;
@@ -31,6 +32,13 @@ __decorate([
     (0, swagger_1.ApiProperty)({ nullable: true }),
     __metadata("design:type", Object)
 ], SessionReportResponseDto.prototype, "max_heart_rate", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: 'COMPLETED',
+        description: '세션 상태 (COMPLETED | ABORTED)',
+    }),
+    __metadata("design:type", String)
+], SessionReportResponseDto.prototype, "status", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ type: [session_exercise_dto_1.SessionExerciseDto] }),
     __metadata("design:type", Array)
