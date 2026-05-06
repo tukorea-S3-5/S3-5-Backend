@@ -14,6 +14,7 @@ const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
 class EndExerciseRecordDto {
     record_id;
+    heart_rates;
 }
 exports.EndExerciseRecordDto = EndExerciseRecordDto;
 __decorate([
@@ -21,4 +22,15 @@ __decorate([
     (0, class_validator_1.IsInt)(),
     __metadata("design:type", Number)
 ], EndExerciseRecordDto.prototype, "record_id", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: [82, 85, 88, 90, 87],
+        required: false,
+        type: [Number],
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsInt)({ each: true }),
+    __metadata("design:type", Array)
+], EndExerciseRecordDto.prototype, "heart_rates", void 0);
 //# sourceMappingURL=end-exercise-record.dto.js.map

@@ -1,6 +1,6 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm';
 
 import { ExerciseSession } from '../entities/exercise-session.entity';
 import { ExerciseRecord } from '../entities/exercise-record.entity';
@@ -26,7 +26,6 @@ export class ReportService {
     userId: string,
     sessionId: number,
   ): Promise<SessionReportResponseDto> {
-
     /**
      * 1. 세션 존재 여부 확인
      */
@@ -34,7 +33,7 @@ export class ReportService {
       where: {
         session_id: sessionId,
         user_id: userId,
-        status: 'COMPLETED',
+        status: In(['COMPLETED', 'ABORTED']),
       },
     });
 
@@ -58,24 +57,46 @@ export class ReportService {
     );
 
     /**
-     * 4. 운동별 정리
+     * 4. 세션 심박수 집계 (세션 안에 있는 record의 평균/최고 심박수로 계산)
      */
-    const exerciseSummary: SessionExerciseDto[] = records.map(
-      (record) => ({
-        exercise_name: record.exercise_name,
-        duration: record.duration ?? null,
-        avg_heart_rate: null, // IoT 연동 전
-        max_heart_rate: null, // IoT 연동 전
-      }),
+    const validRecords = records.filter(
+      (
+        record,
+      ): record is ExerciseRecord & {
+        avg_heart_rate: number;
+        max_heart_rate: number;
+      } => record.avg_heart_rate !== null && record.max_heart_rate !== null,
     );
+
+    const sessionAvgHeartRate = validRecords.length
+      ? Math.round(
+          validRecords.reduce((sum, r) => sum + r.avg_heart_rate, 0) /
+            validRecords.length,
+        )
+      : null;
+
+    const sessionMaxHeartRate = validRecords.length
+      ? Math.max(...validRecords.map((r) => r.max_heart_rate))
+      : null;
+
+    /**
+     * 5. 운동별 정리
+     */
+    const exerciseSummary: SessionExerciseDto[] = records.map((record) => ({
+      exercise_name: record.exercise_name,
+      duration: record.duration ?? null,
+      avg_heart_rate: record.avg_heart_rate ?? null,
+      max_heart_rate: record.max_heart_rate ?? null,
+    }));
 
     /**
      * 5. 반환
      */
     return {
       total_duration: totalDuration,
-      avg_heart_rate: null,
-      max_heart_rate: null,
+      avg_heart_rate: sessionAvgHeartRate,
+      max_heart_rate: sessionMaxHeartRate,
+      status: session.status,
       exercises: exerciseSummary,
     };
   }

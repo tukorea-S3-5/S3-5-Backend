@@ -23,6 +23,8 @@ let ExerciseRecord = class ExerciseRecord {
     started_at;
     ended_at;
     duration;
+    avg_heart_rate;
+    max_heart_rate;
 };
 exports.ExerciseRecord = ExerciseRecord;
 __decorate([
@@ -34,7 +36,9 @@ __decorate([
     __metadata("design:type", Object)
 ], ExerciseRecord.prototype, "session_id", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => exercise_session_entity_1.ExerciseSession, (session) => session.records, { onDelete: 'SET NULL' }),
+    (0, typeorm_1.ManyToOne)(() => exercise_session_entity_1.ExerciseSession, (session) => session.records, {
+        onDelete: 'SET NULL',
+    }),
     (0, typeorm_1.JoinColumn)({ name: 'session_id' }),
     __metadata("design:type", Object)
 ], ExerciseRecord.prototype, "session", void 0);
@@ -66,6 +70,14 @@ __decorate([
     (0, typeorm_1.Column)({ type: 'int', nullable: true }),
     __metadata("design:type", Object)
 ], ExerciseRecord.prototype, "duration", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'int', nullable: true }),
+    __metadata("design:type", Object)
+], ExerciseRecord.prototype, "avg_heart_rate", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'int', nullable: true }),
+    __metadata("design:type", Object)
+], ExerciseRecord.prototype, "max_heart_rate", void 0);
 exports.ExerciseRecord = ExerciseRecord = __decorate([
     (0, typeorm_1.Entity)('exercise_record')
 ], ExerciseRecord);

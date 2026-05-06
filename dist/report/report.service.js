@@ -30,7 +30,7 @@ let ReportService = class ReportService {
             where: {
                 session_id: sessionId,
                 user_id: userId,
-                status: 'COMPLETED',
+                status: (0, typeorm_2.In)(['COMPLETED', 'ABORTED']),
             },
         });
         if (!session) {
@@ -40,16 +40,25 @@ let ReportService = class ReportService {
             where: { session_id: sessionId },
         });
         const totalDuration = records.reduce((sum, record) => sum + (record.duration ?? 0), 0);
+        const validRecords = records.filter((record) => record.avg_heart_rate !== null && record.max_heart_rate !== null);
+        const sessionAvgHeartRate = validRecords.length
+            ? Math.round(validRecords.reduce((sum, r) => sum + r.avg_heart_rate, 0) /
+                validRecords.length)
+            : null;
+        const sessionMaxHeartRate = validRecords.length
+            ? Math.max(...validRecords.map((r) => r.max_heart_rate))
+            : null;
         const exerciseSummary = records.map((record) => ({
             exercise_name: record.exercise_name,
             duration: record.duration ?? null,
-            avg_heart_rate: null,
-            max_heart_rate: null,
+            avg_heart_rate: record.avg_heart_rate ?? null,
+            max_heart_rate: record.max_heart_rate ?? null,
         }));
         return {
             total_duration: totalDuration,
-            avg_heart_rate: null,
-            max_heart_rate: null,
+            avg_heart_rate: sessionAvgHeartRate,
+            max_heart_rate: sessionMaxHeartRate,
+            status: session.status,
             exercises: exerciseSummary,
         };
     }

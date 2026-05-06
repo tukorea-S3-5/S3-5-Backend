@@ -15,10 +15,10 @@ export declare class ExerciseService {
         session: ExerciseSession;
         records: ExerciseRecord[];
     }>;
-    endRecord(recordId: number): Promise<ExerciseRecord>;
+    endRecord(recordId: number, heartRates?: number[]): Promise<ExerciseRecord>;
     pauseRecord(recordId: number): Promise<ExerciseRecord>;
     resumeRecord(recordId: number): Promise<ExerciseRecord>;
-    abortSession(sessionId: number): Promise<ExerciseSession>;
+    abortSession(sessionId: number, heartRates?: number[]): Promise<ExerciseSession>;
     getCurrentSession(userId: string): Promise<{
         message: string;
     } | {
@@ -45,4 +45,5 @@ export declare class ExerciseService {
         }[];
     }>;
     private formatDuration;
+    private calculateHeartRateSummary;
 }

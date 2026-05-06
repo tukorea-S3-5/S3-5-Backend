@@ -10,4 +10,6 @@ export declare class ExerciseRecord {
     started_at: Date | null;
     ended_at: Date | null;
     duration: number | null;
+    avg_heart_rate: number | null;
+    max_heart_rate: number | null;
 }

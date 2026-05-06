@@ -1,29 +1,16 @@
-import {
-  Controller,
-  Post,
-  Get,
-  Body,
-  Req,
-  UseGuards,
-} from '@nestjs/common';
-import {
-  ApiBearerAuth,
-  ApiTags,
-  ApiOperation,
-  ApiBody,
-} from '@nestjs/swagger';
+import { Controller, Post, Get, Body, Req, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags, ApiOperation, ApiBody } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 
 import { ExerciseService } from './exercise.service';
+import { EndExerciseRecordDto } from './dto/end-exercise-record.dto';
 
 @ApiTags('Exercise')
 @ApiBearerAuth('access-token')
 @UseGuards(AuthGuard('jwt'))
 @Controller('exercise')
 export class ExerciseController {
-  constructor(
-    private readonly exerciseService: ExerciseService,
-  ) { }
+  constructor(private readonly exerciseService: ExerciseService) {}
 
   /**
    * 전체 운동 시작
@@ -31,9 +18,7 @@ export class ExerciseController {
   @Post('session/start')
   @ApiOperation({ summary: '전체 운동 시작' })
   startSession(@Req() req) {
-    return this.exerciseService.startRecommendedSession(
-      req.user.user_id,
-    );
+    return this.exerciseService.startRecommendedSession(req.user.user_id);
   }
 
   /**
@@ -52,10 +37,7 @@ export class ExerciseController {
       },
     },
   })
-  startSelectedRecords(
-    @Req() req,
-    @Body() body: { exercise_ids: number[] },
-  ) {
+  startSelectedRecords(@Req() req, @Body() body: { exercise_ids: number[] }) {
     return this.exerciseService.startSelectedRecords(
       req.user.user_id,
       body.exercise_ids,
@@ -67,16 +49,9 @@ export class ExerciseController {
    */
   @Post('record/end')
   @ApiOperation({ summary: '운동 종료 (하나씩)' })
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        record_id: { type: 'number' },
-      },
-    },
-  })
-  endRecord(@Body() body: { record_id: number }) {
-    return this.exerciseService.endRecord(body.record_id);
+  @ApiBody({ type: EndExerciseRecordDto })
+  endRecord(@Body() dto: EndExerciseRecordDto) {
+    return this.exerciseService.endRecord(dto.record_id, dto.heart_rates);
   }
 
   /**
@@ -97,8 +72,8 @@ export class ExerciseController {
   }
 
   /**
- * 운동 재개
- */
+   * 운동 재개
+   */
   @Post('record/resume')
   @ApiOperation({ summary: '운동 재개' })
   @ApiBody({
@@ -123,11 +98,17 @@ export class ExerciseController {
       type: 'object',
       properties: {
         session_id: { type: 'number' },
+        heart_rates: {
+          type: 'array',
+          items: { type: 'number' },
+          example: [82, 85, 88, 90, 87],
+        },
       },
+      required: ['session_id'],
     },
   })
-  abortSession(@Body() body: { session_id: number }) {
-    return this.exerciseService.abortSession(body.session_id);
+  abortSession(@Body() body: { session_id: number; heart_rates?: number[] }) {
+    return this.exerciseService.abortSession(body.session_id, body.heart_rates);
   }
 
   /**
@@ -140,13 +121,11 @@ export class ExerciseController {
   }
 
   /**
- * 현재 진행 중 세션 조회
- */
+   * 현재 진행 중 세션 조회
+   */
   @Get('session/current')
   @ApiOperation({ summary: '현재 진행 중 세션 조회' })
   getCurrentSession(@Req() req) {
-    return this.exerciseService.getCurrentSession(
-      req.user.user_id,
-    );
+    return this.exerciseService.getCurrentSession(req.user.user_id);
   }
 }
