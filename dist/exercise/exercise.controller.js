@@ -36,7 +36,7 @@ let ExerciseController = class ExerciseController {
         return this.exerciseService.pauseRecord(body.record_id);
     }
     resumeRecord(body) {
-        return this.exerciseService.resumeRecord(body.record_id);
+        return this.exerciseService.startOrResumeRecord(body.record_id);
     }
     abortSession(body) {
         return this.exerciseService.abortSession(body.session_id, body.heart_rates);
@@ -104,7 +104,7 @@ __decorate([
 ], ExerciseController.prototype, "pauseRecord", null);
 __decorate([
     (0, common_1.Post)('record/resume'),
-    (0, swagger_1.ApiOperation)({ summary: '운동 재개' }),
+    (0, swagger_1.ApiOperation)({ summary: '운동 시작 및 재개' }),
     (0, swagger_1.ApiBody)({
         schema: {
             type: 'object',

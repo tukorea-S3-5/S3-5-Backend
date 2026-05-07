@@ -17,7 +17,7 @@ export declare class ExerciseService {
     }>;
     endRecord(recordId: number, heartRates?: number[]): Promise<ExerciseRecord>;
     pauseRecord(recordId: number): Promise<ExerciseRecord>;
-    resumeRecord(recordId: number): Promise<ExerciseRecord>;
+    startOrResumeRecord(recordId: number): Promise<ExerciseRecord>;
     abortSession(sessionId: number, heartRates?: number[]): Promise<ExerciseSession>;
     getCurrentSession(userId: string): Promise<{
         message: string;

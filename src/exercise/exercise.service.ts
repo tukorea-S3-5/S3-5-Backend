@@ -64,7 +64,7 @@ export class ExerciseService {
           exercise_id: availableExercises[i].exercise_id,
           exercise_name: availableExercises[i].exercise_name,
           order_index: i + 1,
-          started_at: i === 0 ? new Date() : null,
+          started_at: null,
         }),
       );
 
@@ -128,7 +128,7 @@ export class ExerciseService {
           exercise_id: allowedExercises[i].exercise_id,
           exercise_name: allowedExercises[i].exercise_name,
           order_index: i + 1,
-          started_at: i === 0 ? new Date() : null,
+          started_at: null,
         }),
       );
 
@@ -155,7 +155,7 @@ export class ExerciseService {
       throw new BadRequestException('운동 기록이 없습니다.');
     }
 
-    if (!record.started_at) {
+    if (!record.started_at && (record.duration ?? 0) <= 0) {
       throw new BadRequestException('아직 시작되지 않은 운동입니다.');
     }
 
@@ -163,13 +163,18 @@ export class ExerciseService {
       throw new BadRequestException('이미 종료된 운동입니다.');
     }
 
-    record.ended_at = new Date();
+    const endedAt = new Date();
 
-    const additional = Math.floor(
-      (record.ended_at.getTime() - record.started_at.getTime()) / 1000,
-    );
+    if (record.started_at) {
+      const additional = Math.floor(
+        (endedAt.getTime() - record.started_at.getTime()) / 1000,
+      );
 
-    record.duration = (record.duration ?? 0) + additional;
+      record.duration = (record.duration ?? 0) + additional;
+    }
+
+    record.ended_at = endedAt;
+    record.started_at = null;
 
     const heartRateSummary = this.calculateHeartRateSummary(heartRates);
 
@@ -192,13 +197,10 @@ export class ExerciseService {
       },
     });
 
-    if (nextRecord) {
-      nextRecord.started_at = new Date();
-      await this.recordRepository.save(nextRecord);
-    } else {
-      /**
-       * 세션 종료 처리
-       */
+    /**
+     * 세션 종료 처리
+     */
+    if (!nextRecord) {
       const session = await this.sessionRepository.findOne({
         where: {
           session_id:
@@ -260,8 +262,9 @@ export class ExerciseService {
 
   /**
    * 운동 재개
+   * 처음 시작 시에도 사용
    */
-  async resumeRecord(recordId: number) {
+  async startOrResumeRecord(recordId: number) {
     const record = await this.recordRepository.findOne({
       where: { record_id: recordId },
     });
