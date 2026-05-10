@@ -5,7 +5,6 @@ import { Repository, IsNull, In } from 'typeorm';
 import { ExerciseSession } from '../entities/exercise-session.entity';
 import { ExerciseRecord } from '../entities/exercise-record.entity';
 import { RecommendService } from '../recommend/recommend.service';
-import { map } from 'rxjs';
 
 @Injectable()
 export class ExerciseService {
@@ -64,7 +63,7 @@ export class ExerciseService {
           exercise_id: availableExercises[i].exercise_id,
           exercise_name: availableExercises[i].exercise_name,
           order_index: i + 1,
-          started_at: i === 0 ? new Date() : null,
+          started_at: null,
         }),
       );
 
@@ -128,7 +127,7 @@ export class ExerciseService {
           exercise_id: allowedExercises[i].exercise_id,
           exercise_name: allowedExercises[i].exercise_name,
           order_index: i + 1,
-          started_at: i === 0 ? new Date() : null,
+          started_at: null,
         }),
       );
 
@@ -155,7 +154,7 @@ export class ExerciseService {
       throw new BadRequestException('운동 기록이 없습니다.');
     }
 
-    if (!record.started_at) {
+    if (!record.started_at && (record.duration ?? 0) <= 0) {
       throw new BadRequestException('아직 시작되지 않은 운동입니다.');
     }
 
@@ -163,13 +162,18 @@ export class ExerciseService {
       throw new BadRequestException('이미 종료된 운동입니다.');
     }
 
-    record.ended_at = new Date();
+    const endedAt = new Date();
 
-    const additional = Math.floor(
-      (record.ended_at.getTime() - record.started_at.getTime()) / 1000,
-    );
+    if (record.started_at) {
+      const additional = Math.floor(
+        (endedAt.getTime() - record.started_at.getTime()) / 1000,
+      );
 
-    record.duration = (record.duration ?? 0) + additional;
+      record.duration = (record.duration ?? 0) + additional;
+    }
+
+    record.ended_at = endedAt;
+    record.started_at = null;
 
     const heartRateSummary = this.calculateHeartRateSummary(heartRates);
 
@@ -181,24 +185,19 @@ export class ExerciseService {
     await this.recordRepository.save(record);
 
     /**
-     * 다음 운동 찾기
+     * 남은 운동 찾기
      */
-    const nextRecord = await this.recordRepository.findOne({
+    const remainingRecordCount = await this.recordRepository.count({
       where: {
-        user_id: record.user_id,
         session_id: record.session_id === null ? IsNull() : record.session_id,
-        order_index: record.order_index + 1,
-        started_at: IsNull(),
+        ended_at: IsNull(),
       },
     });
 
-    if (nextRecord) {
-      nextRecord.started_at = new Date();
-      await this.recordRepository.save(nextRecord);
-    } else {
-      /**
-       * 세션 종료 처리
-       */
+    /**
+     * 세션 종료 처리
+     */
+    if (remainingRecordCount === 0) {
       const session = await this.sessionRepository.findOne({
         where: {
           session_id:
@@ -260,8 +259,9 @@ export class ExerciseService {
 
   /**
    * 운동 재개
+   * 처음 시작 시에도 사용
    */
-  async resumeRecord(recordId: number) {
+  async startOrResumeRecord(recordId: number) {
     const record = await this.recordRepository.findOne({
       where: { record_id: recordId },
     });
@@ -315,6 +315,7 @@ export class ExerciseService {
     let totalDuration = 0;
 
     for (const record of session.records) {
+      // 진행 중인 운동 처리
       if (record.started_at && !record.ended_at) {
         record.ended_at = now;
         const additional = Math.floor(
@@ -331,7 +332,22 @@ export class ExerciseService {
         }
       }
 
-      if (!record.started_at && !record.ended_at) {
+      // 일시정지 운동 처리
+      if (
+        !record.started_at &&
+        !record.ended_at &&
+        (record.duration ?? 0) > 0
+      ) {
+        record.ended_at = now;
+        const heartRateSummary = this.calculateHeartRateSummary(heartRates);
+
+        if (heartRateSummary) {
+          record.avg_heart_rate = heartRateSummary.avgHeartRate;
+          record.max_heart_rate = heartRateSummary.maxHeartRate;
+        }
+      }
+      // 실행 안 한 운동 처리
+      else if (!record.started_at && !record.ended_at) {
         record.ended_at = now;
         record.duration = record.duration ?? 0;
       }

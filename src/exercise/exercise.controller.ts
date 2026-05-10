@@ -72,10 +72,10 @@ export class ExerciseController {
   }
 
   /**
-   * 운동 재개
+   * 운동 시작 및 재개
    */
   @Post('record/resume')
-  @ApiOperation({ summary: '운동 재개' })
+  @ApiOperation({ summary: '운동 시작 및 재개' })
   @ApiBody({
     schema: {
       type: 'object',
@@ -85,7 +85,7 @@ export class ExerciseController {
     },
   })
   resumeRecord(@Body() body: { record_id: number }) {
-    return this.exerciseService.resumeRecord(body.record_id);
+    return this.exerciseService.startOrResumeRecord(body.record_id);
   }
 
   /**

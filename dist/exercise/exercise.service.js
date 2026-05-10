@@ -56,7 +56,7 @@ let ExerciseService = class ExerciseService {
                 exercise_id: availableExercises[i].exercise_id,
                 exercise_name: availableExercises[i].exercise_name,
                 order_index: i + 1,
-                started_at: i === 0 ? new Date() : null,
+                started_at: null,
             }));
             createdRecords.push(record);
         }
@@ -94,7 +94,7 @@ let ExerciseService = class ExerciseService {
                 exercise_id: allowedExercises[i].exercise_id,
                 exercise_name: allowedExercises[i].exercise_name,
                 order_index: i + 1,
-                started_at: i === 0 ? new Date() : null,
+                started_at: null,
             }));
             createdRecords.push(record);
         }
@@ -110,34 +110,32 @@ let ExerciseService = class ExerciseService {
         if (!record) {
             throw new common_1.BadRequestException('운동 기록이 없습니다.');
         }
-        if (!record.started_at) {
+        if (!record.started_at && (record.duration ?? 0) <= 0) {
             throw new common_1.BadRequestException('아직 시작되지 않은 운동입니다.');
         }
         if (record.ended_at) {
             throw new common_1.BadRequestException('이미 종료된 운동입니다.');
         }
-        record.ended_at = new Date();
-        const additional = Math.floor((record.ended_at.getTime() - record.started_at.getTime()) / 1000);
-        record.duration = (record.duration ?? 0) + additional;
+        const endedAt = new Date();
+        if (record.started_at) {
+            const additional = Math.floor((endedAt.getTime() - record.started_at.getTime()) / 1000);
+            record.duration = (record.duration ?? 0) + additional;
+        }
+        record.ended_at = endedAt;
+        record.started_at = null;
         const heartRateSummary = this.calculateHeartRateSummary(heartRates);
         if (heartRateSummary) {
             record.avg_heart_rate = heartRateSummary.avgHeartRate;
             record.max_heart_rate = heartRateSummary.maxHeartRate;
         }
         await this.recordRepository.save(record);
-        const nextRecord = await this.recordRepository.findOne({
+        const remainingRecordCount = await this.recordRepository.count({
             where: {
-                user_id: record.user_id,
                 session_id: record.session_id === null ? (0, typeorm_2.IsNull)() : record.session_id,
-                order_index: record.order_index + 1,
-                started_at: (0, typeorm_2.IsNull)(),
+                ended_at: (0, typeorm_2.IsNull)(),
             },
         });
-        if (nextRecord) {
-            nextRecord.started_at = new Date();
-            await this.recordRepository.save(nextRecord);
-        }
-        else {
+        if (remainingRecordCount === 0) {
             const session = await this.sessionRepository.findOne({
                 where: {
                     session_id: record.session_id === null ? undefined : record.session_id,
@@ -174,7 +172,7 @@ let ExerciseService = class ExerciseService {
         await this.recordRepository.save(record);
         return record;
     }
-    async resumeRecord(recordId) {
+    async startOrResumeRecord(recordId) {
         const record = await this.recordRepository.findOne({
             where: { record_id: recordId },
         });
@@ -220,7 +218,17 @@ let ExerciseService = class ExerciseService {
                     record.max_heart_rate = heartRateSummary.maxHeartRate;
                 }
             }
-            if (!record.started_at && !record.ended_at) {
+            if (!record.started_at &&
+                !record.ended_at &&
+                (record.duration ?? 0) > 0) {
+                record.ended_at = now;
+                const heartRateSummary = this.calculateHeartRateSummary(heartRates);
+                if (heartRateSummary) {
+                    record.avg_heart_rate = heartRateSummary.avgHeartRate;
+                    record.max_heart_rate = heartRateSummary.maxHeartRate;
+                }
+            }
+            else if (!record.started_at && !record.ended_at) {
                 record.ended_at = now;
                 record.duration = record.duration ?? 0;
             }
