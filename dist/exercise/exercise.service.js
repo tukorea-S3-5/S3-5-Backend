@@ -129,15 +129,13 @@ let ExerciseService = class ExerciseService {
             record.max_heart_rate = heartRateSummary.maxHeartRate;
         }
         await this.recordRepository.save(record);
-        const nextRecord = await this.recordRepository.findOne({
+        const remainingRecordCount = await this.recordRepository.count({
             where: {
-                user_id: record.user_id,
                 session_id: record.session_id === null ? (0, typeorm_2.IsNull)() : record.session_id,
-                order_index: record.order_index + 1,
-                started_at: (0, typeorm_2.IsNull)(),
+                ended_at: (0, typeorm_2.IsNull)(),
             },
         });
-        if (!nextRecord) {
+        if (remainingRecordCount === 0) {
             const session = await this.sessionRepository.findOne({
                 where: {
                     session_id: record.session_id === null ? undefined : record.session_id,
@@ -220,7 +218,17 @@ let ExerciseService = class ExerciseService {
                     record.max_heart_rate = heartRateSummary.maxHeartRate;
                 }
             }
-            if (!record.started_at && !record.ended_at) {
+            if (!record.started_at &&
+                !record.ended_at &&
+                (record.duration ?? 0) > 0) {
+                record.ended_at = now;
+                const heartRateSummary = this.calculateHeartRateSummary(heartRates);
+                if (heartRateSummary) {
+                    record.avg_heart_rate = heartRateSummary.avgHeartRate;
+                    record.max_heart_rate = heartRateSummary.maxHeartRate;
+                }
+            }
+            else if (!record.started_at && !record.ended_at) {
                 record.ended_at = now;
                 record.duration = record.duration ?? 0;
             }
