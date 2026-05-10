@@ -17,8 +17,26 @@ export class ExerciseController {
    */
   @Post('session/start')
   @ApiOperation({ summary: '전체 운동 시작' })
-  startSession(@Req() req) {
-    return this.exerciseService.startRecommendedSession(req.user.user_id);
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        type: {
+          type: 'string',
+          enum: ['recommend', 'caution'],
+          example: 'recommend',
+          description:
+            'recommend: 추천 운동 전체 시작, caution: 주의 운동 전체 시작',
+        },
+      },
+    },
+    required: false,
+  })
+  startSession(@Req() req, @Body() body: { type?: 'recommend' | 'caution' }) {
+    return this.exerciseService.startRecommendedSession(
+      req.user.user_id,
+      body?.type ?? 'recommend',
+    );
   }
 
   /**

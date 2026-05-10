@@ -2,12 +2,13 @@ import { Repository } from 'typeorm';
 import { ExerciseSession } from '../entities/exercise-session.entity';
 import { ExerciseRecord } from '../entities/exercise-record.entity';
 import { RecommendService } from '../recommend/recommend.service';
+type SessionStartType = 'recommend' | 'caution';
 export declare class ExerciseService {
     private readonly sessionRepository;
     private readonly recordRepository;
     private readonly recommendService;
     constructor(sessionRepository: Repository<ExerciseSession>, recordRepository: Repository<ExerciseRecord>, recommendService: RecommendService);
-    startRecommendedSession(userId: string): Promise<{
+    startRecommendedSession(userId: string, type?: SessionStartType): Promise<{
         session: ExerciseSession;
         records: ExerciseRecord[];
     }>;
@@ -47,3 +48,4 @@ export declare class ExerciseService {
     private formatDuration;
     private calculateHeartRateSummary;
 }
+export {};

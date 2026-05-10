@@ -3,7 +3,9 @@ import { EndExerciseRecordDto } from './dto/end-exercise-record.dto';
 export declare class ExerciseController {
     private readonly exerciseService;
     constructor(exerciseService: ExerciseService);
-    startSession(req: any): Promise<{
+    startSession(req: any, body: {
+        type?: 'recommend' | 'caution';
+    }): Promise<{
         session: import("../entities/exercise-session.entity").ExerciseSession;
         records: import("../entities/exercise-record.entity").ExerciseRecord[];
     }>;
