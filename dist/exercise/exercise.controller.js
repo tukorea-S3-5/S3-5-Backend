@@ -23,8 +23,8 @@ let ExerciseController = class ExerciseController {
     constructor(exerciseService) {
         this.exerciseService = exerciseService;
     }
-    startSession(req) {
-        return this.exerciseService.startRecommendedSession(req.user.user_id);
+    startSession(req, body) {
+        return this.exerciseService.startRecommendedSession(req.user.user_id, body?.type ?? 'recommend');
     }
     startSelectedRecords(req, body) {
         return this.exerciseService.startSelectedRecords(req.user.user_id, body.exercise_ids);
@@ -52,9 +52,24 @@ exports.ExerciseController = ExerciseController;
 __decorate([
     (0, common_1.Post)('session/start'),
     (0, swagger_1.ApiOperation)({ summary: '전체 운동 시작' }),
+    (0, swagger_1.ApiBody)({
+        schema: {
+            type: 'object',
+            properties: {
+                type: {
+                    type: 'string',
+                    enum: ['recommend', 'caution'],
+                    example: 'recommend',
+                    description: 'recommend: 추천 운동 전체 시작, caution: 주의 운동 전체 시작',
+                },
+            },
+        },
+        required: false,
+    }),
     __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", void 0)
 ], ExerciseController.prototype, "startSession", null);
 __decorate([

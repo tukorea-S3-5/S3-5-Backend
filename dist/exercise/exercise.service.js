@@ -28,7 +28,7 @@ let ExerciseService = class ExerciseService {
         this.recordRepository = recordRepository;
         this.recommendService = recommendService;
     }
-    async startRecommendedSession(userId) {
+    async startRecommendedSession(userId, type = 'recommend') {
         const existingSession = await this.sessionRepository.findOne({
             where: {
                 user_id: userId,
@@ -39,9 +39,11 @@ let ExerciseService = class ExerciseService {
             throw new common_1.BadRequestException('이미 진행 중인 세션이 있습니다.');
         }
         const result = await this.recommendService.recommend(userId);
-        const availableExercises = [...result.recommend, ...result.caution];
+        const availableExercises = type === 'caution' ? result.caution : result.recommend;
         if (!availableExercises.length) {
-            throw new common_1.BadRequestException('수행 가능한 운동이 없습니다.');
+            throw new common_1.BadRequestException(type === 'caution'
+                ? '수행 가능한 주의 운동이 없습니다.'
+                : '수행 가능한 추천 운동이 없습니다.');
         }
         const session = await this.sessionRepository.save(this.sessionRepository.create({
             user_id: userId,
@@ -209,9 +211,10 @@ let ExerciseService = class ExerciseService {
         let totalDuration = 0;
         for (const record of session.records) {
             if (record.started_at && !record.ended_at) {
-                record.ended_at = now;
                 const additional = Math.floor((now.getTime() - record.started_at.getTime()) / 1000);
                 record.duration = (record.duration ?? 0) + additional;
+                record.ended_at = now;
+                record.started_at = null;
                 const heartRateSummary = this.calculateHeartRateSummary(heartRates);
                 if (heartRateSummary) {
                     record.avg_heart_rate = heartRateSummary.avgHeartRate;
@@ -222,6 +225,7 @@ let ExerciseService = class ExerciseService {
                 !record.ended_at &&
                 (record.duration ?? 0) > 0) {
                 record.ended_at = now;
+                record.started_at = null;
                 const heartRateSummary = this.calculateHeartRateSummary(heartRates);
                 if (heartRateSummary) {
                     record.avg_heart_rate = heartRateSummary.avgHeartRate;
@@ -230,6 +234,7 @@ let ExerciseService = class ExerciseService {
             }
             else if (!record.started_at && !record.ended_at) {
                 record.ended_at = now;
+                record.started_at = null;
                 record.duration = record.duration ?? 0;
             }
             totalDuration += record.duration ?? 0;

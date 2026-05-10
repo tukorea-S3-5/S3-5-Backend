@@ -6,6 +6,8 @@ import { ExerciseSession } from '../entities/exercise-session.entity';
 import { ExerciseRecord } from '../entities/exercise-record.entity';
 import { RecommendService } from '../recommend/recommend.service';
 
+type SessionStartType = 'recommend' | 'caution';
+
 @Injectable()
 export class ExerciseService {
   constructor(
@@ -23,7 +25,10 @@ export class ExerciseService {
    * - 첫 번째만 시작
    * - record 목록 반환
    */
-  async startRecommendedSession(userId: string) {
+  async startRecommendedSession(
+    userId: string,
+    type: SessionStartType = 'recommend',
+  ) {
     // 기존 ONGOING 세션 존재 여부 확인 (중복 세션 방지)
     const existingSession = await this.sessionRepository.findOne({
       where: {
@@ -38,11 +43,17 @@ export class ExerciseService {
 
     const result = await this.recommendService.recommend(userId);
 
-    // recommend + caution 모두 허용
-    const availableExercises = [...result.recommend, ...result.caution];
+    // 전체 운동 시작은 프론트에서 선택한 탭 기준으로 세션을 생성한다.
+    // 추천 탭 전체 시작이면 추천 운동만, 주의 탭 전체 시작이면 주의 운동만 포함한다.
+    const availableExercises =
+      type === 'caution' ? result.caution : result.recommend;
 
     if (!availableExercises.length) {
-      throw new BadRequestException('수행 가능한 운동이 없습니다.');
+      throw new BadRequestException(
+        type === 'caution'
+          ? '수행 가능한 주의 운동이 없습니다.'
+          : '수행 가능한 추천 운동이 없습니다.',
+      );
     }
 
     const session = await this.sessionRepository.save(
@@ -96,7 +107,7 @@ export class ExerciseService {
 
     const result = await this.recommendService.recommend(userId);
 
-    // recommend + caution 풀 생성
+    // 선택 시작은 추천/주의 운동을 섞어서 선택할 수 있도록 둘 다 허용한다.
     const allowedPool = [...result.recommend, ...result.caution];
 
     const allowedExercises = allowedPool.filter((ex) =>
@@ -185,7 +196,9 @@ export class ExerciseService {
     await this.recordRepository.save(record);
 
     /**
-     * 남은 운동 찾기
+     * 세션 완료 여부 확인
+     * - 운동 순서가 1 → 3 → 2처럼 바뀔 수 있으므로 order_index 기준으로 판단하지 않는다.
+     * - 현재 세션 안에서 아직 ended_at이 null인 record가 없을 때만 세션을 COMPLETED 처리한다.
      */
     const remainingRecordCount = await this.recordRepository.count({
       where: {
@@ -194,9 +207,6 @@ export class ExerciseService {
       },
     });
 
-    /**
-     * 세션 종료 처리
-     */
     if (remainingRecordCount === 0) {
       const session = await this.sessionRepository.findOne({
         where: {
@@ -317,12 +327,13 @@ export class ExerciseService {
     for (const record of session.records) {
       // 진행 중인 운동 처리
       if (record.started_at && !record.ended_at) {
-        record.ended_at = now;
         const additional = Math.floor(
           (now.getTime() - record.started_at.getTime()) / 1000,
         );
 
         record.duration = (record.duration ?? 0) + additional;
+        record.ended_at = now;
+        record.started_at = null;
 
         const heartRateSummary = this.calculateHeartRateSummary(heartRates);
 
@@ -339,6 +350,7 @@ export class ExerciseService {
         (record.duration ?? 0) > 0
       ) {
         record.ended_at = now;
+        record.started_at = null;
         const heartRateSummary = this.calculateHeartRateSummary(heartRates);
 
         if (heartRateSummary) {
@@ -349,6 +361,7 @@ export class ExerciseService {
       // 실행 안 한 운동 처리
       else if (!record.started_at && !record.ended_at) {
         record.ended_at = now;
+        record.started_at = null;
         record.duration = record.duration ?? 0;
       }
 
