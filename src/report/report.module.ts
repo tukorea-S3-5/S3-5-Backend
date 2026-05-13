@@ -5,6 +5,7 @@ import { ExerciseSession } from '../entities/exercise-session.entity';
 import { ExerciseRecord } from '../entities/exercise-record.entity';
 import { ReportService } from './report.service';
 import { ReportController } from './report.controller';
+import { AiModule } from '../ai/ai.module';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { ReportController } from './report.controller';
       ExerciseSession,
       ExerciseRecord,
     ]),
+    AiModule,
   ],
   providers: [ReportService],
   controllers: [ReportController],

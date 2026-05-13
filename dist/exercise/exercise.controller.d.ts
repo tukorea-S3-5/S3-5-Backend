@@ -27,28 +27,9 @@ export declare class ExerciseController {
         heart_rates?: number[];
     }): Promise<import("../entities/exercise-session.entity").ExerciseSession>;
     getHistory(req: any): Promise<{
-        sessions: {
-            total_duration_formatted: string;
-            session_id: number;
-            user_id: string;
-            status: "ONGOING" | "COMPLETED" | "ABORTED";
-            started_at: Date;
-            ended_at: Date | null;
-            total_duration: number;
-            records: import("../entities/exercise-record.entity").ExerciseRecord[];
-        }[];
+        sessions: import("../entities/exercise-session.entity").ExerciseSession[];
     }>;
-    getCurrentSession(req: any): Promise<{
+    getCurrentSession(req: any): Promise<import("../entities/exercise-session.entity").ExerciseSession | {
         message: string;
-    } | {
-        total_duration_formatted: string;
-        session_id: number;
-        user_id: string;
-        status: "ONGOING" | "COMPLETED" | "ABORTED";
-        started_at: Date;
-        ended_at: Date | null;
-        total_duration: number;
-        records: import("../entities/exercise-record.entity").ExerciseRecord[];
-        message?: undefined;
     }>;
 }

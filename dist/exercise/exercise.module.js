@@ -14,6 +14,7 @@ const exercise_record_entity_1 = require("../entities/exercise-record.entity");
 const exercise_service_1 = require("./exercise.service");
 const exercise_controller_1 = require("./exercise.controller");
 const recommend_module_1 = require("../recommend/recommend.module");
+const ai_module_1 = require("../ai/ai.module");
 let ExerciseModule = class ExerciseModule {
 };
 exports.ExerciseModule = ExerciseModule;
@@ -25,6 +26,7 @@ exports.ExerciseModule = ExerciseModule = __decorate([
                 exercise_record_entity_1.ExerciseRecord,
             ]),
             recommend_module_1.RecommendModule,
+            ai_module_1.AiModule,
         ],
         controllers: [exercise_controller_1.ExerciseController],
         providers: [exercise_service_1.ExerciseService],

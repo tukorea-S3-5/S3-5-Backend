@@ -17,6 +17,7 @@ exports.AiModule = AiModule = __decorate([
     (0, common_1.Module)({
         providers: [ai_service_1.AiService],
         controllers: [ai_controller_1.AiController],
+        exports: [ai_service_1.AiService],
     })
 ], AiModule);
 //# sourceMappingURL=ai.module.js.map

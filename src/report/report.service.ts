@@ -6,6 +6,7 @@ import { ExerciseSession } from '../entities/exercise-session.entity';
 import { ExerciseRecord } from '../entities/exercise-record.entity';
 import { SessionReportResponseDto } from './dto/session-report-response.dto';
 import { SessionExerciseDto } from './dto/session-exercise.dto';
+import { AiService } from '../ai/ai.service';
 
 @Injectable()
 export class ReportService {
@@ -15,7 +16,9 @@ export class ReportService {
 
     @InjectRepository(ExerciseRecord)
     private readonly recordRepository: Repository<ExerciseRecord>,
-  ) {}
+
+    private readonly aiService: AiService,
+  ) { }
 
   /**
    * 특정 세션 리포트 생성
@@ -26,6 +29,7 @@ export class ReportService {
     userId: string,
     sessionId: number,
   ): Promise<SessionReportResponseDto> {
+
     /**
      * 1. 세션 존재 여부 확인
      */
@@ -57,7 +61,7 @@ export class ReportService {
     );
 
     /**
-     * 4. 세션 심박수 집계 (세션 안에 있는 record의 평균/최고 심박수로 계산)
+     * 4. 세션 심박수 집계
      */
     const validRecords = records.filter(
       (
@@ -70,9 +74,9 @@ export class ReportService {
 
     const sessionAvgHeartRate = validRecords.length
       ? Math.round(
-          validRecords.reduce((sum, r) => sum + r.avg_heart_rate, 0) /
-            validRecords.length,
-        )
+        validRecords.reduce((sum, r) => sum + r.avg_heart_rate, 0) /
+        validRecords.length,
+      )
       : null;
 
     const sessionMaxHeartRate = validRecords.length
@@ -90,7 +94,47 @@ export class ReportService {
     }));
 
     /**
-     * 5. 반환
+     * 6. AI 코멘트 생성 (Mock 또는 LLM)
+     */
+    const intensityLevel =
+      sessionAvgHeartRate && sessionAvgHeartRate > 140
+        ? 'HIGH'
+        : sessionAvgHeartRate && sessionAvgHeartRate > 110
+          ? 'MEDIUM'
+          : 'LOW';
+
+    // const aiComment =
+    //   process.env.USE_LLM === 'true'
+    //     ? await this.aiService.generateExerciseComment({
+    //         week: undefined,
+    //         totalDuration,
+    //         status: session.status,
+    //         symptoms: [],
+    //         avgHeartRate: sessionAvgHeartRate ?? 0,
+    //         intensityLevel,
+    //         trimesterNotice: '',
+    //         exercises: records.map((r) => ({
+    //           name: r.exercise_name,
+    //           duration: r.duration ?? 0,
+    //         })),
+    //       })
+    //     : null;
+    const aiComment = await this.aiService.generateExerciseComment({
+      week: undefined,
+      totalDuration,
+      status: session.status,
+      symptoms: [],
+      avgHeartRate: sessionAvgHeartRate ?? 0,
+      intensityLevel,
+      trimesterNotice: '',
+      exercises: records.map((r) => ({
+        name: r.exercise_name,
+        duration: r.duration ?? 0,
+      })),
+    });
+
+    /**
+     * 7. 반환
      */
     return {
       total_duration: totalDuration,
@@ -98,6 +142,7 @@ export class ReportService {
       max_heart_rate: sessionMaxHeartRate,
       status: session.status,
       exercises: exerciseSummary,
+      ai_comment: aiComment,
     };
   }
 }

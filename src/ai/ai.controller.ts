@@ -5,7 +5,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { CreateHealthReportDto } from './dto/create-health-report.dto';
 
 @ApiTags('LLM AI')
-@ApiBearerAuth('access-token') // Swagger 보안 스키마 이름과 정확히 맞춤
+@ApiBearerAuth('access-token') 
 @UseGuards(AuthGuard('jwt'))
 @Controller('ai')
 export class AiController {

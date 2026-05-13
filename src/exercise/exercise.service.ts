@@ -29,12 +29,8 @@ export class ExerciseService {
     userId: string,
     type: SessionStartType = 'recommend',
   ) {
-    // 기존 ONGOING 세션 존재 여부 확인 (중복 세션 방지)
     const existingSession = await this.sessionRepository.findOne({
-      where: {
-        user_id: userId,
-        status: 'ONGOING',
-      },
+      where: { user_id: userId, status: 'ONGOING' },
     });
 
     if (existingSession) {
@@ -43,8 +39,6 @@ export class ExerciseService {
 
     const result = await this.recommendService.recommend(userId);
 
-    // 전체 운동 시작은 프론트에서 선택한 탭 기준으로 세션을 생성한다.
-    // 추천 탭 전체 시작이면 추천 운동만, 주의 탭 전체 시작이면 주의 운동만 포함한다.
     const availableExercises =
       type === 'caution' ? result.caution : result.recommend;
 
@@ -81,24 +75,15 @@ export class ExerciseService {
       createdRecords.push(record);
     }
 
-    return {
-      session,
-      records: createdRecords,
-    };
+    return { session, records: createdRecords };
   }
 
   /**
    * 개별 운동 시작 (선택 시작)
-   * - 선택한 운동들만 세션 생성
-   * - 첫 번째 운동만 started_at 세팅
    */
   async startSelectedRecords(userId: string, exerciseIds: number[]) {
-    // 기존 ONGOING 세션 존재 여부 확인 (중복 세션 방지)
     const existingSession = await this.sessionRepository.findOne({
-      where: {
-        user_id: userId,
-        status: 'ONGOING',
-      },
+      where: { user_id: userId, status: 'ONGOING' },
     });
 
     if (existingSession) {
@@ -106,8 +91,6 @@ export class ExerciseService {
     }
 
     const result = await this.recommendService.recommend(userId);
-
-    // 선택 시작은 추천/주의 운동을 섞어서 선택할 수 있도록 둘 다 허용한다.
     const allowedPool = [...result.recommend, ...result.caution];
 
     const allowedExercises = allowedPool.filter((ex) =>
@@ -145,16 +128,11 @@ export class ExerciseService {
       createdRecords.push(record);
     }
 
-    return {
-      session,
-      records: createdRecords,
-    };
+    return { session, records: createdRecords };
   }
 
   /**
    * 운동 종료
-   * - 다음 운동 자동 시작
-   * - 마지막이면 세션 total_duration 계산
    */
   async endRecord(recordId: number, heartRates?: number[]) {
     const record = await this.recordRepository.findOne({
@@ -179,7 +157,6 @@ export class ExerciseService {
       const additional = Math.floor(
         (endedAt.getTime() - record.started_at.getTime()) / 1000,
       );
-
       record.duration = (record.duration ?? 0) + additional;
     }
 
@@ -195,11 +172,6 @@ export class ExerciseService {
 
     await this.recordRepository.save(record);
 
-    /**
-     * 세션 완료 여부 확인
-     * - 운동 순서가 1 → 3 → 2처럼 바뀔 수 있으므로 order_index 기준으로 판단하지 않는다.
-     * - 현재 세션 안에서 아직 ended_at이 null인 record가 없을 때만 세션을 COMPLETED 처리한다.
-     */
     const remainingRecordCount = await this.recordRepository.count({
       where: {
         session_id: record.session_id === null ? IsNull() : record.session_id,
@@ -254,7 +226,6 @@ export class ExerciseService {
     }
 
     const now = new Date();
-
     const additional = Math.floor(
       (now.getTime() - record.started_at.getTime()) / 1000,
     );
@@ -269,7 +240,6 @@ export class ExerciseService {
 
   /**
    * 운동 재개
-   * 처음 시작 시에도 사용
    */
   async startOrResumeRecord(recordId: number) {
     const record = await this.recordRepository.findOne({
@@ -284,22 +254,7 @@ export class ExerciseService {
       throw new BadRequestException('이미 종료된 운동입니다.');
     }
 
-    if (record.started_at) {
-      throw new BadRequestException('이미 진행 중입니다.');
-    }
-
-    if (record.session_id) {
-      const session = await this.sessionRepository.findOne({
-        where: { session_id: record.session_id },
-      });
-
-      if (!session || session.status !== 'ONGOING') {
-        throw new BadRequestException('이미 종료된 세션입니다.');
-      }
-    }
-
     record.started_at = new Date();
-
     await this.recordRepository.save(record);
 
     return record;
@@ -307,9 +262,6 @@ export class ExerciseService {
 
   /**
    * 세션 중단
-   * - 현재 운동 종료
-   * - 남은 운동 전부 종료 처리
-   * - 세션 상태 ABORTED
    */
   async abortSession(sessionId: number, heartRates?: number[]) {
     const session = await this.sessionRepository.findOne({
@@ -325,48 +277,16 @@ export class ExerciseService {
     let totalDuration = 0;
 
     for (const record of session.records) {
-      // 진행 중인 운동 처리
       if (record.started_at && !record.ended_at) {
         const additional = Math.floor(
           (now.getTime() - record.started_at.getTime()) / 1000,
         );
-
         record.duration = (record.duration ?? 0) + additional;
         record.ended_at = now;
         record.started_at = null;
-
-        const heartRateSummary = this.calculateHeartRateSummary(heartRates);
-
-        if (heartRateSummary) {
-          record.avg_heart_rate = heartRateSummary.avgHeartRate;
-          record.max_heart_rate = heartRateSummary.maxHeartRate;
-        }
-      }
-
-      // 일시정지 운동 처리
-      if (
-        !record.started_at &&
-        !record.ended_at &&
-        (record.duration ?? 0) > 0
-      ) {
-        record.ended_at = now;
-        record.started_at = null;
-        const heartRateSummary = this.calculateHeartRateSummary(heartRates);
-
-        if (heartRateSummary) {
-          record.avg_heart_rate = heartRateSummary.avgHeartRate;
-          record.max_heart_rate = heartRateSummary.maxHeartRate;
-        }
-      }
-      // 실행 안 한 운동 처리
-      else if (!record.started_at && !record.ended_at) {
-        record.ended_at = now;
-        record.started_at = null;
-        record.duration = record.duration ?? 0;
       }
 
       totalDuration += record.duration ?? 0;
-
       await this.recordRepository.save(record);
     }
 
@@ -379,37 +299,19 @@ export class ExerciseService {
     return session;
   }
 
-  /**
-   * 현재 진행 중 세션 조회
-   */
   async getCurrentSession(userId: string) {
     const session = await this.sessionRepository.findOne({
-      where: {
-        user_id: userId,
-        status: 'ONGOING',
-      },
+      where: { user_id: userId, status: 'ONGOING' },
       relations: ['records'],
-      order: { started_at: 'DESC' },
     });
 
     if (!session) {
-      return {
-        message: '현재 진행 중인 운동이 없습니다.',
-      };
+      return { message: '현재 진행 중인 운동이 없습니다.' };
     }
 
-    return {
-      ...session,
-      total_duration_formatted: this.formatDuration(
-        session.total_duration ?? 0,
-      ),
-    };
+    return session;
   }
 
-  /**
-   * 운동 기록 조회
-   * - 세션 총 시간 포맷 포함
-   */
   async getHistory(userId: string) {
     const sessions = await this.sessionRepository.find({
       where: {
@@ -417,48 +319,14 @@ export class ExerciseService {
         status: In(['COMPLETED', 'ABORTED']),
       },
       relations: ['records'],
-      order: { started_at: 'DESC' },
     });
 
-    return {
-      sessions: sessions.map((s) => ({
-        ...s,
-        total_duration_formatted: this.formatDuration(s.total_duration ?? 0),
-      })),
-    };
+    return { sessions };
   }
 
-  /**
-   * 초 → 시간 포맷 변환
-   */
-  private formatDuration(seconds: number) {
-    const h = Math.floor(seconds / 3600);
-    const m = Math.floor((seconds % 3600) / 60);
-    const s = seconds % 60;
-
-    const parts: string[] = [];
-
-    if (h > 0) {
-      parts.push(`${h}시간`);
-    }
-
-    if (m > 0) {
-      parts.push(`${m}분`);
-    }
-
-    if (s > 0 || parts.length === 0) {
-      parts.push(`${s}초`);
-    }
-
-    return parts.join(' ');
-  }
-
-  // 심박수 배열 요약값 계산
-  // 0, NaN, 비정상 범위 값은 제외
   private calculateHeartRateSummary(heartRates?: number[]) {
     if (!heartRates?.length) return null;
 
-    // 정상 범위 심박수만 저장
     const validHeartRates = heartRates.filter(
       (bpm) => Number.isInteger(bpm) && bpm > 50 && bpm < 180,
     );
