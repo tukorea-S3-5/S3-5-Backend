@@ -20,32 +20,12 @@ export declare class ExerciseService {
     pauseRecord(recordId: number): Promise<ExerciseRecord>;
     startOrResumeRecord(recordId: number): Promise<ExerciseRecord>;
     abortSession(sessionId: number, heartRates?: number[]): Promise<ExerciseSession>;
-    getCurrentSession(userId: string): Promise<{
+    getCurrentSession(userId: string): Promise<ExerciseSession | {
         message: string;
-    } | {
-        total_duration_formatted: string;
-        session_id: number;
-        user_id: string;
-        status: "ONGOING" | "COMPLETED" | "ABORTED";
-        started_at: Date;
-        ended_at: Date | null;
-        total_duration: number;
-        records: ExerciseRecord[];
-        message?: undefined;
     }>;
     getHistory(userId: string): Promise<{
-        sessions: {
-            total_duration_formatted: string;
-            session_id: number;
-            user_id: string;
-            status: "ONGOING" | "COMPLETED" | "ABORTED";
-            started_at: Date;
-            ended_at: Date | null;
-            total_duration: number;
-            records: ExerciseRecord[];
-        }[];
+        sessions: ExerciseSession[];
     }>;
-    private formatDuration;
     private calculateHeartRateSummary;
 }
 export {};

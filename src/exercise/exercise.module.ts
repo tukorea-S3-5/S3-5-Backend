@@ -6,6 +6,7 @@ import { ExerciseRecord } from '../entities/exercise-record.entity';
 import { ExerciseService } from './exercise.service';
 import { ExerciseController } from './exercise.controller';
 import { RecommendModule } from '../recommend/recommend.module';
+import { AiModule } from '../ai/ai.module'; 
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { RecommendModule } from '../recommend/recommend.module';
       ExerciseRecord,
     ]),
     RecommendModule,
+    AiModule, 
   ],
   controllers: [ExerciseController],
   providers: [ExerciseService],

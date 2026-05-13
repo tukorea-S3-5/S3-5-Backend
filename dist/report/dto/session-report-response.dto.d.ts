@@ -5,4 +5,5 @@ export declare class SessionReportResponseDto {
     max_heart_rate: number | null;
     status: string;
     exercises: SessionExerciseDto[];
+    ai_comment: string | null;
 }

@@ -18,6 +18,7 @@ class SessionReportResponseDto {
     max_heart_rate;
     status;
     exercises;
+    ai_comment;
 }
 exports.SessionReportResponseDto = SessionReportResponseDto;
 __decorate([
@@ -43,4 +44,11 @@ __decorate([
     (0, swagger_1.ApiProperty)({ type: [session_exercise_dto_1.SessionExerciseDto] }),
     __metadata("design:type", Array)
 ], SessionReportResponseDto.prototype, "exercises", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        nullable: true,
+        description: 'AI 운동 리포트 코멘트',
+    }),
+    __metadata("design:type", Object)
+], SessionReportResponseDto.prototype, "ai_comment", void 0);
 //# sourceMappingURL=session-report-response.dto.js.map

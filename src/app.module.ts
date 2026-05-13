@@ -24,6 +24,7 @@ import { HeartRateModule } from './heart-rate/heart-rate.module';
     // 환경변수
     ConfigModule.forRoot({
       isGlobal: true,
+      envFilePath: `.env.${process.env.NODE_ENV || 'local'}`,
     }),
 
     // MySQL 연결

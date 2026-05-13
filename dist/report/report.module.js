@@ -13,6 +13,7 @@ const exercise_session_entity_1 = require("../entities/exercise-session.entity")
 const exercise_record_entity_1 = require("../entities/exercise-record.entity");
 const report_service_1 = require("./report.service");
 const report_controller_1 = require("./report.controller");
+const ai_module_1 = require("../ai/ai.module");
 let ReportModule = class ReportModule {
 };
 exports.ReportModule = ReportModule;
@@ -23,6 +24,7 @@ exports.ReportModule = ReportModule = __decorate([
                 exercise_session_entity_1.ExerciseSession,
                 exercise_record_entity_1.ExerciseRecord,
             ]),
+            ai_module_1.AiModule,
         ],
         providers: [report_service_1.ReportService],
         controllers: [report_controller_1.ReportController],

@@ -30,10 +30,7 @@ let ExerciseService = class ExerciseService {
     }
     async startRecommendedSession(userId, type = 'recommend') {
         const existingSession = await this.sessionRepository.findOne({
-            where: {
-                user_id: userId,
-                status: 'ONGOING',
-            },
+            where: { user_id: userId, status: 'ONGOING' },
         });
         if (existingSession) {
             throw new common_1.BadRequestException('이미 진행 중인 세션이 있습니다.');
@@ -62,17 +59,11 @@ let ExerciseService = class ExerciseService {
             }));
             createdRecords.push(record);
         }
-        return {
-            session,
-            records: createdRecords,
-        };
+        return { session, records: createdRecords };
     }
     async startSelectedRecords(userId, exerciseIds) {
         const existingSession = await this.sessionRepository.findOne({
-            where: {
-                user_id: userId,
-                status: 'ONGOING',
-            },
+            where: { user_id: userId, status: 'ONGOING' },
         });
         if (existingSession) {
             throw new common_1.BadRequestException('이미 진행 중인 세션이 있습니다.');
@@ -100,10 +91,7 @@ let ExerciseService = class ExerciseService {
             }));
             createdRecords.push(record);
         }
-        return {
-            session,
-            records: createdRecords,
-        };
+        return { session, records: createdRecords };
     }
     async endRecord(recordId, heartRates) {
         const record = await this.recordRepository.findOne({
@@ -184,17 +172,6 @@ let ExerciseService = class ExerciseService {
         if (record.ended_at) {
             throw new common_1.BadRequestException('이미 종료된 운동입니다.');
         }
-        if (record.started_at) {
-            throw new common_1.BadRequestException('이미 진행 중입니다.');
-        }
-        if (record.session_id) {
-            const session = await this.sessionRepository.findOne({
-                where: { session_id: record.session_id },
-            });
-            if (!session || session.status !== 'ONGOING') {
-                throw new common_1.BadRequestException('이미 종료된 세션입니다.');
-            }
-        }
         record.started_at = new Date();
         await this.recordRepository.save(record);
         return record;
@@ -215,27 +192,6 @@ let ExerciseService = class ExerciseService {
                 record.duration = (record.duration ?? 0) + additional;
                 record.ended_at = now;
                 record.started_at = null;
-                const heartRateSummary = this.calculateHeartRateSummary(heartRates);
-                if (heartRateSummary) {
-                    record.avg_heart_rate = heartRateSummary.avgHeartRate;
-                    record.max_heart_rate = heartRateSummary.maxHeartRate;
-                }
-            }
-            if (!record.started_at &&
-                !record.ended_at &&
-                (record.duration ?? 0) > 0) {
-                record.ended_at = now;
-                record.started_at = null;
-                const heartRateSummary = this.calculateHeartRateSummary(heartRates);
-                if (heartRateSummary) {
-                    record.avg_heart_rate = heartRateSummary.avgHeartRate;
-                    record.max_heart_rate = heartRateSummary.maxHeartRate;
-                }
-            }
-            else if (!record.started_at && !record.ended_at) {
-                record.ended_at = now;
-                record.started_at = null;
-                record.duration = record.duration ?? 0;
             }
             totalDuration += record.duration ?? 0;
             await this.recordRepository.save(record);
@@ -248,22 +204,13 @@ let ExerciseService = class ExerciseService {
     }
     async getCurrentSession(userId) {
         const session = await this.sessionRepository.findOne({
-            where: {
-                user_id: userId,
-                status: 'ONGOING',
-            },
+            where: { user_id: userId, status: 'ONGOING' },
             relations: ['records'],
-            order: { started_at: 'DESC' },
         });
         if (!session) {
-            return {
-                message: '현재 진행 중인 운동이 없습니다.',
-            };
+            return { message: '현재 진행 중인 운동이 없습니다.' };
         }
-        return {
-            ...session,
-            total_duration_formatted: this.formatDuration(session.total_duration ?? 0),
-        };
+        return session;
     }
     async getHistory(userId) {
         const sessions = await this.sessionRepository.find({
@@ -272,30 +219,8 @@ let ExerciseService = class ExerciseService {
                 status: (0, typeorm_2.In)(['COMPLETED', 'ABORTED']),
             },
             relations: ['records'],
-            order: { started_at: 'DESC' },
         });
-        return {
-            sessions: sessions.map((s) => ({
-                ...s,
-                total_duration_formatted: this.formatDuration(s.total_duration ?? 0),
-            })),
-        };
-    }
-    formatDuration(seconds) {
-        const h = Math.floor(seconds / 3600);
-        const m = Math.floor((seconds % 3600) / 60);
-        const s = seconds % 60;
-        const parts = [];
-        if (h > 0) {
-            parts.push(`${h}시간`);
-        }
-        if (m > 0) {
-            parts.push(`${m}분`);
-        }
-        if (s > 0 || parts.length === 0) {
-            parts.push(`${s}초`);
-        }
-        return parts.join(' ');
+        return { sessions };
     }
     calculateHeartRateSummary(heartRates) {
         if (!heartRates?.length)

@@ -18,12 +18,15 @@ const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const exercise_session_entity_1 = require("../entities/exercise-session.entity");
 const exercise_record_entity_1 = require("../entities/exercise-record.entity");
+const ai_service_1 = require("../ai/ai.service");
 let ReportService = class ReportService {
     sessionRepository;
     recordRepository;
-    constructor(sessionRepository, recordRepository) {
+    aiService;
+    constructor(sessionRepository, recordRepository, aiService) {
         this.sessionRepository = sessionRepository;
         this.recordRepository = recordRepository;
+        this.aiService = aiService;
     }
     async generateSessionReport(userId, sessionId) {
         const session = await this.sessionRepository.findOne({
@@ -54,12 +57,31 @@ let ReportService = class ReportService {
             avg_heart_rate: record.avg_heart_rate ?? null,
             max_heart_rate: record.max_heart_rate ?? null,
         }));
+        const intensityLevel = sessionAvgHeartRate && sessionAvgHeartRate > 140
+            ? 'HIGH'
+            : sessionAvgHeartRate && sessionAvgHeartRate > 110
+                ? 'MEDIUM'
+                : 'LOW';
+        const aiComment = await this.aiService.generateExerciseComment({
+            week: undefined,
+            totalDuration,
+            status: session.status,
+            symptoms: [],
+            avgHeartRate: sessionAvgHeartRate ?? 0,
+            intensityLevel,
+            trimesterNotice: '',
+            exercises: records.map((r) => ({
+                name: r.exercise_name,
+                duration: r.duration ?? 0,
+            })),
+        });
         return {
             total_duration: totalDuration,
             avg_heart_rate: sessionAvgHeartRate,
             max_heart_rate: sessionMaxHeartRate,
             status: session.status,
             exercises: exerciseSummary,
+            ai_comment: aiComment,
         };
     }
 };
@@ -69,6 +91,7 @@ exports.ReportService = ReportService = __decorate([
     __param(0, (0, typeorm_1.InjectRepository)(exercise_session_entity_1.ExerciseSession)),
     __param(1, (0, typeorm_1.InjectRepository)(exercise_record_entity_1.ExerciseRecord)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
-        typeorm_2.Repository])
+        typeorm_2.Repository,
+        ai_service_1.AiService])
 ], ReportService);
 //# sourceMappingURL=report.service.js.map
