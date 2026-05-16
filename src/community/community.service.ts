@@ -80,11 +80,13 @@ export class CommunityService {
   }
 
   /**
-   * 게시글 상세 조회
-   * - 조회수 증가 처리
-   * - 댓글 포함 반환
-   */
-  async getPostById(id: number) {
+ * 게시글 상세 조회
+ * - 조회수 증가 처리
+ * - 댓글 포함 반환
+ * - commentsCount 
+ * - isLiked 
+ */
+  async getPostById(id: number, currentUserId: string) {
     const post = await this.postRepository.findOne({
       where: { id },
       relations: ['user'],
@@ -102,9 +104,34 @@ export class CommunityService {
       order: { createdAt: 'ASC' },
     });
 
-    return { post, comments };
-  }
+    const commentsCount = comments.length;
 
+    const isLiked = await this.likeRepository.exist({
+      where: {
+        postId: id,
+        userId: currentUserId,
+      },
+    });
+
+    return {
+      post: {
+        id: post.id,
+        title: post.title,
+        content: post.content,
+        createdAt: post.createdAt,
+        views: post.views,
+        likes: post.likes,
+        user: {
+          user_id: post.user.user_id,
+          name: post.user.name,
+          profileImage: post.user.profileImage,
+        },
+      },
+      comments,
+      commentsCount,
+      isLiked,
+    };
+  }
   /**
    * 댓글 작성
    */
@@ -184,14 +211,14 @@ export class CommunityService {
       relations: ['user'],
       order: { createdAt: 'DESC' },
     });
-  
+
     const result: PostListDto[] = [];
-  
+
     for (const post of posts) {
       const commentsCount = await this.commentRepository.count({
         where: { postId: post.id },
       });
-  
+
       result.push({
         id: post.id,
         title: post.title,

@@ -24,7 +24,7 @@ export declare class HeartRateController {
         count: number;
         records: {
             bpm: number;
-            created_at: Date;
+            created_at: null;
         }[];
     }>;
 }

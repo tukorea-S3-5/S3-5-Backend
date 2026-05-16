@@ -1,5 +1,6 @@
 import {
-  Controller, Get, Post, Body, Param, UseGuards, ParseIntPipe, Request, } from '@nestjs/common';
+  Controller, Get, Post, Body, Param, UseGuards, ParseIntPipe, Request,
+} from '@nestjs/common';
 import {
   ApiTags,
   ApiBearerAuth,
@@ -16,7 +17,7 @@ import { CreateCommentDto } from './dto/create-comment.dto';
 @UseGuards(AuthGuard('jwt'))
 @Controller('community')
 export class CommunityController {
-  constructor(private readonly communityService: CommunityService) {}
+  constructor(private readonly communityService: CommunityService) { }
 
   /**
    * 게시글 작성
@@ -66,12 +67,17 @@ export class CommunityController {
   }
 
   /**
-   * 게시글 상세 조회
-   */
+  * 게시글 상세 조회
+  */
+
   @Get('posts/:id')
   @ApiOperation({ summary: '게시글 상세 조회' })
-  getPost(@Param('id', ParseIntPipe) id: number) {
-    return this.communityService.getPostById(id);
+  getPost(
+    @Param('id', ParseIntPipe) id: number,
+    @Request() req: any,
+  ) {
+    const userId = req.user.user_id;
+    return this.communityService.getPostById(id, userId);
   }
 
   /**
