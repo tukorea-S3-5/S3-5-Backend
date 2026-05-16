@@ -13,12 +13,19 @@ const heart_rate_service_1 = require("./heart-rate.service");
 const heart_rate_controller_1 = require("./heart-rate.controller");
 const user_entity_1 = require("../user/user.entity");
 const heart_rate_record_entity_1 = require("./heart-rate-record.entity");
+const health_baseline_entity_1 = require("../entities/health-baseline.entity");
 let HeartRateModule = class HeartRateModule {
 };
 exports.HeartRateModule = HeartRateModule;
 exports.HeartRateModule = HeartRateModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([user_entity_1.User, heart_rate_record_entity_1.HeartRateRecord])],
+        imports: [
+            typeorm_1.TypeOrmModule.forFeature([
+                user_entity_1.User,
+                heart_rate_record_entity_1.HeartRateRecord,
+                health_baseline_entity_1.HealthBaseline,
+            ]),
+        ],
         providers: [heart_rate_service_1.HeartRateService],
         controllers: [heart_rate_controller_1.HeartRateController],
     })

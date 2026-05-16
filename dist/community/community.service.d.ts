@@ -10,9 +10,23 @@ export declare class CommunityService {
     constructor(postRepository: Repository<Post>, commentRepository: Repository<Comment>, likeRepository: Repository<PostLike>);
     createPost(title: string, content: string, userId: string): Promise<Post>;
     getAllPosts(currentUserId: string): Promise<PostListDto[]>;
-    getPostById(id: number): Promise<{
-        post: Post;
+    getPostById(id: number, currentUserId: string): Promise<{
+        post: {
+            id: number;
+            title: string;
+            content: string;
+            createdAt: Date;
+            views: number;
+            likes: number;
+            user: {
+                user_id: string;
+                name: string;
+                profileImage: string | null;
+            };
+        };
         comments: Comment[];
+        commentsCount: number;
+        isLiked: boolean;
     }>;
     createComment(postId: number, content: string, userId: string): Promise<Comment>;
     toggleLike(postId: number, userId: string): Promise<{

@@ -4,9 +4,16 @@ import { HeartRateService } from './heart-rate.service';
 import { HeartRateController } from './heart-rate.controller';
 import { User } from '../user/user.entity';
 import { HeartRateRecord } from './heart-rate-record.entity';
+import { HealthBaseline } from '../entities/health-baseline.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, HeartRateRecord])],
+  imports: [
+    TypeOrmModule.forFeature([
+      User,
+      HeartRateRecord,
+      HealthBaseline,
+    ]),
+  ],
   providers: [HeartRateService],
   controllers: [HeartRateController],
 })

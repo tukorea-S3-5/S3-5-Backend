@@ -40,8 +40,9 @@ let CommunityController = class CommunityController {
         const userId = req.user.user_id;
         return this.communityService.getMyPosts(userId);
     }
-    getPost(id) {
-        return this.communityService.getPostById(id);
+    getPost(id, req) {
+        const userId = req.user.user_id;
+        return this.communityService.getPostById(id, userId);
     }
     createComment(dto, req) {
         const userId = req.user.user_id;
@@ -90,8 +91,9 @@ __decorate([
     (0, common_1.Get)('posts/:id'),
     (0, swagger_1.ApiOperation)({ summary: '게시글 상세 조회' }),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number]),
+    __metadata("design:paramtypes", [Number, Object]),
     __metadata("design:returntype", void 0)
 ], CommunityController.prototype, "getPost", null);
 __decorate([

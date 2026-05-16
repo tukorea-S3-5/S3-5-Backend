@@ -69,7 +69,7 @@ let CommunityService = class CommunityService {
         }
         return result;
     }
-    async getPostById(id) {
+    async getPostById(id, currentUserId) {
         const post = await this.postRepository.findOne({
             where: { id },
             relations: ['user'],
@@ -83,7 +83,31 @@ let CommunityService = class CommunityService {
             where: { postId: id },
             order: { createdAt: 'ASC' },
         });
-        return { post, comments };
+        const commentsCount = comments.length;
+        const isLiked = await this.likeRepository.exist({
+            where: {
+                postId: id,
+                userId: currentUserId,
+            },
+        });
+        return {
+            post: {
+                id: post.id,
+                title: post.title,
+                content: post.content,
+                createdAt: post.createdAt,
+                views: post.views,
+                likes: post.likes,
+                user: {
+                    user_id: post.user.user_id,
+                    name: post.user.name,
+                    profileImage: post.user.profileImage,
+                },
+            },
+            comments,
+            commentsCount,
+            isLiked,
+        };
     }
     async createComment(postId, content, userId) {
         const comment = this.commentRepository.create({

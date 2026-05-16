@@ -1,10 +1,12 @@
 import { Repository } from 'typeorm';
 import { User } from '../user/user.entity';
 import { HeartRateRecord } from './heart-rate-record.entity';
+import { HealthBaseline } from '../entities/health-baseline.entity';
 export declare class HeartRateService {
     private readonly userRepository;
     private readonly heartRateRepository;
-    constructor(userRepository: Repository<User>, heartRateRepository: Repository<HeartRateRecord>);
+    private readonly baselineRepository;
+    constructor(userRepository: Repository<User>, heartRateRepository: Repository<HeartRateRecord>, baselineRepository: Repository<HealthBaseline>);
     updateRestingHeartRate(userId: string, restingHeartRate: number): Promise<{
         message: string;
         restingHeartRate: number;
@@ -25,7 +27,7 @@ export declare class HeartRateService {
         count: number;
         records: {
             bpm: number;
-            created_at: Date;
+            created_at: null;
         }[];
     }>;
     private calculateAge;

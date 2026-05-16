@@ -1,8 +1,9 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Between } from 'typeorm';
+import { Repository } from 'typeorm';
 import { User } from '../user/user.entity';
 import { HeartRateRecord } from './heart-rate-record.entity';
+import { HealthBaseline } from '../entities/health-baseline.entity';
 
 @Injectable()
 export class HeartRateService {
@@ -12,6 +13,9 @@ export class HeartRateService {
 
     @InjectRepository(HeartRateRecord)
     private readonly heartRateRepository: Repository<HeartRateRecord>,
+
+    @InjectRepository(HealthBaseline)
+    private readonly baselineRepository: Repository<HealthBaseline>,
   ) {}
 
   /**
@@ -91,23 +95,15 @@ export class HeartRateService {
 
   /**
    * 주간 심박 통계
+   * - health_baseline.resting_hr 값을 반환
+   * - 실제 기록 평균이 아니라 baseline 기준 표시
    */
   async getWeeklyHeartRate(userId: string) {
-    const now = new Date();
-    const start = new Date();
-    start.setDate(now.getDate() - 7);
-  
-    const records = await this.heartRateRepository.find({
-      where: {
-        user_id: userId,
-        created_at: Between(start, now),
-      },
-      order: {
-        created_at: 'ASC',
-      },
+    const baseline = await this.baselineRepository.findOne({
+      where: { user_id: userId },
     });
-  
-    if (!records.length) {
+
+    if (!baseline || baseline.resting_hr == null) {
       return {
         average: null,
         max: null,
@@ -115,21 +111,17 @@ export class HeartRateService {
         records: [],
       };
     }
-  
-    const avg = Math.round(
-      records.reduce((sum, r) => sum + r.bpm, 0) / records.length,
-    );
-  
-    const max = Math.max(...records.map(r => r.bpm));
-  
+
     return {
-      average: avg,
-      max,
-      count: records.length,
-      records: records.map(r => ({
-        bpm: r.bpm,
-        created_at: r.created_at,
-      })),
+      average: baseline.resting_hr,
+      max: baseline.resting_hr,
+      count: 1,
+      records: [
+        {
+          bpm: baseline.resting_hr,
+          created_at: null,
+        },
+      ],
     };
   }
 

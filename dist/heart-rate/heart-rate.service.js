@@ -18,12 +18,15 @@ const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const user_entity_1 = require("../user/user.entity");
 const heart_rate_record_entity_1 = require("./heart-rate-record.entity");
+const health_baseline_entity_1 = require("../entities/health-baseline.entity");
 let HeartRateService = class HeartRateService {
     userRepository;
     heartRateRepository;
-    constructor(userRepository, heartRateRepository) {
+    baselineRepository;
+    constructor(userRepository, heartRateRepository, baselineRepository) {
         this.userRepository = userRepository;
         this.heartRateRepository = heartRateRepository;
+        this.baselineRepository = baselineRepository;
     }
     async updateRestingHeartRate(userId, restingHeartRate) {
         const user = await this.userRepository.findOne({
@@ -72,19 +75,10 @@ let HeartRateService = class HeartRateService {
         };
     }
     async getWeeklyHeartRate(userId) {
-        const now = new Date();
-        const start = new Date();
-        start.setDate(now.getDate() - 7);
-        const records = await this.heartRateRepository.find({
-            where: {
-                user_id: userId,
-                created_at: (0, typeorm_2.Between)(start, now),
-            },
-            order: {
-                created_at: 'ASC',
-            },
+        const baseline = await this.baselineRepository.findOne({
+            where: { user_id: userId },
         });
-        if (!records.length) {
+        if (!baseline || baseline.resting_hr == null) {
             return {
                 average: null,
                 max: null,
@@ -92,16 +86,16 @@ let HeartRateService = class HeartRateService {
                 records: [],
             };
         }
-        const avg = Math.round(records.reduce((sum, r) => sum + r.bpm, 0) / records.length);
-        const max = Math.max(...records.map(r => r.bpm));
         return {
-            average: avg,
-            max,
-            count: records.length,
-            records: records.map(r => ({
-                bpm: r.bpm,
-                created_at: r.created_at,
-            })),
+            average: baseline.resting_hr,
+            max: baseline.resting_hr,
+            count: 1,
+            records: [
+                {
+                    bpm: baseline.resting_hr,
+                    created_at: null,
+                },
+            ],
         };
     }
     calculateAge(birthDate) {
@@ -119,7 +113,9 @@ exports.HeartRateService = HeartRateService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(user_entity_1.User)),
     __param(1, (0, typeorm_1.InjectRepository)(heart_rate_record_entity_1.HeartRateRecord)),
+    __param(2, (0, typeorm_1.InjectRepository)(health_baseline_entity_1.HealthBaseline)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
+        typeorm_2.Repository,
         typeorm_2.Repository])
 ], HeartRateService);
 //# sourceMappingURL=heart-rate.service.js.map
