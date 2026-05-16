@@ -19,4 +19,5 @@ export declare class User {
     removeRefreshToken(): void;
     restingHeartRate: number | null;
     restingHeartRateUpdatedAt: Date | null;
+    profileImage: string | null;
 }

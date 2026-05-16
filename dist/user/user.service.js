@@ -25,6 +25,42 @@ let UserService = class UserService {
     async findByEmail(email) {
         return await this.userRepository.findOne({ where: { email } });
     }
+    async getMe(userId) {
+        const user = await this.userRepository.findOne({
+            where: { user_id: userId },
+        });
+        if (!user) {
+            throw new common_1.BadRequestException('사용자가 존재하지 않습니다.');
+        }
+        return {
+            user_id: user.user_id,
+            email: user.email,
+            name: user.name,
+            birth_date: user.birth_date,
+            profileImage: user.profileImage,
+            created_at: user.created_at,
+        };
+    }
+    async updateMe(userId, name, profileImage) {
+        const user = await this.userRepository.findOne({
+            where: { user_id: userId },
+        });
+        if (!user) {
+            throw new common_1.BadRequestException('사용자가 존재하지 않습니다.');
+        }
+        if (name !== undefined) {
+            user.name = name;
+        }
+        if (profileImage !== undefined) {
+            user.profileImage = profileImage;
+        }
+        await this.userRepository.save(user);
+        return {
+            message: '사용자 정보가 수정되었습니다.',
+            name: user.name,
+            profileImage: user.profileImage,
+        };
+    }
 };
 exports.UserService = UserService;
 exports.UserService = UserService = __decorate([

@@ -36,11 +36,38 @@ let CommunityService = class CommunityService {
         });
         return await this.postRepository.save(post);
     }
-    async getAllPosts() {
-        return await this.postRepository.find({
+    async getAllPosts(currentUserId) {
+        const posts = await this.postRepository.find({
             relations: ['user'],
             order: { createdAt: 'DESC' },
         });
+        const result = [];
+        for (const post of posts) {
+            const commentsCount = await this.commentRepository.count({
+                where: { postId: post.id },
+            });
+            const isLiked = await this.likeRepository.exist({
+                where: {
+                    postId: post.id,
+                    userId: currentUserId,
+                },
+            });
+            result.push({
+                id: post.id,
+                title: post.title,
+                content: post.content,
+                createdAt: post.createdAt,
+                user: {
+                    user_id: post.user.user_id,
+                    name: post.user.name,
+                    profileImage: post.user.profileImage,
+                },
+                likes: post.likes,
+                commentsCount,
+                isLiked,
+            });
+        }
+        return result;
     }
     async getPostById(id) {
         const post = await this.postRepository.findOne({
@@ -85,6 +112,53 @@ let CommunityService = class CommunityService {
         post.likes += 1;
         await this.postRepository.save(post);
         return { liked: true, likes: post.likes };
+    }
+    async getLikedPosts(userId) {
+        const likes = await this.likeRepository.find({
+            where: { userId },
+            relations: ['post', 'post.user'],
+            order: { createdAt: 'DESC' },
+        });
+        return likes.map(like => ({
+            id: like.post.id,
+            title: like.post.title,
+            content: like.post.content,
+            createdAt: like.post.createdAt,
+            user: {
+                user_id: like.post.user.user_id,
+                name: like.post.user.name,
+                profileImage: like.post.user.profileImage,
+            },
+            likes: like.post.likes,
+        }));
+    }
+    async getMyPosts(userId) {
+        const posts = await this.postRepository.find({
+            where: { userId },
+            relations: ['user'],
+            order: { createdAt: 'DESC' },
+        });
+        const result = [];
+        for (const post of posts) {
+            const commentsCount = await this.commentRepository.count({
+                where: { postId: post.id },
+            });
+            result.push({
+                id: post.id,
+                title: post.title,
+                content: post.content,
+                createdAt: post.createdAt,
+                user: {
+                    user_id: post.user.user_id,
+                    name: post.user.name,
+                    profileImage: post.user.profileImage,
+                },
+                likes: post.likes,
+                commentsCount,
+                isLiked: false,
+            });
+        }
+        return result;
     }
 };
 exports.CommunityService = CommunityService;

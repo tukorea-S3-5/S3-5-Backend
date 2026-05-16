@@ -30,6 +30,9 @@ let HeartRateController = class HeartRateController {
     async check(req, dto) {
         return this.heartRateService.checkHeartRate(req.user.user_id, dto.currentHeartRate);
     }
+    async weekly(req) {
+        return this.heartRateService.getWeeklyHeartRate(req.user.user_id);
+    }
 };
 exports.HeartRateController = HeartRateController;
 __decorate([
@@ -50,6 +53,14 @@ __decorate([
     __metadata("design:paramtypes", [Object, check_heart_rate_dto_1.CheckHeartRateDto]),
     __metadata("design:returntype", Promise)
 ], HeartRateController.prototype, "check", null);
+__decorate([
+    (0, common_1.Get)('weekly'),
+    (0, swagger_1.ApiOperation)({ summary: '주간 심박 통계 조회' }),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], HeartRateController.prototype, "weekly", null);
 exports.HeartRateController = HeartRateController = __decorate([
     (0, swagger_1.ApiTags)('HeartRate'),
     (0, swagger_1.ApiBearerAuth)('access-token'),

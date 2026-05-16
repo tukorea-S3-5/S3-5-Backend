@@ -1,18 +1,9 @@
 import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Param,
-  UseGuards,
-  ParseIntPipe,
-  Request,
-} from '@nestjs/common';
+  Controller, Get, Post, Body, Param, UseGuards, ParseIntPipe, Request, } from '@nestjs/common';
 import {
   ApiTags,
   ApiBearerAuth,
   ApiOperation,
-  ApiResponse,
 } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 
@@ -45,11 +36,33 @@ export class CommunityController {
 
   /**
    * 게시글 목록 조회
+   * - 로그인 유저 기준 isLiked 포함
    */
   @Get('posts')
   @ApiOperation({ summary: '게시글 목록 조회' })
-  getAllPosts() {
-    return this.communityService.getAllPosts();
+  getAllPosts(@Request() req: any) {
+    const userId = req.user.user_id;
+    return this.communityService.getAllPosts(userId);
+  }
+
+  /**
+   * 내가 좋아요 누른 게시글 목록 조회
+   */
+  @Get('posts/liked')
+  @ApiOperation({ summary: '좋아요 누른 게시글 목록 조회' })
+  getLikedPosts(@Request() req: any) {
+    const userId = req.user.user_id;
+    return this.communityService.getLikedPosts(userId);
+  }
+
+  /**
+   * 내가 작성한 게시글 목록 조회
+   */
+  @Get('posts/me')
+  @ApiOperation({ summary: '내가 작성한 게시글 목록 조회' })
+  getMyPosts(@Request() req: any) {
+    const userId = req.user.user_id;
+    return this.communityService.getMyPosts(userId);
   }
 
   /**
