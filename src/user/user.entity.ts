@@ -136,4 +136,10 @@ export class User {
    */
   @Column({ type: 'timestamp', nullable: true })
   restingHeartRateUpdatedAt: Date | null;
+
+  /**
+  * 프로필 이미지 URL
+  */
+  @Column({ type: 'varchar', length: 300, nullable: true })
+  profileImage: string | null;
 }

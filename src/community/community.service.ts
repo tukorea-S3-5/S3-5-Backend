@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-
+import { PostListDto } from './dto/post-list.dto';
 import { Post } from '../entities/post.entity';
 import { Comment } from '../entities/comment.entity';
 import { PostLike } from '../entities/post-like.entity';
@@ -17,7 +17,7 @@ export class CommunityService {
 
     @InjectRepository(PostLike)
     private readonly likeRepository: Repository<PostLike>,
-  ) {}
+  ) { }
 
   /**
    * 게시글 작성
@@ -36,12 +36,47 @@ export class CommunityService {
   /**
    * 게시글 목록 조회
    * - user 정보까지 함께 조회
+   * - 댓글 수 추가
+   * - 현재 로그인 유저 기준 isLiked 추가
+   * - 목록에서는 views 반환하지 않음
    */
-  async getAllPosts() {
-    return await this.postRepository.find({
-      relations: ['user'], // User 엔티티 relation 연결되어 있어야 함
+  async getAllPosts(currentUserId: string): Promise<PostListDto[]> {
+    const posts = await this.postRepository.find({
+      relations: ['user'],
       order: { createdAt: 'DESC' },
     });
+
+    const result: PostListDto[] = [];
+
+    for (const post of posts) {
+      const commentsCount = await this.commentRepository.count({
+        where: { postId: post.id },
+      });
+
+      const isLiked = await this.likeRepository.exist({
+        where: {
+          postId: post.id,
+          userId: currentUserId,
+        },
+      });
+
+      result.push({
+        id: post.id,
+        title: post.title,
+        content: post.content,
+        createdAt: post.createdAt,
+        user: {
+          user_id: post.user.user_id,
+          name: post.user.name,
+          profileImage: post.user.profileImage,
+        },
+        likes: post.likes,
+        commentsCount,
+        isLiked,
+      });
+    }
+
+    return result;
   }
 
   /**
@@ -114,5 +149,64 @@ export class CommunityService {
     await this.postRepository.save(post);
 
     return { liked: true, likes: post.likes };
+  }
+
+  /**
+ * 내가 좋아요 누른 게시글 목록 조회
+ */
+  async getLikedPosts(userId: string) {
+    const likes = await this.likeRepository.find({
+      where: { userId },
+      relations: ['post', 'post.user'],
+      order: { createdAt: 'DESC' }, // PostLike에 createdAt이 있다면
+    });
+
+    return likes.map(like => ({
+      id: like.post.id,
+      title: like.post.title,
+      content: like.post.content,
+      createdAt: like.post.createdAt,
+      user: {
+        user_id: like.post.user.user_id,
+        name: like.post.user.name,
+        profileImage: like.post.user.profileImage,
+      },
+      likes: like.post.likes,
+    }));
+  }
+
+  /**
+   * 내가 작성한 게시글 목록 조회
+   */
+  async getMyPosts(userId: string): Promise<PostListDto[]> {
+    const posts = await this.postRepository.find({
+      where: { userId },
+      relations: ['user'],
+      order: { createdAt: 'DESC' },
+    });
+  
+    const result: PostListDto[] = [];
+  
+    for (const post of posts) {
+      const commentsCount = await this.commentRepository.count({
+        where: { postId: post.id },
+      });
+  
+      result.push({
+        id: post.id,
+        title: post.title,
+        content: post.content,
+        createdAt: post.createdAt,
+        user: {
+          user_id: post.user.user_id,
+          name: post.user.name,
+          profileImage: post.user.profileImage,
+        },
+        likes: post.likes,
+        commentsCount,
+        isLiked: false,
+      });
+    }
+    return result;
   }
 }

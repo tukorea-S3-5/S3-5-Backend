@@ -1,4 +1,5 @@
 import { Repository } from 'typeorm';
+import { PostListDto } from './dto/post-list.dto';
 import { Post } from '../entities/post.entity';
 import { Comment } from '../entities/comment.entity';
 import { PostLike } from '../entities/post-like.entity';
@@ -8,7 +9,7 @@ export declare class CommunityService {
     private readonly likeRepository;
     constructor(postRepository: Repository<Post>, commentRepository: Repository<Comment>, likeRepository: Repository<PostLike>);
     createPost(title: string, content: string, userId: string): Promise<Post>;
-    getAllPosts(): Promise<Post[]>;
+    getAllPosts(currentUserId: string): Promise<PostListDto[]>;
     getPostById(id: number): Promise<{
         post: Post;
         comments: Comment[];
@@ -18,4 +19,17 @@ export declare class CommunityService {
         liked: boolean;
         likes: number;
     }>;
+    getLikedPosts(userId: string): Promise<{
+        id: number;
+        title: string;
+        content: string;
+        createdAt: Date;
+        user: {
+            user_id: string;
+            name: string;
+            profileImage: string | null;
+        };
+        likes: number;
+    }[]>;
+    getMyPosts(userId: string): Promise<PostListDto[]>;
 }

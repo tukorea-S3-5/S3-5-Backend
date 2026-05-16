@@ -17,7 +17,9 @@ const common_1 = require("@nestjs/common");
 const user_service_1 = require("./user.service");
 const swagger_1 = require("@nestjs/swagger");
 const find_email_dto_1 = require("./dto/find-email.dto");
+const update_user_dto_1 = require("./dto/update-user.dto");
 const public_decorator_1 = require("../common/decorators/public.decorator");
+const passport_1 = require("@nestjs/passport");
 let UserController = class UserController {
     userService;
     constructor(userService) {
@@ -31,6 +33,12 @@ let UserController = class UserController {
             email: email,
         };
     }
+    async getMe(req) {
+        return this.userService.getMe(req.user.user_id);
+    }
+    async updateMe(req, dto) {
+        return this.userService.updateMe(req.user.user_id, dto.name, dto.profileImage);
+    }
 };
 exports.UserController = UserController;
 __decorate([
@@ -43,6 +51,27 @@ __decorate([
     __metadata("design:paramtypes", [find_email_dto_1.FindEmailDto]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "checkEmailExists", null);
+__decorate([
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),
+    (0, swagger_1.ApiBearerAuth)('access-token'),
+    (0, common_1.Get)('/me'),
+    (0, swagger_1.ApiOperation)({ summary: '내 정보 조회' }),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "getMe", null);
+__decorate([
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),
+    (0, swagger_1.ApiBearerAuth)('access-token'),
+    (0, common_1.Put)('/me'),
+    (0, swagger_1.ApiOperation)({ summary: '내 정보 수정' }),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, update_user_dto_1.UpdateUserDto]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "updateMe", null);
 exports.UserController = UserController = __decorate([
     (0, common_1.Controller)('user'),
     __metadata("design:paramtypes", [user_service_1.UserService])

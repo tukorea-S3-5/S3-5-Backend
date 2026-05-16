@@ -13,4 +13,18 @@ export declare class HeartRateController {
         maxHR: number;
         restingHR: number | null;
     }>;
+    weekly(req: any): Promise<{
+        average: null;
+        max: null;
+        count: number;
+        records: never[];
+    } | {
+        average: number;
+        max: number;
+        count: number;
+        records: {
+            bpm: number;
+            created_at: Date;
+        }[];
+    }>;
 }

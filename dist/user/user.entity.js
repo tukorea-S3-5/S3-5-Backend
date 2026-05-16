@@ -78,6 +78,7 @@ let User = class User {
     }
     restingHeartRate;
     restingHeartRateUpdatedAt;
+    profileImage;
 };
 exports.User = User;
 __decorate([
@@ -133,6 +134,10 @@ __decorate([
     (0, typeorm_1.Column)({ type: 'timestamp', nullable: true }),
     __metadata("design:type", Object)
 ], User.prototype, "restingHeartRateUpdatedAt", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'varchar', length: 300, nullable: true }),
+    __metadata("design:type", Object)
+], User.prototype, "profileImage", void 0);
 exports.User = User = __decorate([
     (0, typeorm_1.Entity)('user')
 ], User);

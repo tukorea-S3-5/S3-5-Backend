@@ -28,8 +28,17 @@ let CommunityController = class CommunityController {
         const userId = req.user.user_id;
         return this.communityService.createPost(dto.title, dto.content, userId);
     }
-    getAllPosts() {
-        return this.communityService.getAllPosts();
+    getAllPosts(req) {
+        const userId = req.user.user_id;
+        return this.communityService.getAllPosts(userId);
+    }
+    getLikedPosts(req) {
+        const userId = req.user.user_id;
+        return this.communityService.getLikedPosts(userId);
+    }
+    getMyPosts(req) {
+        const userId = req.user.user_id;
+        return this.communityService.getMyPosts(userId);
     }
     getPost(id) {
         return this.communityService.getPostById(id);
@@ -56,10 +65,27 @@ __decorate([
 __decorate([
     (0, common_1.Get)('posts'),
     (0, swagger_1.ApiOperation)({ summary: '게시글 목록 조회' }),
+    __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], CommunityController.prototype, "getAllPosts", null);
+__decorate([
+    (0, common_1.Get)('posts/liked'),
+    (0, swagger_1.ApiOperation)({ summary: '좋아요 누른 게시글 목록 조회' }),
+    __param(0, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], CommunityController.prototype, "getLikedPosts", null);
+__decorate([
+    (0, common_1.Get)('posts/me'),
+    (0, swagger_1.ApiOperation)({ summary: '내가 작성한 게시글 목록 조회' }),
+    __param(0, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], CommunityController.prototype, "getMyPosts", null);
 __decorate([
     (0, common_1.Get)('posts/:id'),
     (0, swagger_1.ApiOperation)({ summary: '게시글 상세 조회' }),
