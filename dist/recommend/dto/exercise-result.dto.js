@@ -22,6 +22,7 @@ class ExerciseResultDto {
     description;
     difficulty_label;
     video_url;
+    ai_comment;
 }
 exports.ExerciseResultDto = ExerciseResultDto;
 __decorate([
@@ -70,4 +71,12 @@ __decorate([
     }),
     __metadata("design:type", Object)
 ], ExerciseResultDto.prototype, "video_url", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: '현재 BMI와 증상 기준으로 안전 필터를 통과한 운동입니다.',
+        required: false,
+        nullable: true,
+    }),
+    __metadata("design:type", String)
+], ExerciseResultDto.prototype, "ai_comment", void 0);
 //# sourceMappingURL=exercise-result.dto.js.map

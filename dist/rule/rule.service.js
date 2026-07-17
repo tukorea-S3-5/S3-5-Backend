@@ -30,10 +30,7 @@ let RuleService = class RuleService {
         if (bmi >= 25 && level === 'HIGH') {
             return false;
         }
-        if (fitnessLevel === 'LOW' && level !== 'LOW') {
-            return false;
-        }
-        if (fitnessLevel === 'MEDIUM' && level === 'HIGH') {
+        if (fitnessLevel === 'SEDENTARY' && level !== 'LOW') {
             return false;
         }
         return true;

@@ -21,16 +21,19 @@ const exercise_tag_map_entity_1 = require("../entities/exercise-tag-map.entity")
 const pregnancy_info_entity_1 = require("../entities/pregnancy-info.entity");
 const symptom_log_entity_1 = require("../entities/symptom-log.entity");
 const condition_enum_1 = require("../common/enums/condition.enum");
+const ai_service_1 = require("../ai/ai.service");
 let RecommendService = class RecommendService {
     exerciseRepository;
     tagRepository;
     pregnancyRepository;
     symptomRepository;
-    constructor(exerciseRepository, tagRepository, pregnancyRepository, symptomRepository) {
+    aiService;
+    constructor(exerciseRepository, tagRepository, pregnancyRepository, symptomRepository, aiService) {
         this.exerciseRepository = exerciseRepository;
         this.tagRepository = tagRepository;
         this.pregnancyRepository = pregnancyRepository;
         this.symptomRepository = symptomRepository;
+        this.aiService = aiService;
     }
     calculateWeek(lmpInput) {
         const lmp = lmpInput instanceof Date
@@ -45,6 +48,40 @@ let RecommendService = class RecommendService {
         const week = this.calculateWeek(lmp);
         return Math.ceil(week / 13);
     }
+    buildExerciseResult(exercise, aiComment) {
+        return {
+            exercise_id: exercise.exercise_id,
+            exercise_name: exercise.exercise_name,
+            category_name: exercise.category_name,
+            intensity: exercise.intensity ?? '',
+            position_type: exercise.position_type ?? '',
+            fall_risk: exercise.fall_risk,
+            allowed_trimesters: exercise.allowed_trimesters,
+            description: exercise.description ?? '',
+            difficulty_label: exercise.difficulty_label ?? '',
+            video_url: exercise.video_url ?? null,
+            ai_comment: aiComment,
+        };
+    }
+    async buildAiComment(params) {
+        return this.aiService.generateRecommendationComment({
+            type: params.type,
+            week: this.calculateWeek(params.pregnancy.last_menstrual_period),
+            trimester: params.trimester,
+            bmi: params.pregnancy.bmi,
+            symptoms: params.symptoms,
+            conditions: params.conditionCodes,
+            exercise: {
+                name: params.exercise.exercise_name,
+                category: params.exercise.category_name,
+                intensity: params.exercise.intensity ?? '',
+                positionType: params.exercise.position_type ?? '',
+                fallRisk: params.exercise.fall_risk,
+                description: params.exercise.description ?? '',
+            },
+            ruleReasons: params.ruleReasons,
+        });
+    }
     isIntensityAllowed(intensity, conditions, bmi, fitnessLevel) {
         const level = intensity ?? 'LOW';
         if (conditions.includes(condition_enum_1.ConditionType.HYPERTENSION)) {
@@ -58,10 +95,7 @@ let RecommendService = class RecommendService {
         if (bmi >= 25 && level === 'HIGH') {
             return false;
         }
-        if (fitnessLevel === 'LOW' && level !== 'LOW') {
-            return false;
-        }
-        if (fitnessLevel === 'MEDIUM' && level === 'HIGH') {
+        if (fitnessLevel === 'SEDENTARY' && level !== 'LOW') {
             return false;
         }
         return true;
@@ -88,63 +122,139 @@ let RecommendService = class RecommendService {
         const caution = [];
         const notRecommend = [];
         outerLoop: for (const exercise of exercises) {
-            const base = {
-                exercise_id: exercise.exercise_id,
-                exercise_name: exercise.exercise_name,
-                category_name: exercise.category_name,
-                intensity: exercise.intensity ?? '',
-                position_type: exercise.position_type ?? '',
-                fall_risk: exercise.fall_risk,
-                allowed_trimesters: exercise.allowed_trimesters,
-                description: exercise.description ?? '',
-                difficulty_label: exercise.difficulty_label ?? '',
-                video_url: exercise.video_url ?? null,
-            };
             if (!exercise.allowed_trimesters?.includes(trimester)) {
-                notRecommend.push(base);
+                const aiComment = await this.buildAiComment({
+                    type: 'not_recommend',
+                    pregnancy,
+                    trimester,
+                    symptoms,
+                    conditionCodes,
+                    exercise,
+                    ruleReasons: [`${trimester}분기 허용 운동 목록에 포함되지 않음`],
+                });
+                notRecommend.push(this.buildExerciseResult(exercise, aiComment));
                 continue;
             }
             if (trimester === 2 && exercise.position_type === 'SUPINE') {
-                notRecommend.push(base);
+                const aiComment = await this.buildAiComment({
+                    type: 'not_recommend',
+                    pregnancy,
+                    trimester,
+                    symptoms,
+                    conditionCodes,
+                    exercise,
+                    ruleReasons: ['2분기에는 바로 누운 자세 운동 제한'],
+                });
+                notRecommend.push(this.buildExerciseResult(exercise, aiComment));
                 continue;
             }
             if (trimester === 3 && exercise.fall_risk) {
-                notRecommend.push(base);
+                const aiComment = await this.buildAiComment({
+                    type: 'not_recommend',
+                    pregnancy,
+                    trimester,
+                    symptoms,
+                    conditionCodes,
+                    exercise,
+                    ruleReasons: ['3분기에는 낙상 위험 운동 제한'],
+                });
+                notRecommend.push(this.buildExerciseResult(exercise, aiComment));
                 continue;
             }
             if (!this.isIntensityAllowed(exercise.intensity, conditionCodes, pregnancy.bmi, pregnancy.fitness_level)) {
-                notRecommend.push(base);
+                const aiComment = await this.buildAiComment({
+                    type: 'not_recommend',
+                    pregnancy,
+                    trimester,
+                    symptoms,
+                    conditionCodes,
+                    exercise,
+                    ruleReasons: [
+                        `기저 질환, BMI(${pregnancy.bmi}), 운동 수준(${pregnancy.fitness_level}) 기준에서 강도 제한`,
+                    ],
+                });
+                notRecommend.push(this.buildExerciseResult(exercise, aiComment));
                 continue;
             }
             const relatedTags = tagMaps.filter(tag => tag.exercise_id === exercise.exercise_id &&
                 symptoms.includes(tag.symptom_name));
             let hasPositiveStrong = false;
             let hasPositiveWeak = false;
+            const positiveReasons = [];
             for (const tag of relatedTags) {
                 if (tag.effect_type === 'NEGATIVE') {
-                    notRecommend.push(base);
+                    const aiComment = await this.buildAiComment({
+                        type: 'not_recommend',
+                        pregnancy,
+                        trimester,
+                        symptoms,
+                        conditionCodes,
+                        exercise,
+                        ruleReasons: [`현재 증상(${tag.symptom_name})에 부정 영향 태그 존재`],
+                    });
+                    notRecommend.push(this.buildExerciseResult(exercise, aiComment));
                     continue outerLoop;
                 }
                 if (tag.effect_type === 'POSITIVE_STRONG') {
                     hasPositiveStrong = true;
+                    positiveReasons.push(`현재 증상(${tag.symptom_name})에 강한 긍정 태그`);
                 }
                 if (tag.effect_type === 'POSITIVE_WEAK') {
                     hasPositiveWeak = true;
+                    positiveReasons.push(`현재 증상(${tag.symptom_name})에 긍정 태그`);
                 }
             }
             if (hasPositiveStrong) {
-                recommend.push(base);
+                const aiComment = await this.buildAiComment({
+                    type: 'recommend',
+                    pregnancy,
+                    trimester,
+                    symptoms,
+                    conditionCodes,
+                    exercise,
+                    ruleReasons: positiveReasons,
+                });
+                recommend.push(this.buildExerciseResult(exercise, aiComment));
                 continue;
             }
             if (hasPositiveWeak) {
-                recommend.push(base);
+                const aiComment = await this.buildAiComment({
+                    type: 'recommend',
+                    pregnancy,
+                    trimester,
+                    symptoms,
+                    conditionCodes,
+                    exercise,
+                    ruleReasons: positiveReasons,
+                });
+                recommend.push(this.buildExerciseResult(exercise, aiComment));
                 continue;
             }
             if (symptoms.length === 0) {
-                recommend.push(base);
+                const aiComment = await this.buildAiComment({
+                    type: 'recommend',
+                    pregnancy,
+                    trimester,
+                    symptoms,
+                    conditionCodes,
+                    exercise,
+                    ruleReasons: ['임신 분기, 자세, 낙상 위험, 개인 강도 기준 통과'],
+                });
+                recommend.push(this.buildExerciseResult(exercise, aiComment));
             }
             else {
-                caution.push(base);
+                const aiComment = await this.buildAiComment({
+                    type: 'caution',
+                    pregnancy,
+                    trimester,
+                    symptoms,
+                    conditionCodes,
+                    exercise,
+                    ruleReasons: [
+                        '안전 필터는 통과했지만 최신 증상과 직접적인 긍정 태그가 없어 주의 운동으로 분류',
+                    ],
+                });
+                caution.push(this.buildExerciseResult(exercise, aiComment));
             }
         }
         return {
@@ -164,6 +274,7 @@ exports.RecommendService = RecommendService = __decorate([
     __metadata("design:paramtypes", [typeorm_2.Repository,
         typeorm_2.Repository,
         typeorm_2.Repository,
-        typeorm_2.Repository])
+        typeorm_2.Repository,
+        ai_service_1.AiService])
 ], RecommendService);
 //# sourceMappingURL=recommend.service.js.map

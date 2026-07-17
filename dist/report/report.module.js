@@ -11,6 +11,8 @@ const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const exercise_session_entity_1 = require("../entities/exercise-session.entity");
 const exercise_record_entity_1 = require("../entities/exercise-record.entity");
+const pregnancy_info_entity_1 = require("../entities/pregnancy-info.entity");
+const symptom_log_entity_1 = require("../entities/symptom-log.entity");
 const report_service_1 = require("./report.service");
 const report_controller_1 = require("./report.controller");
 const ai_module_1 = require("../ai/ai.module");
@@ -23,6 +25,8 @@ exports.ReportModule = ReportModule = __decorate([
             typeorm_1.TypeOrmModule.forFeature([
                 exercise_session_entity_1.ExerciseSession,
                 exercise_record_entity_1.ExerciseRecord,
+                pregnancy_info_entity_1.PregnancyInfo,
+                symptom_log_entity_1.SymptomLog,
             ]),
             ai_module_1.AiModule,
         ],

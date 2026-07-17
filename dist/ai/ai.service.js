@@ -24,8 +24,11 @@ let AiService = class AiService {
             });
         }
     }
+    isLlmEnabled() {
+        return process.env.USE_LLM === 'true' && !!this.openai;
+    }
     async generateExerciseComment(data) {
-        if (process.env.USE_LLM !== 'true' || !this.openai) {
+        if (!this.isLlmEnabled()) {
             return this.generateMockComment(data);
         }
         const exerciseSummary = data.exercises
@@ -33,11 +36,16 @@ let AiService = class AiService {
             .join(', ');
         const prompt = `
     임신 ${data.week ?? '알 수 없음'}주차 사용자입니다.
+    임신 분기: ${data.trimester ?? '알 수 없음'}분기
+    BMI: ${data.bmi ?? '알 수 없음'}
+    최대 허용 심박수: ${data.maxAllowedBpm ?? '알 수 없음'}bpm
+    기저 질환/주의 조건: ${data.conditions?.join(', ') || '없음'}
     오늘 수행한 운동: ${exerciseSummary}
     총 운동 시간: ${Math.floor(data.totalDuration / 60)}분
     평균 심박수: ${Math.round(data.avgHeartRate)}
     강도 수준: ${data.intensityLevel}
     현재 증상: ${data.symptoms.join(', ') || '없음'}
+    서버 Rule Engine 판단 근거: ${data.ruleReasons?.join(' / ') || '특이 제한 없음'}
 
     참고 주의사항:
     ${data.trimesterNotice}
@@ -49,11 +57,23 @@ let AiService = class AiService {
     을 3~4줄로 작성하세요.
     의료적 진단처럼 말하지 말고 조언 형태로 작성하세요.
     `;
-        const response = await this.openai.chat.completions.create({
-            model: 'gpt-4o-mini',
-            messages: [{ role: 'user', content: prompt }],
-        });
-        return response.choices[0].message.content ?? '';
+        try {
+            const response = await this.openai.chat.completions.create({
+                model: 'gpt-4o-mini',
+                messages: [
+                    {
+                        role: 'system',
+                        content: 'You write safe Korean wellness guidance for pregnant users. Never diagnose. Always defer risky symptoms to medical professionals.',
+                    },
+                    { role: 'user', content: prompt },
+                ],
+                temperature: 0.4,
+            });
+            return response.choices[0].message.content ?? this.generateMockComment(data);
+        }
+        catch {
+            return this.generateMockComment(data);
+        }
     }
     attachObjectParticle(word) {
         if (!word)
@@ -106,6 +126,9 @@ let AiService = class AiService {
         if (data.symptoms?.length > 0) {
             message += `현재 증상(${data.symptoms.join(', ')})을 고려해 무리하지 않는 것이 중요합니다. `;
         }
+        if (data.ruleReasons?.length) {
+            message += `서버 안전 기준상 ${data.ruleReasons.join(', ')} 점을 함께 고려했습니다. `;
+        }
         if (data.week) {
             if (data.week <= 13) {
                 message += `임신 초기에는 특히 피로 관리가 중요합니다. `;
@@ -120,8 +143,67 @@ let AiService = class AiService {
         message += `꾸준함이 가장 큰 자산입니다. 오늘도 잘 해내셨습니다.`;
         return message;
     }
+    async generateRecommendationComment(data) {
+        if (!this.isLlmEnabled()) {
+            return this.generateMockRecommendationComment(data);
+        }
+        const label = data.type === 'recommend'
+            ? '추천'
+            : data.type === 'caution'
+                ? '주의'
+                : '비추천';
+        const prompt = `
+    임신 ${data.week ?? '알 수 없음'}주차, ${data.trimester ?? '알 수 없음'}분기 사용자입니다.
+    BMI: ${data.bmi ?? '알 수 없음'}
+    현재 증상: ${data.symptoms.join(', ') || '없음'}
+    기저 질환/주의 조건: ${data.conditions.join(', ') || '없음'}
+
+    운동명: ${data.exercise.name}
+    카테고리: ${data.exercise.category}
+    강도: ${data.exercise.intensity}
+    자세: ${data.exercise.positionType}
+    낙상 위험: ${data.exercise.fallRisk ? '있음' : '없음'}
+    운동 설명: ${data.exercise.description}
+
+    서버 Rule Engine 분류: ${label}
+    서버 판단 근거: ${data.ruleReasons.join(' / ') || '특이 제한 없음'}
+
+    위 정보를 바탕으로 사용자가 이해할 수 있는 한 문장 설명을 작성하세요.
+    의료 진단처럼 말하지 말고, 서버의 안전 기준에 따른 운동 안내처럼 작성하세요.
+    `;
+        try {
+            const response = await this.openai.chat.completions.create({
+                model: 'gpt-4o-mini',
+                messages: [
+                    {
+                        role: 'system',
+                        content: 'You explain server-side pregnancy exercise recommendations in Korean. Keep it concise, safe, and non-diagnostic.',
+                    },
+                    { role: 'user', content: prompt },
+                ],
+                temperature: 0.3,
+            });
+            return (response.choices[0].message.content ??
+                this.generateMockRecommendationComment(data));
+        }
+        catch {
+            return this.generateMockRecommendationComment(data);
+        }
+    }
+    generateMockRecommendationComment(data) {
+        const base = data.ruleReasons.length
+            ? data.ruleReasons.join(', ')
+            : `${data.trimester ?? '현재'}분기 기준과 현재 상태에서 큰 제한 요소가 확인되지 않았습니다`;
+        if (data.type === 'not_recommend') {
+            return `${data.exercise.name}은 ${base} 때문에 현재 상태에서는 피하는 것이 좋습니다.`;
+        }
+        if (data.type === 'caution') {
+            return `${data.exercise.name}은 수행 가능하지만 ${base}을 고려해 강도와 시간을 낮춰 진행하는 것이 좋습니다.`;
+        }
+        return `${data.exercise.name}은 ${base}을 고려했을 때 현재 상태에서 비교적 안전하게 시도할 수 있는 운동입니다.`;
+    }
     async generateHealthReport(data) {
-        if (process.env.USE_LLM !== 'true' || !this.openai) {
+        if (!this.isLlmEnabled()) {
             return this.generateMockHealthReport(data);
         }
         const prompt = `
@@ -135,11 +217,23 @@ let AiService = class AiService {
     을 3~4줄로 작성하세요.
     의료적 진단처럼 말하지 말고 조언 형태로 작성하세요.
     `;
-        const response = await this.openai.chat.completions.create({
-            model: 'gpt-4o-mini',
-            messages: [{ role: 'user', content: prompt }],
-        });
-        return response.choices[0].message.content ?? '';
+        try {
+            const response = await this.openai.chat.completions.create({
+                model: 'gpt-4o-mini',
+                messages: [
+                    {
+                        role: 'system',
+                        content: 'You write safe Korean pregnancy wellness guidance. Never present medical diagnosis.',
+                    },
+                    { role: 'user', content: prompt },
+                ],
+                temperature: 0.4,
+            });
+            return response.choices[0].message.content ?? this.generateMockHealthReport(data);
+        }
+        catch {
+            return this.generateMockHealthReport(data);
+        }
     }
     generateMockHealthReport(data) {
         let message = `임신 ${data.week}주차입니다. `;
