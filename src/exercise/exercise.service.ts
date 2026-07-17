@@ -34,7 +34,8 @@ export class ExerciseService {
     });
 
     if (existingSession) {
-      throw new BadRequestException('이미 진행 중인 세션이 있습니다.');
+      // 400 에러 대신 꼬여있는 기존 세션을 강제로 종료(Abort)
+      await this.abortSession(existingSession.session_id);
     }
 
     const result = await this.recommendService.recommend(userId);
@@ -87,7 +88,8 @@ export class ExerciseService {
     });
 
     if (existingSession) {
-      throw new BadRequestException('이미 진행 중인 세션이 있습니다.');
+      // 400 에러 대신 꼬여있는 기존 세션을 강제로 종료(Abort)
+      await this.abortSession(existingSession.session_id);
     }
 
     const result = await this.recommendService.recommend(userId);
