@@ -25,10 +25,10 @@ export class CreateUserDto {
   })
   @IsString()
   @IsNotEmpty({ message: '비밀번호는 필수 입력 항목입니다.' })
-  //   @MinLength(8, { message: '비밀번호는 최소 8자 이상이어야 합니다.' })
-  //   @Matches(/^(?=.*[a-zA-Z])(?=.*[0-9]).{8,}$/, {
-  //     message: '비밀번호는 영문과 숫자를 포함해야 합니다.',
-  //   })
+  @MinLength(8, { message: '비밀번호는 최소 8자 이상이어야 합니다.' })
+  @Matches(/^(?=.*[a-zA-Z])(?=.*[0-9]).{8,}$/, {
+    message: '비밀번호는 영문과 숫자를 포함해야 합니다.',
+  })
   readonly password: string;
 
   @ApiProperty({

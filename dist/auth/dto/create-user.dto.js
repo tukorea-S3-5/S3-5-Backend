@@ -37,6 +37,10 @@ __decorate([
     }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)({ message: '비밀번호는 필수 입력 항목입니다.' }),
+    (0, class_validator_1.MinLength)(8, { message: '비밀번호는 최소 8자 이상이어야 합니다.' }),
+    (0, class_validator_1.Matches)(/^(?=.*[a-zA-Z])(?=.*[0-9]).{8,}$/, {
+        message: '비밀번호는 영문과 숫자를 포함해야 합니다.',
+    }),
     __metadata("design:type", String)
 ], CreateUserDto.prototype, "password", void 0);
 __decorate([
