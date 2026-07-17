@@ -16,6 +16,7 @@ const exercise_entity_1 = require("../entities/exercise.entity");
 const exercise_tag_map_entity_1 = require("../entities/exercise-tag-map.entity");
 const symptom_log_entity_1 = require("../entities/symptom-log.entity");
 const exercise_step_entity_1 = require("../entities/exercise-step.entity");
+const ai_module_1 = require("../ai/ai.module");
 let RecommendModule = class RecommendModule {
 };
 exports.RecommendModule = RecommendModule;
@@ -29,6 +30,7 @@ exports.RecommendModule = RecommendModule = __decorate([
                 symptom_log_entity_1.SymptomLog,
                 exercise_step_entity_1.ExerciseStep,
             ]),
+            ai_module_1.AiModule,
         ],
         controllers: [recommend_controller_1.RecommendController],
         providers: [recommend_service_1.RecommendService],

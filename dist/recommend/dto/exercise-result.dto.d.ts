@@ -9,4 +9,5 @@ export declare class ExerciseResultDto {
     description: string;
     difficulty_label: string;
     video_url?: string | null;
+    ai_comment?: string;
 }

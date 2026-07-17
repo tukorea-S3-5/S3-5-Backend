@@ -8,6 +8,7 @@ import { Exercise } from '../entities/exercise.entity';
 import { ExerciseTagMap } from '../entities/exercise-tag-map.entity';
 import { SymptomLog } from '../entities/symptom-log.entity';
 import { ExerciseStep } from '../entities/exercise-step.entity';
+import { AiModule } from '../ai/ai.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { ExerciseStep } from '../entities/exercise-step.entity';
       SymptomLog,
       ExerciseStep,
     ]),
+    AiModule,
   ],
   controllers: [RecommendController],
   providers: [RecommendService],

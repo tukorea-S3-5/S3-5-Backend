@@ -37,11 +37,10 @@ export class ExerciseResultDto {
   })
   video_url?: string | null;
 
-  // // LLM 붙일 준비
-  // @ApiProperty({
-  //   example: '현재 BMI와 안정 심박수 기준으로 안전한 운동입니다.',
-  //   required: false,
-  //   nullable: true,
-  // })
-  // ai_comment?: string;
+  @ApiProperty({
+    example: '현재 BMI와 증상 기준으로 안전 필터를 통과한 운동입니다.',
+    required: false,
+    nullable: true,
+  })
+  ai_comment?: string;
 }

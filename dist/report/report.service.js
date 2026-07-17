@@ -18,15 +18,68 @@ const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const exercise_session_entity_1 = require("../entities/exercise-session.entity");
 const exercise_record_entity_1 = require("../entities/exercise-record.entity");
+const pregnancy_info_entity_1 = require("../entities/pregnancy-info.entity");
+const symptom_log_entity_1 = require("../entities/symptom-log.entity");
 const ai_service_1 = require("../ai/ai.service");
 let ReportService = class ReportService {
     sessionRepository;
     recordRepository;
+    pregnancyRepository;
+    symptomRepository;
     aiService;
-    constructor(sessionRepository, recordRepository, aiService) {
+    constructor(sessionRepository, recordRepository, pregnancyRepository, symptomRepository, aiService) {
         this.sessionRepository = sessionRepository;
         this.recordRepository = recordRepository;
+        this.pregnancyRepository = pregnancyRepository;
+        this.symptomRepository = symptomRepository;
         this.aiService = aiService;
+    }
+    calculateWeek(lmpInput) {
+        const lmp = lmpInput instanceof Date ? lmpInput : new Date(lmpInput);
+        const today = new Date();
+        const diffDays = (today.getTime() - lmp.getTime()) / (1000 * 60 * 60 * 24);
+        const week = Math.floor(diffDays / 7);
+        return week < 0 ? 0 : week;
+    }
+    calculateTrimester(week) {
+        if (week <= 13)
+            return 1;
+        if (week <= 27)
+            return 2;
+        return 3;
+    }
+    getTrimesterNotice(trimester) {
+        if (trimester === 1) {
+            return '임신 초기에는 피로, 어지러움, 출혈 징후가 있으면 즉시 운동을 중단하고 저강도 운동 위주로 진행합니다.';
+        }
+        if (trimester === 2) {
+            return '임신 중기에는 복부 압박과 바로 누운 자세를 피하고 균형이 불안정한 동작은 주의합니다.';
+        }
+        if (trimester === 3) {
+            return '임신 후기에는 낙상 위험과 과도한 심박 상승을 피하고 운동 강도와 시간을 낮춥니다.';
+        }
+        return '임신 정보가 부족하므로 무리하지 않는 저강도 운동을 우선합니다.';
+    }
+    buildReportRuleReasons(params) {
+        const reasons = [];
+        if (params.trimester === 2) {
+            reasons.push('2분기 기준 복부 압박과 바로 누운 자세를 주의');
+        }
+        if (params.trimester === 3) {
+            reasons.push('3분기 기준 낙상 위험과 과도한 운동 강도를 주의');
+        }
+        if (params.avgHeartRate &&
+            params.maxAllowedBpm &&
+            params.avgHeartRate >= params.maxAllowedBpm) {
+            reasons.push('평균 심박수가 사용자 최대 허용 심박수에 근접');
+        }
+        if (params.symptoms.length) {
+            reasons.push(`최근 증상(${params.symptoms.join(', ')}) 반영`);
+        }
+        if (params.conditions.length) {
+            reasons.push(`기저 질환/주의 조건(${params.conditions.join(', ')}) 반영`);
+        }
+        return reasons;
     }
     async generateSessionReport(userId, sessionId) {
         const session = await this.sessionRepository.findOne({
@@ -42,6 +95,21 @@ let ReportService = class ReportService {
         const records = await this.recordRepository.find({
             where: { session_id: sessionId },
         });
+        const pregnancy = await this.pregnancyRepository.findOne({
+            where: { user_id: userId },
+            order: { pregnancy_id: 'DESC' },
+            relations: ['conditions'],
+        });
+        const latestSymptom = await this.symptomRepository.findOne({
+            where: { user_id: userId },
+            order: { created_at: 'DESC' },
+        });
+        const week = pregnancy
+            ? this.calculateWeek(pregnancy.last_menstrual_period)
+            : undefined;
+        const trimester = week !== undefined ? this.calculateTrimester(week) : undefined;
+        const symptoms = latestSymptom?.symptoms ?? [];
+        const conditions = pregnancy?.conditions?.map((condition) => condition.condition_code) ?? [];
         const totalDuration = records.reduce((sum, record) => sum + (record.duration ?? 0), 0);
         const validRecords = records.filter((record) => record.avg_heart_rate !== null && record.max_heart_rate !== null);
         const sessionAvgHeartRate = validRecords.length
@@ -62,14 +130,26 @@ let ReportService = class ReportService {
             : sessionAvgHeartRate && sessionAvgHeartRate > 110
                 ? 'MEDIUM'
                 : 'LOW';
+        const ruleReasons = this.buildReportRuleReasons({
+            trimester,
+            avgHeartRate: sessionAvgHeartRate,
+            maxAllowedBpm: pregnancy?.max_allowed_bpm ?? null,
+            symptoms,
+            conditions,
+        });
         const aiComment = await this.aiService.generateExerciseComment({
-            week: undefined,
+            week,
+            trimester,
+            bmi: pregnancy?.bmi ?? null,
+            maxAllowedBpm: pregnancy?.max_allowed_bpm ?? null,
+            conditions,
             totalDuration,
             status: session.status,
-            symptoms: [],
+            symptoms,
             avgHeartRate: sessionAvgHeartRate ?? 0,
             intensityLevel,
-            trimesterNotice: '',
+            trimesterNotice: this.getTrimesterNotice(trimester),
+            ruleReasons,
             exercises: records.map((r) => ({
                 name: r.exercise_name,
                 duration: r.duration ?? 0,
@@ -90,7 +170,11 @@ exports.ReportService = ReportService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(exercise_session_entity_1.ExerciseSession)),
     __param(1, (0, typeorm_1.InjectRepository)(exercise_record_entity_1.ExerciseRecord)),
+    __param(2, (0, typeorm_1.InjectRepository)(pregnancy_info_entity_1.PregnancyInfo)),
+    __param(3, (0, typeorm_1.InjectRepository)(symptom_log_entity_1.SymptomLog)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
+        typeorm_2.Repository,
+        typeorm_2.Repository,
         typeorm_2.Repository,
         ai_service_1.AiService])
 ], ReportService);

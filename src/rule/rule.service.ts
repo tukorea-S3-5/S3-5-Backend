@@ -33,12 +33,7 @@ export class RuleService {
     }
 
     // 운동 경험 낮음 → LOW만 허용
-    if (fitnessLevel === 'LOW' && level !== 'LOW') {
-      return false;
-    }
-
-    // 중간 체력 → HIGH 제한
-    if (fitnessLevel === 'MEDIUM' && level === 'HIGH') {
+    if (fitnessLevel === 'SEDENTARY' && level !== 'LOW') {
       return false;
     }
 
