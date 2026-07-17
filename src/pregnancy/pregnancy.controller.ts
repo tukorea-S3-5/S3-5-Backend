@@ -7,11 +7,7 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiBearerAuth,
-  ApiOperation,
-} from '@nestjs/swagger';
+import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 
 import { PregnancyService } from './pregnancy.service';
@@ -23,9 +19,7 @@ import { UpdatePregnancyDto } from './dto/update-pregnancy.dto';
 @UseGuards(AuthGuard('jwt'))
 @Controller('pregnancy')
 export class PregnancyController {
-  constructor(
-    private readonly pregnancyService: PregnancyService,
-  ) { }
+  constructor(private readonly pregnancyService: PregnancyService) {}
 
   /**
    * 임신 정보 등록
@@ -34,16 +28,10 @@ export class PregnancyController {
    */
   @Post()
   @ApiOperation({ summary: '임신 정보 등록' })
-  create(
-    @Req() req,
-    @Body() dto: CreatePregnancyDto,
-  ) {
+  create(@Req() req, @Body() dto: CreatePregnancyDto) {
     // JwtStrategy.validate()에서 반환한 user 객체
     // 여기서 user_id를 꺼내 서비스로 전달
-    return this.pregnancyService.create(
-      req.user.user_id,
-      dto,
-    );
+    return this.pregnancyService.create(req.user.user_id, dto);
   }
 
   /**
@@ -52,9 +40,7 @@ export class PregnancyController {
   @Get('me')
   @ApiOperation({ summary: '내 최신 임신 정보 조회' })
   findMyLatest(@Req() req) {
-    return this.pregnancyService.findLatestByUser(
-      req.user.user_id,
-    );
+    return this.pregnancyService.findLatestByUser(req.user.user_id);
   }
 
   /**
@@ -62,14 +48,8 @@ export class PregnancyController {
    */
   @Put('me')
   @ApiOperation({ summary: '내 최신 임신 정보 수정' })
-  updateMyLatest(
-    @Req() req,
-    @Body() dto: UpdatePregnancyDto,
-  ) {
-    return this.pregnancyService.updateLatestByUser(
-      req.user.user_id,
-      dto,
-    );
+  updateMyLatest(@Req() req, @Body() dto: UpdatePregnancyDto) {
+    return this.pregnancyService.updateLatestByUser(req.user.user_id, dto);
   }
 
   /**
@@ -78,9 +58,7 @@ export class PregnancyController {
   @Get('guideline')
   @ApiOperation({ summary: '분기별 운동 가이드라인 조회' })
   getGuideline(@Req() req) {
-    return this.pregnancyService.getGuideline(
-      req.user.user_id,
-    );
+    return this.pregnancyService.getGuideline(req.user.user_id);
   }
 
   /**
@@ -89,22 +67,18 @@ export class PregnancyController {
   @Get('weekly-health')
   @ApiOperation({ summary: '주차별 건강 정보 조회' })
   getWeeklyHealth(@Req() req) {
-    return this.pregnancyService.getWeeklyHealth(
-      req.user.user_id,
-    );
+    return this.pregnancyService.getWeeklyHealth(req.user.user_id);
   }
   /**
- * 최근 4주 기준 체중 증가 추세 분석 조회
- * 
- * - 최근 4주 체중 로그 기반 선형 기울기 계산
- * - BMI 기준 주당 권장 증가량과 비교
- * - 과도 증가 / 증가 부족 / 정상 추세 판정
- */
+   * 최근 4주 기준 체중 증가 추세 분석 조회
+   *
+   * - 최근 4주 체중 로그 기반 선형 기울기 계산
+   * - BMI 기준 주당 권장 증가량과 비교
+   * - 과도 증가 / 증가 부족 / 정상 증가 추세 판정
+   */
   @Get('weight-trend')
-@ApiOperation({ summary: '최근 4주 기준 체중 증가 추세 분석 조회' })
-async getWeightTrend(@Req() req) {
-  return this.pregnancyService.calculateWeightTrend(
-    req.user.user_id,   
-  );
-}
+  @ApiOperation({ summary: '최근 4주 기준 체중 증가 추세 분석 조회' })
+  async getWeightTrend(@Req() req) {
+    return this.pregnancyService.calculateWeightTrend(req.user.user_id);
+  }
 }

@@ -11,7 +11,6 @@ import { User } from '../user/user.entity';
 
 @Injectable()
 export class PregnancyService {
-
   constructor(
     @InjectRepository(PregnancyInfo)
     private readonly pregnancyRepository: Repository<PregnancyInfo>,
@@ -24,11 +23,11 @@ export class PregnancyService {
 
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-  ) { }
+  ) {}
 
   /**
- * 분기별 운동 가이드라인 상수 (ACOG 기준)
- */
+   * 분기별 운동 가이드라인 상수 (ACOG 기준)
+   */
   private readonly GUIDELINES = {
     1: {
       title: '1분기 운동 가이드라인 (ACOG)',
@@ -64,9 +63,7 @@ export class PregnancyService {
    */
   private calculateAge(birthInput: Date | string): number {
     const birthDate =
-      birthInput instanceof Date
-        ? birthInput
-        : new Date(birthInput);
+      birthInput instanceof Date ? birthInput : new Date(birthInput);
 
     const today = new Date();
     let age = today.getFullYear() - birthDate.getFullYear();
@@ -90,7 +87,6 @@ export class PregnancyService {
     fitnessLevel: 'ACTIVE' | 'SEDENTARY',
     bmi: number,
   ): number {
-
     let maxBpm = 0;
 
     if (age < 20) {
@@ -115,16 +111,11 @@ export class PregnancyService {
    * 임신 주차 계산 (동적)
    */
   private calculateWeek(lmpInput: Date | string): number {
-    const lmp =
-      lmpInput instanceof Date
-        ? lmpInput
-        : new Date(lmpInput);
+    const lmp = lmpInput instanceof Date ? lmpInput : new Date(lmpInput);
 
     const today = new Date();
 
-    const diffDays =
-      (today.getTime() - lmp.getTime()) /
-      (1000 * 60 * 60 * 24);
+    const diffDays = (today.getTime() - lmp.getTime()) / (1000 * 60 * 60 * 24);
 
     // 미래 날짜 방지
     const week = Math.floor(diffDays / 7);
@@ -146,7 +137,6 @@ export class PregnancyService {
    * week / trimester는 저장하지 않음
    */
   async create(userId: string, dto: CreatePregnancyDto) {
-
     const user = await this.userRepository.findOne({
       where: { user_id: userId },
     });
@@ -160,18 +150,11 @@ export class PregnancyService {
 
     const age = this.calculateAge(user.birth_date);
 
-    const maxBpm =
-      this.calculateMaxBpm(
-        age,
-        dto.fitness_level,
-        bmi,
-      );
+    const maxBpm = this.calculateMaxBpm(age, dto.fitness_level, bmi);
 
     const lmp = new Date(dto.last_menstrual_period);
 
-    const dueDate = new Date(
-      lmp.getTime() + 280 * 24 * 60 * 60 * 1000,
-    );
+    const dueDate = new Date(lmp.getTime() + 280 * 24 * 60 * 60 * 1000);
 
     const pregnancy = await this.pregnancyRepository.save(
       this.pregnancyRepository.create({
@@ -208,7 +191,6 @@ export class PregnancyService {
    * 모든 시간 기반 값은 동적 계산
    */
   async findLatestByUser(userId: string) {
-
     const pregnancy = await this.pregnancyRepository.findOne({
       where: { user_id: userId },
       order: { pregnancy_id: 'DESC' },
@@ -217,43 +199,34 @@ export class PregnancyService {
 
     if (!pregnancy) return null;
 
-    const week =
-      this.calculateWeek(
-        pregnancy.last_menstrual_period,
-      );
+    const week = this.calculateWeek(pregnancy.last_menstrual_period);
 
-    const trimester =
-      this.calculateTrimester(week);
+    const trimester = this.calculateTrimester(week);
 
     // 현재 나이 재계산
     const user = await this.userRepository.findOne({
       where: { user_id: userId },
     });
 
-    const age =
-      user ? this.calculateAge(user.birth_date) : 0;
+    const age = user ? this.calculateAge(user.birth_date) : 0;
 
     // max bpm도 동적으로 재계산
-    const recalculatedMaxBpm =
-      this.calculateMaxBpm(
-        age,
-        pregnancy.fitness_level,
-        pregnancy.bmi,
-      );
+    const recalculatedMaxBpm = this.calculateMaxBpm(
+      age,
+      pregnancy.fitness_level,
+      pregnancy.bmi,
+    );
 
-    const latestWeightLog =
-      await this.weightRepository.findOne({
-        where: { pregnancy_id: pregnancy.pregnancy_id },
-        order: { week: 'DESC' },
-      });
+    const latestWeightLog = await this.weightRepository.findOne({
+      where: { pregnancy_id: pregnancy.pregnancy_id },
+      order: { week: 'DESC' },
+    });
 
     const startWeight = pregnancy.pre_weight;
 
-    const currentWeight =
-      latestWeightLog?.weight ?? startWeight;
+    const currentWeight = latestWeightLog?.weight ?? startWeight;
 
-    const totalGain =
-      Number((currentWeight - startWeight).toFixed(1));
+    const totalGain = Number((currentWeight - startWeight).toFixed(1));
 
     return {
       pregnancy_id: pregnancy.pregnancy_id,
@@ -266,21 +239,14 @@ export class PregnancyService {
       is_multiple: pregnancy.is_multiple,
       bmi: pregnancy.bmi,
       max_allowed_bpm: recalculatedMaxBpm,
-      conditions:
-        pregnancy.conditions?.map(
-          c => c.condition_code,
-        ) ?? [],
+      conditions: pregnancy.conditions?.map((c) => c.condition_code) ?? [],
     };
   }
 
   /**
    * 최신 임신 정보 수정
    */
-  async updateLatestByUser(
-    userId: string,
-    dto: UpdatePregnancyDto,
-  ) {
-
+  async updateLatestByUser(userId: string, dto: UpdatePregnancyDto) {
     const pregnancy = await this.pregnancyRepository.findOne({
       where: { user_id: userId },
       order: { pregnancy_id: 'DESC' },
@@ -292,34 +258,26 @@ export class PregnancyService {
     if (dto.pre_weight !== undefined) {
       pregnancy.pre_weight = dto.pre_weight;
 
-      const heightMeter =
-        pregnancy.height / 100;
+      const heightMeter = pregnancy.height / 100;
 
-      pregnancy.bmi =
-        dto.pre_weight /
-        (heightMeter * heightMeter);
+      pregnancy.bmi = dto.pre_weight / (heightMeter * heightMeter);
     }
 
     if (dto.is_multiple !== undefined) {
-      pregnancy.is_multiple =
-        dto.is_multiple;
+      pregnancy.is_multiple = dto.is_multiple;
     }
 
     if (dto.due_date) {
-      pregnancy.due_date =
-        new Date(dto.due_date);
+      pregnancy.due_date = new Date(dto.due_date);
     }
 
-    return this.pregnancyRepository.save(
-      pregnancy,
-    );
+    return this.pregnancyRepository.save(pregnancy);
   }
 
   /**
- * 분기별 운동 가이드라인 조회
- */
+   * 분기별 운동 가이드라인 조회
+   */
   async getGuideline(userId: string) {
-
     const pregnancy = await this.pregnancyRepository.findOne({
       where: { user_id: userId },
       order: { pregnancy_id: 'DESC' },
@@ -329,16 +287,11 @@ export class PregnancyService {
       throw new NotFoundException('임신 정보가 없습니다.');
     }
 
-    const week =
-      this.calculateWeek(
-        pregnancy.last_menstrual_period,
-      );
+    const week = this.calculateWeek(pregnancy.last_menstrual_period);
 
-    const trimester =
-      this.calculateTrimester(week);
+    const trimester = this.calculateTrimester(week);
 
-    const guideline =
-      this.GUIDELINES[trimester];
+    const guideline = this.GUIDELINES[trimester];
 
     return {
       week,
@@ -352,23 +305,10 @@ export class PregnancyService {
    * 분기별 흔한 증상
    */
   private getCommonSymptoms(trimester: number): string[] {
-
     const symptoms = {
-      1: [
-        '입덧',
-        '피로감',
-        '유방 통증',
-      ],
-      2: [
-        '요통',
-        '다리 경련',
-        '부종 시작',
-      ],
-      3: [
-        '강한 수축',
-        '양수 터짐 가능',
-        '진통',
-      ],
+      1: ['입덧', '피로감', '유방 통증'],
+      2: ['요통', '다리 경련', '부종 시작'],
+      3: ['강한 수축', '양수 터짐 가능', '진통'],
     };
 
     return symptoms[trimester] ?? [];
@@ -378,7 +318,6 @@ export class PregnancyService {
    * 분기별 기본 건강 팁
    */
   private getDefaultTip(trimester: number): string {
-
     const tips = {
       1: '무리한 활동을 줄이고 충분한 휴식을 취하세요.',
       2: '규칙적인 가벼운 운동을 유지하세요.',
@@ -388,10 +327,9 @@ export class PregnancyService {
     return tips[trimester] ?? '건강 상태를 주의 깊게 관찰하세요.';
   }
   /**
-* BMI 기준 권장 체중 증가량 계산
-*/
+   * BMI 기준 권장 체중 증가량 계산
+   */
   private calculateRecommendedWeight(pregnancy: any): string {
-
     const bmi = pregnancy.bmi;
     const week = pregnancy.week;
     const isMultiple = pregnancy.is_multiple === true;
@@ -422,7 +360,6 @@ export class PregnancyService {
     currentWeek: number,
     isMultiple: boolean,
   ) {
-
     // 단태아 총 증가량
     const singletonGainMap = {
       UNDER: { min: 12.7, max: 18.1 },
@@ -465,11 +402,9 @@ export class PregnancyService {
 
     const ratio = (currentWeek - 12) / 28;
 
-    const weekMin =
-      week12Min + (preWeight + totalMin - week12Min) * ratio;
+    const weekMin = week12Min + (preWeight + totalMin - week12Min) * ratio;
 
-    const weekMax =
-      week12Max + (preWeight + totalMax - week12Max) * ratio;
+    const weekMax = week12Max + (preWeight + totalMax - week12Max) * ratio;
 
     return {
       min: Number(weekMin.toFixed(1)),
@@ -478,10 +413,9 @@ export class PregnancyService {
   }
 
   /**
- * 주차별 건강 정보 조회
- */
+   * 주차별 건강 정보 조회
+   */
   async getWeeklyHealth(userId: string) {
-
     const latest = await this.findLatestByUser(userId);
 
     if (!latest) {
@@ -490,22 +424,18 @@ export class PregnancyService {
 
     const { week, trimester } = latest;
 
-    const recommendedWeight =
-      this.calculateRecommendedWeight(latest);
+    const recommendedWeight = this.calculateRecommendedWeight(latest);
 
-    const symptoms =
-      this.getCommonSymptoms(trimester);
+    const symptoms = this.getCommonSymptoms(trimester);
 
-    const tip =
-      this.getDefaultTip(trimester);
+    const tip = this.getDefaultTip(trimester);
 
-    const guidelineRange =
-      this.calculateGuidelineWeight(
-        latest.pre_weight,
-        latest.bmi,
-        latest.week,
-        latest.is_multiple === true,
-      );
+    const guidelineRange = this.calculateGuidelineWeight(
+      latest.pre_weight,
+      latest.bmi,
+      latest.week,
+      latest.is_multiple === true,
+    );
 
     let weightStatus = '정상 범위';
 
@@ -526,10 +456,9 @@ export class PregnancyService {
   }
 
   /**
-  * 최근 4주 기준 체중 증가 추세 분석
-  */
+   * 최근 4주 기준 체중 증가 추세 분석
+   */
   async calculateWeightTrend(userId: string) {
-
     const pregnancy = await this.pregnancyRepository.findOne({
       where: { user_id: userId },
       order: { pregnancy_id: 'DESC' },
@@ -539,10 +468,7 @@ export class PregnancyService {
       throw new NotFoundException('임신 정보가 없습니다.');
     }
 
-    const week =
-      this.calculateWeek(
-        pregnancy.last_menstrual_period,
-      );
+    const week = this.calculateWeek(pregnancy.last_menstrual_period);
 
     const logs = await this.weightRepository.find({
       where: { pregnancy_id: pregnancy.pregnancy_id },
@@ -550,17 +476,15 @@ export class PregnancyService {
     });
 
     const latestLog = logs[0];
-    const currentWeight =
-      latestLog?.weight ?? pregnancy.pre_weight;
+    const currentWeight = latestLog?.weight ?? pregnancy.pre_weight;
 
     // 현재 위치 (선형 보간)
-    const guidelineRange =
-      this.calculateGuidelineWeight(
-        pregnancy.pre_weight,
-        pregnancy.bmi,
-        week,
-        pregnancy.is_multiple === true,
-      );
+    const guidelineRange = this.calculateGuidelineWeight(
+      pregnancy.pre_weight,
+      pregnancy.bmi,
+      week,
+      pregnancy.is_multiple === true,
+    );
 
     let currentPositionStatus = '정상 범위';
 
@@ -599,9 +523,7 @@ export class PregnancyService {
       };
     }
 
-    const slope =
-      (last.weight - first.weight) /
-      weekDiff;
+    const slope = (last.weight - first.weight) / weekDiff;
 
     // 1분기 속도 판단 제외
     if (week <= 12) {
@@ -623,20 +545,38 @@ export class PregnancyService {
 
     // 단태아
     if (!isMultiple) {
-      if (bmi < 18.5) { minSlope = 0.45; maxSlope = 0.59; }
-      else if (bmi < 25) { minSlope = 0.36; maxSlope = 0.45; }
-      else if (bmi < 30) { minSlope = 0.22; maxSlope = 0.31; }
-      else { minSlope = 0.18; maxSlope = 0.27; }
+      if (bmi < 18.5) {
+        minSlope = 0.45;
+        maxSlope = 0.59;
+      } else if (bmi < 25) {
+        minSlope = 0.36;
+        maxSlope = 0.45;
+      } else if (bmi < 30) {
+        minSlope = 0.22;
+        maxSlope = 0.31;
+      } else {
+        minSlope = 0.18;
+        maxSlope = 0.27;
+      }
     }
     // 다태아
     else {
-      if (bmi < 18.5) { minSlope = 0.75; maxSlope = 0.93; }
-      else if (bmi < 25) { minSlope = 0.54; maxSlope = 0.82; }
-      else if (bmi < 30) { minSlope = 0.43; maxSlope = 0.75; }
-      else { minSlope = 0.32; maxSlope = 0.61; }
+      if (bmi < 18.5) {
+        minSlope = 0.75;
+        maxSlope = 0.93;
+      } else if (bmi < 25) {
+        minSlope = 0.54;
+        maxSlope = 0.82;
+      } else if (bmi < 30) {
+        minSlope = 0.43;
+        maxSlope = 0.75;
+      } else {
+        minSlope = 0.32;
+        maxSlope = 0.61;
+      }
     }
 
-    let slopeStatus = '정상 추세';
+    let slopeStatus = '정상 증가 추세';
 
     if (slope > maxSlope) {
       slopeStatus = '과도 증가 추세';
